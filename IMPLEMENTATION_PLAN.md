@@ -79,16 +79,16 @@ This is a comprehensive implementation plan for an online bookstore built with p
 
 **Tasks:**
 1. **Create Database:**
-   - [ ] Access phpMyAdmin: http://localhost/phpmyadmin
-   - [ ] Create new database: `bookstore`
-   - [ ] Set character set: UTF-8MB4
-   - [ ] Set collation: utf8mb4_unicode_ci
+   - [X] Access phpMyAdmin: http://localhost/phpmyadmin
+   - [X] Create new database: `bookstore`
+   - [X] Set character set: UTF-8MB4
+   - [X] Set collation: utf8mb4_unicode_ci
 
 2. **Import Database Schema:**
-   - [ ] Open `db/bookstore_schema.sql`
-   - [ ] Review table structure (see Database Structure section below)
-   - [ ] Import into `bookstore` database
-   - [ ] Verify all 10 tables created:
+   - [X] Open `db/bookstore_schema.sql`
+   - [X] Review table structure (see Database Structure section below)
+   - [X] Import into `bookstore` database
+   - [X] Verify all 10 tables created:
      - customers
      - categories
      - authors
@@ -103,9 +103,9 @@ This is a comprehensive implementation plan for an online bookstore built with p
      - banners
 
 3. **Import Sample Data:**
-   - [ ] Open `db/bookstore_seeds.sql`
-   - [ ] Import into `bookstore` database
-   - [ ] Verify sample data loaded
+   - [X] Open `db/bookstore_seeds.sql`
+   - [X] Import into `bookstore` database
+   - [X] Verify sample data loaded
 
 **Deliverables:**
 - ✅ `bookstore` database created
