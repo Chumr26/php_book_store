@@ -15,13 +15,13 @@
     RewriteRule ^(.*)$ index.php?path=$1 [QSA,L]
 </IfModule>
 
-# Security headers
+# Security headers - Block direct PHP access
 <FilesMatch "\.php$">
     Deny from all
 </FilesMatch>
 
-# Allow index.php
-<FilesMatch "^index\.php$">
+# Allow specific PHP files
+<FilesMatch "^(index|test_connection)\.php$">
     Allow from all
 </FilesMatch>
 
