@@ -1,0 +1,8 @@
+{
+    "name": "bookstore/project",
+    "description": "BookStore E-commerce Website",
+    "type": "project",
+    "require": {
+        "phpmailer/phpmailer": "^7.0"
+    }
+}

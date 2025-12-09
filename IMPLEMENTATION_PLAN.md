@@ -288,9 +288,9 @@ This is a comprehensive implementation plan for an online bookstore built with p
 
 **Files to Create:**
 
-1. **Model/books.php**
-   - [ ] Create `Books` class
-   - [ ] Methods:
+1. **Model/Books.php**
+   - [x] Create `Books` class
+   - [x] Methods:
      - `getAllBooks()` - Get all books with pagination
      - `getBookById($id)` - Get single book details
      - `searchBooks($keyword)` - Search by title/author
@@ -303,8 +303,8 @@ This is a comprehensive implementation plan for an online bookstore built with p
      - `updateStock($id, $quantity)` - Reduce stock after order
 
 2. **Model/customers.php**
-   - [ ] Create `Customers` class
-   - [ ] Methods:
+   - [x] Create `Customers` class
+   - [x] Methods:
      - `registerCustomer($data)` - Create new account
      - `getCustomerById($id)` - Get customer info
      - `getCustomerByEmail($email)` - Check email existence
@@ -315,8 +315,8 @@ This is a comprehensive implementation plan for an online bookstore built with p
      - `deleteCustomer($id)` - Delete customer (admin)
 
 3. **Model/shopping_cart.php**
-   - [ ] Create `ShoppingCart` class
-   - [ ] Methods:
+   - [x] Create `ShoppingCart` class
+   - [x] Methods:
      - `addToCart($customerId, $bookId, $quantity)` - Add book
      - `getCartItems($customerId)` - Get cart items
      - `updateCartItem($cartItemId, $quantity)` - Update quantity
@@ -325,8 +325,8 @@ This is a comprehensive implementation plan for an online bookstore built with p
      - `getCartTotal($customerId)` - Calculate total
 
 4. **Model/orders.php**
-   - [ ] Create `Orders` class
-   - [ ] Methods:
+   - [x] Create `Orders` class
+   - [x] Methods:
      - `createOrder($customerId, $data)` - Create new order
      - `getOrderById($id)` - Get order details
      - `getOrderItems($orderId)` - Get items in order
@@ -337,27 +337,36 @@ This is a comprehensive implementation plan for an online bookstore built with p
      - `generateOrderNumber()` - Generate unique order number
 
 5. **Model/pagination.php**
-   - [ ] Create `Pagination` class
-   - [ ] Methods:
+   - [x] Create `Pagination` class
+   - [x] Methods:
      - `paginate($query, $page, $limit)` - Paginate results
      - `getTotalPages($total, $limit)` - Calculate pages
      - `getOffset($page, $limit)` - Get SQL offset
 
 6. **Model/class.phpmailer.php**
-   - [ ] Import PHPMailer library (if not already included)
-   - [ ] Configure for email sending
+   - [x] Import PHPMailer library via Composer
+   - [x] Configure for email sending
 
-7. **Model/class.smtp.php**
-   - [ ] Configure SMTP settings for Gmail
-   - [ ] Host: smtp.gmail.com
-   - [ ] Port: 587
-   - [ ] Username and Password fields (to be configured)
+7. **Additional Models Created:**
+   - [x] `Model/Categories.php` - Category management
+   - [x] `Model/Authors.php` - Author management
+   - [x] `Model/Publishers.php` - Publisher management
+   - [x] `Model/Reviews.php` - Book reviews
+   - [x] `Model/Banners.php` - Banner/slider management
+   - [x] `Model/EmailSender.php` - PHPMailer wrapper with email templates
+
+8. **Admin Models:**
+   - [x] `Admin/Model/AdminBooks.php` - Extended book management
+   - [x] `Admin/Model/AdminAuth.php` - Admin authentication
 
 **Deliverables:**
-- ✅ All Model classes created
-- ✅ CRUD operations implemented
-- ✅ Database queries optimized
+- ✅ All Model classes created (12 models total)
+- ✅ CRUD operations implemented with prepared statements
+- ✅ Database queries optimized for security
 - ✅ Error handling implemented
+- ✅ PHPMailer installed via Composer
+- ✅ Email templates created (registration, password reset, order confirmation)
+- ✅ Separate admin models with extended functionality
 
 ---
 
@@ -1350,7 +1359,7 @@ $result = $stmt->get_result();
 | Phase | Tasks | Duration | Status |
 |-------|-------|----------|--------|
 | 1. Setup & Infrastructure | 4 tasks | 2-3 days | **✅ Complete** |
-| 2. Database Layer | 2 tasks | 3-4 days | ⏳ Next |
+| 2. Database Layer | 2 tasks | 3-4 days | **🟢 In Progress (50%)** |
 | 3. Business Logic | 1 task | 5-7 days | Not Started |
 | 4. Presentation Layer | 2 tasks | 7-10 days | Not Started |
 | 5. Styling & Assets | 3 tasks | 3-5 days | Not Started |

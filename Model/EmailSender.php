@@ -1,0 +1,269 @@
+<?php
+/**
+ * Email Sender Class
+ * 
+ * Wrapper for PHPMailer to send emails
+ * Uses Composer's PHPMailer library
+ */
+
+// Include Composer autoloader
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+class EmailSender {
+    private $mail;
+    private $smtpHost;
+    private $smtpPort;
+    private $smtpUsername;
+    private $smtpPassword;
+    private $fromEmail;
+    private $fromName;
+    
+    /**
+     * Constructor - Initialize PHPMailer
+     * 
+     * @param array $config SMTP configuration (optional, uses defaults if not provided)
+     */
+    public function __construct($config = []) {
+        $this->mail = new PHPMailer(true);
+        
+        // Default SMTP configuration (can be overridden)
+        $this->smtpHost = $config['smtp_host'] ?? 'smtp.gmail.com';
+        $this->smtpPort = $config['smtp_port'] ?? 587;
+        $this->smtpUsername = $config['smtp_username'] ?? '';
+        $this->smtpPassword = $config['smtp_password'] ?? '';
+        $this->fromEmail = $config['from_email'] ?? 'noreply@bookstore.com';
+        $this->fromName = $config['from_name'] ?? 'BookStore';
+        
+        // Configure SMTP
+        $this->configureSMTP();
+    }
+    
+    /**
+     * Configure SMTP settings
+     */
+    private function configureSMTP() {
+        try {
+            // Server settings
+            // $this->mail->SMTPDebug = SMTP::DEBUG_SERVER; // Enable for debugging
+            $this->mail->isSMTP();
+            $this->mail->Host = $this->smtpHost;
+            $this->mail->SMTPAuth = true;
+            $this->mail->Username = $this->smtpUsername;
+            $this->mail->Password = $this->smtpPassword;
+            $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $this->mail->Port = $this->smtpPort;
+            $this->mail->CharSet = 'UTF-8';
+            
+            // Set default sender
+            $this->mail->setFrom($this->fromEmail, $this->fromName);
+            
+        } catch (Exception $e) {
+            error_log("PHPMailer configuration error: {$e->getMessage()}");
+        }
+    }
+    
+    /**
+     * Send email
+     * 
+     * @param string $to Recipient email
+     * @param string $toName Recipient name
+     * @param string $subject Email subject
+     * @param string $body Email body (HTML)
+     * @param string $altBody Alternative plain text body (optional)
+     * @return bool Success status
+     */
+    public function sendEmail($to, $toName, $subject, $body, $altBody = '') {
+        try {
+            // Recipients
+            $this->mail->addAddress($to, $toName);
+            
+            // Content
+            $this->mail->isHTML(true);
+            $this->mail->Subject = $subject;
+            $this->mail->Body = $body;
+            $this->mail->AltBody = $altBody ?: strip_tags($body);
+            
+            // Send
+            $result = $this->mail->send();
+            
+            // Clear addresses for next email
+            $this->mail->clearAddresses();
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            error_log("Email sending failed: {$this->mail->ErrorInfo}");
+            return false;
+        }
+    }
+    
+    /**
+     * Send registration confirmation email
+     * 
+     * @param string $email Customer email
+     * @param string $name Customer name
+     * @return bool Success status
+     */
+    public function sendRegistrationConfirmation($email, $name) {
+        $subject = "Chào mừng đến với BookStore!";
+        
+        $body = "
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background-color: #007bff; color: white; padding: 20px; text-align: center; }
+                .content { padding: 20px; background-color: #f9f9f9; }
+                .button { background-color: #28a745; color: white; padding: 10px 20px; text-decoration: none; display: inline-block; margin: 10px 0; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1>BookStore</h1>
+                </div>
+                <div class='content'>
+                    <h2>Xin chào {$name}!</h2>
+                    <p>Cảm ơn bạn đã đăng ký tài khoản tại BookStore.</p>
+                    <p>Tài khoản của bạn đã được tạo thành công. Bạn có thể đăng nhập và bắt đầu mua sắm ngay bây giờ!</p>
+                    <a href='http://localhost/book_store/login.php' class='button'>Đăng nhập ngay</a>
+                    <p>Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi.</p>
+                    <p>Trân trọng,<br>Đội ngũ BookStore</p>
+                </div>
+            </div>
+        </body>
+        </html>";
+        
+        return $this->sendEmail($email, $name, $subject, $body);
+    }
+    
+    /**
+     * Send password reset email
+     * 
+     * @param string $email Customer email
+     * @param string $name Customer name
+     * @param string $resetToken Reset token
+     * @return bool Success status
+     */
+    public function sendPasswordReset($email, $name, $resetToken) {
+        $resetLink = "http://localhost/book_store/reset_password.php?token={$resetToken}";
+        $subject = "Đặt lại mật khẩu - BookStore";
+        
+        $body = "
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background-color: #007bff; color: white; padding: 20px; text-align: center; }
+                .content { padding: 20px; background-color: #f9f9f9; }
+                .button { background-color: #ffc107; color: black; padding: 10px 20px; text-decoration: none; display: inline-block; margin: 10px 0; }
+                .warning { color: #dc3545; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1>BookStore</h1>
+                </div>
+                <div class='content'>
+                    <h2>Xin chào {$name}!</h2>
+                    <p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản BookStore của mình.</p>
+                    <p>Vui lòng nhấp vào nút bên dưới để đặt lại mật khẩu:</p>
+                    <a href='{$resetLink}' class='button'>Đặt lại mật khẩu</a>
+                    <p class='warning'>Liên kết này sẽ hết hạn sau 1 giờ.</p>
+                    <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
+                    <p>Trân trọng,<br>Đội ngũ BookStore</p>
+                </div>
+            </div>
+        </body>
+        </html>";
+        
+        return $this->sendEmail($email, $name, $subject, $body);
+    }
+    
+    /**
+     * Send order confirmation email
+     * 
+     * @param string $email Customer email
+     * @param string $name Customer name
+     * @param array $orderData Order details
+     * @return bool Success status
+     */
+    public function sendOrderConfirmation($email, $name, $orderData) {
+        $subject = "Xác nhận đơn hàng #{$orderData['order_number']} - BookStore";
+        
+        // Build items list
+        $itemsHtml = '';
+        foreach ($orderData['items'] as $item) {
+            $itemsHtml .= "<tr>
+                <td>{$item['title']}</td>
+                <td>{$item['quantity']}</td>
+                <td>" . number_format($item['unit_price'], 0, ',', '.') . " đ</td>
+                <td>" . number_format($item['total_price'], 0, ',', '.') . " đ</td>
+            </tr>";
+        }
+        
+        $body = "
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background-color: #28a745; color: white; padding: 20px; text-align: center; }
+                .content { padding: 20px; background-color: #f9f9f9; }
+                table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+                th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+                th { background-color: #007bff; color: white; }
+                .total { font-size: 18px; font-weight: bold; text-align: right; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1>Đơn hàng đã được xác nhận!</h1>
+                </div>
+                <div class='content'>
+                    <h2>Xin chào {$name}!</h2>
+                    <p>Cảm ơn bạn đã đặt hàng tại BookStore. Đơn hàng của bạn đã được xác nhận.</p>
+                    <p><strong>Mã đơn hàng:</strong> {$orderData['order_number']}</p>
+                    <p><strong>Ngày đặt:</strong> {$orderData['order_date']}</p>
+                    
+                    <h3>Chi tiết đơn hàng:</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th>Số lượng</th>
+                                <th>Đơn giá</th>
+                                <th>Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {$itemsHtml}
+                        </tbody>
+                    </table>
+                    
+                    <p class='total'>Tổng cộng: " . number_format($orderData['total_amount'], 0, ',', '.') . " đ</p>
+                    
+                    <h3>Thông tin giao hàng:</h3>
+                    <p><strong>Người nhận:</strong> {$orderData['recipient_name']}<br>
+                    <strong>Địa chỉ:</strong> {$orderData['delivery_address']}<br>
+                    <strong>Điện thoại:</strong> {$orderData['phone']}</p>
+                    
+                    <p>Chúng tôi sẽ liên hệ với bạn sớm nhất để xác nhận giao hàng.</p>
+                    <p>Trân trọng,<br>Đội ngũ BookStore</p>
+                </div>
+            </div>
+        </body>
+        </html>";
+        
+        return $this->sendEmail($email, $name, $subject, $body);
+    }
+}
+?>
