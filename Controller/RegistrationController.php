@@ -1,0 +1,222 @@
+<?php
+/**
+ * RegistrationController
+ * Handles customer registration
+ */
+
+require_once __DIR__ . '/BaseController.php';
+require_once __DIR__ . '/../Model/Customers.php';
+require_once __DIR__ . '/helpers/SessionHelper.php';
+require_once __DIR__ . '/helpers/Validator.php';
+
+class RegistrationController extends BaseController {
+    private $customersModel;
+    
+    public function __construct($conn) {
+        parent::__construct($conn);
+        $this->customersModel = new Customers($conn);
+    }
+    
+    /**
+     * Display registration form
+     */
+    public function showForm() {
+        SessionHelper::start();
+        
+        // Redirect if already logged in
+        if (SessionHelper::isLoggedIn()) {
+            header('Location: index.php');
+            exit;
+        }
+        
+        return [
+            'csrf_token' => SessionHelper::generateCSRFToken(),
+            'page_title' => 'Đăng ký tài khoản'
+        ];
+    }
+    
+    /**
+     * Process registration form
+     */
+    public function register() {
+        try {
+            SessionHelper::start();
+            
+            // Check if already logged in
+            if (SessionHelper::isLoggedIn()) {
+                header('Location: index.php');
+                exit;
+            }
+            
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                header('Location: index.php?page=registration');
+                exit;
+            }
+            
+            // Verify CSRF token
+            $token = isset($_POST['csrf_token']) ? $_POST['csrf_token'] : '';
+            if (!SessionHelper::verifyCSRFToken($token)) {
+                SessionHelper::setFlash('error', 'Token không hợp lệ. Vui lòng thử lại.');
+                header('Location: index.php?page=registration');
+                exit;
+            }
+            
+            // Get form data
+            $fullName = isset($_POST['full_name']) ? trim($_POST['full_name']) : '';
+            $email = isset($_POST['email']) ? trim($_POST['email']) : '';
+            $password = isset($_POST['password']) ? $_POST['password'] : '';
+            $confirmPassword = isset($_POST['confirm_password']) ? $_POST['confirm_password'] : '';
+            $phone = isset($_POST['phone']) ? trim($_POST['phone']) : '';
+            $address = isset($_POST['address']) ? trim($_POST['address']) : '';
+            $gender = isset($_POST['gender']) ? $_POST['gender'] : '';
+            $dateOfBirth = isset($_POST['date_of_birth']) ? $_POST['date_of_birth'] : '';
+            
+            // Validate input
+            $validator = new Validator();
+            
+            $validator->required('full_name', $fullName, 'Họ tên là bắt buộc.');
+            $validator->minLength('full_name', $fullName, 3, 'Họ tên phải có ít nhất 3 ký tự.');
+            
+            $validator->required('email', $email, 'Email là bắt buộc.');
+            $validator->email('email', $email, 'Email không hợp lệ.');
+            
+            $validator->required('password', $password, 'Mật khẩu là bắt buộc.');
+            $validator->password('password', $password, 8);
+            $validator->passwordMatch('confirm_password', $password, $confirmPassword);
+            
+            $validator->required('phone', $phone, 'Số điện thoại là bắt buộc.');
+            $validator->phone('phone', $phone);
+            
+            $validator->required('address', $address, 'Địa chỉ là bắt buộc.');
+            
+            if (!empty($gender)) {
+                $validator->inArray('gender', $gender, ['Nam', 'Nữ'], 'Giới tính không hợp lệ.');
+            }
+            
+            if (!empty($dateOfBirth)) {
+                $validator->date('date_of_birth', $dateOfBirth, 'Y-m-d', 'Ngày sinh không hợp lệ.');
+            }
+            
+            if ($validator->hasErrors()) {
+                SessionHelper::setFlash('error', $validator->getFirstError());
+                
+                // Store form data to repopulate
+                SessionHelper::set('registration_data', $_POST);
+                
+                header('Location: index.php?page=registration');
+                exit;
+            }
+            
+            // Check if email already exists
+            if ($this->checkEmailExists($email)) {
+                SessionHelper::setFlash('error', 'Email đã được sử dụng. Vui lòng sử dụng email khác.');
+                SessionHelper::set('registration_data', $_POST);
+                header('Location: index.php?page=registration');
+                exit;
+            }
+            
+            // Prepare data for registration
+            $customerData = [
+                'ten_khachhang' => Validator::sanitizeString($fullName),
+                'email' => Validator::sanitizeEmail($email),
+                'password' => password_hash($password, PASSWORD_DEFAULT),
+                'dien_thoai' => Validator::sanitizeString($phone),
+                'dia_chi' => Validator::sanitizeString($address),
+                'gioi_tinh' => !empty($gender) ? $gender : null,
+                'ngay_sinh' => !empty($dateOfBirth) ? $dateOfBirth : null
+            ];
+            
+            // Register customer
+            $customerId = $this->customersModel->registerCustomer($customerData);
+            
+            if ($customerId) {
+                // Registration successful
+                SessionHelper::remove('registration_data');
+                SessionHelper::setFlash('success', 'Đăng ký thành công! Vui lòng đăng nhập.');
+                
+                // TODO: Send registration confirmation email
+                // $this->sendRegistrationEmail($email, $fullName);
+                
+                header('Location: index.php?page=login');
+                exit;
+            } else {
+                SessionHelper::setFlash('error', 'Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.');
+                SessionHelper::set('registration_data', $_POST);
+                header('Location: index.php?page=registration');
+                exit;
+            }
+            
+        } catch (Exception $e) {
+            error_log("RegistrationController::register Error: " . $e->getMessage());
+            SessionHelper::setFlash('error', 'Có lỗi xảy ra. Vui lòng thử lại sau.');
+            header('Location: index.php?page=registration');
+            exit;
+        }
+    }
+    
+    /**
+     * Check if email already exists
+     * @param string $email Email address
+     * @return bool True if exists
+     */
+    public function checkEmailExists($email) {
+        try {
+            $customer = $this->customersModel->getCustomerByEmail($email);
+            return !empty($customer);
+        } catch (Exception $e) {
+            error_log("Error checking email: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Validate email via AJAX
+     */
+    public function validateEmail() {
+        try {
+            header('Content-Type: application/json');
+            
+            if (!isset($_POST['email'])) {
+                echo json_encode([
+                    'valid' => false,
+                    'message' => 'Email is required'
+                ]);
+                exit;
+            }
+            
+            $email = trim($_POST['email']);
+            
+            // Validate format
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                echo json_encode([
+                    'valid' => false,
+                    'message' => 'Email không hợp lệ'
+                ]);
+                exit;
+            }
+            
+            // Check if exists
+            if ($this->checkEmailExists($email)) {
+                echo json_encode([
+                    'valid' => false,
+                    'message' => 'Email đã được sử dụng'
+                ]);
+                exit;
+            }
+            
+            echo json_encode([
+                'valid' => true,
+                'message' => 'Email hợp lệ'
+            ]);
+            exit;
+            
+        } catch (Exception $e) {
+            error_log("Error validating email: " . $e->getMessage());
+            echo json_encode([
+                'valid' => false,
+                'message' => 'Có lỗi xảy ra'
+            ]);
+            exit;
+        }
+    }
+}

@@ -21,7 +21,14 @@ class Publishers {
      * @return array Publishers
      */
     public function getAllPublishers() {
-        $sql = "SELECT * FROM publishers ORDER BY publisher_name ASC";
+        $sql = "SELECT id_nxb as id_publisher,
+                       ten_nxb as publisher_name,
+                       dia_chi as address,
+                       dien_thoai as phone,
+                       email,
+                       website
+                FROM nhaxuatban 
+                ORDER BY ten_nxb ASC";
         $result = $this->conn->query($sql);
         
         $publishers = [];
@@ -39,7 +46,14 @@ class Publishers {
      * @return array|null Publisher data or null
      */
     public function getPublisherById($id) {
-        $sql = "SELECT * FROM publishers WHERE id_publisher = ?";
+        $sql = "SELECT id_nxb as id_publisher,
+                       ten_nxb as publisher_name,
+                       dia_chi as address,
+                       dien_thoai as phone,
+                       email,
+                       website
+                FROM nhaxuatban 
+                WHERE id_nxb = ?";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $id);

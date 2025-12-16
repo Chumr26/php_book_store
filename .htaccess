@@ -6,8 +6,12 @@
     # Set the base path
     RewriteBase /book_store/
     
-    # Prevent direct access to certain directories
-    RewriteRule ^(Model|Controller|Admin|Content)/ - [F]
+    # Allow static resources (CSS, JS, images) in Content directory
+    RewriteCond %{REQUEST_URI} \.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|webp)$ [NC]
+    RewriteRule ^ - [L]
+    
+    # Prevent direct access to certain directories (except Content for static files)
+    RewriteRule ^(Model|Controller|Admin)/ - [F]
     
     # Rewrite requests to index.php
     RewriteCond %{REQUEST_FILENAME} !-f
@@ -22,6 +26,11 @@
 
 # Allow specific PHP files
 <FilesMatch "^(index|test_connection)\.php$">
+    Allow from all
+</FilesMatch>
+
+# Allow static resources (CSS, JS, images)
+<FilesMatch "\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|webp)$">
     Allow from all
 </FilesMatch>
 

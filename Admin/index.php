@@ -1,17 +1,19 @@
 <?php
 /**
- * Admin Panel - Entry Point
+ * Admin Panel - Main Entry Point
  * 
- * This is the entry point for the Admin management panel.
- * All admin requests are routed through this file.
+ * This is the main entry point for the Admin management panel.
+ * All admin requests are routed through this file using MVC pattern.
+ * 
+ * Routing Logic:
+ * - GET parameter 'page' determines which controller/action to load
+ * - All routes require admin authentication
+ * - POST requests are handled by controllers with CSRF protection
  * 
  * @author BookStore Development Team
- * @version 1.0
- * @since 2025-12-09
+ * @version 2.0
+ * @since 2025-12-16
  */
-
-// Start session
-session_start();
 
 // Set error reporting
 error_reporting(E_ALL);
@@ -21,45 +23,340 @@ ini_set('display_errors', 1);
 define('ADMIN_BASE_URL', 'http://localhost/book_store/Admin/');
 define('ADMIN_BASE_PATH', __DIR__ . '/');
 define('BASE_URL', 'http://localhost/book_store/');
+define('BASE_PATH', dirname(__DIR__) . '/');
 
 // Include database connection
 require_once ADMIN_BASE_PATH . 'Model/connect.php';
 
-// Check if admin is logged in
-// if (!isset($_SESSION['admin_id'])) {
-//     header('Location: ' . ADMIN_BASE_URL . 'View/login.php');
-//     exit();
-// }
+// Include SessionHelper
+require_once BASE_PATH . 'Controller/helpers/SessionHelper.php';
 
-?>
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - BookStore Management</title>
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/bookstore.css">
-</head>
-<body>
-    <div class="admin-container">
-        <?php
-        // Include admin header
-        // include_once ADMIN_BASE_PATH . 'View/header.php';
-        ?>
+// Start session via SessionHelper
+SessionHelper::start();
+
+// Get routing parameters
+$page = $_GET['page'] ?? 'dashboard';
+
+// Check admin authentication (except for login page)
+if ($page !== 'login' && !SessionHelper::isAdminLoggedIn()) {
+    SessionHelper::setFlash('warning', 'Vui lòng đăng nhập để tiếp tục');
+    header('Location: ' . ADMIN_BASE_URL . 'index.php?page=login');
+    exit;
+}
+
+// Initialize variables for view
+$pageTitle = 'Admin - BookStore Management';
+$viewData = [];
+$viewFile = null;
+
+try {
+    // Route to appropriate admin controller
+    switch ($page) {
+        // ========== AUTHENTICATION ==========
+        case 'login':
+            // TODO: Create AdminAuthController for admin login
+            // For now, redirect to placeholder
+            $viewFile = 'View/login.php';
+            $pageTitle = 'Admin Login - BookStore';
+            break;
         
-        <main class="admin-content">
-            <h1>Welcome to Admin Panel</h1>
-            <p>Admin panel is under development.</p>
-        </main>
+        case 'logout':
+            SessionHelper::logoutAdmin();
+            SessionHelper::setFlash('success', 'Đăng xuất thành công');
+            header('Location: ' . ADMIN_BASE_URL . 'index.php?page=login');
+            exit;
         
-        <?php
-        // Include admin footer
-        // include_once ADMIN_BASE_PATH . 'View/footer.php';
-        ?>
-    </div>
+        // ========== DASHBOARD ==========
+        case 'dashboard':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminDashboardController.php';
+            $controller = new AdminDashboardController($conn);
+            $viewData = $controller->index();
+            $viewFile = 'View/dashboard.php';
+            $pageTitle = 'Dashboard - Admin BookStore';
+            break;
+        
+        case 'export_statistics':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminDashboardController.php';
+            $controller = new AdminDashboardController($conn);
+            $controller->exportStatistics();
+            break;
+        
+        // ========== BOOK MANAGEMENT ==========
+        case 'books':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminBookController.php';
+            $controller = new AdminBookController($conn);
+            $viewData = $controller->index();
+            $viewFile = 'View/books/index.php';
+            $pageTitle = 'Quản lý sách - Admin BookStore';
+            break;
+        
+        case 'book_create':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminBookController.php';
+            $controller = new AdminBookController($conn);
+            
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $controller->store();
+            } else {
+                $viewData = $controller->create();
+                $viewFile = 'View/books/create.php';
+                $pageTitle = 'Thêm sách mới - Admin BookStore';
+            }
+            break;
+        
+        case 'book_edit':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminBookController.php';
+            $controller = new AdminBookController($conn);
+            
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $controller->update();
+            } else {
+                $viewData = $controller->edit();
+                $viewFile = 'View/books/edit.php';
+                $pageTitle = 'Sửa sách - Admin BookStore';
+            }
+            break;
+        
+        case 'book_delete':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminBookController.php';
+            $controller = new AdminBookController($conn);
+            $controller->delete();
+            break;
+        
+        case 'book_bulk_delete':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminBookController.php';
+            $controller = new AdminBookController($conn);
+            $controller->bulkDelete();
+            break;
+        
+        case 'book_toggle_status':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminBookController.php';
+            $controller = new AdminBookController($conn);
+            $controller->toggleStatus();
+            break;
+        
+        // ========== ORDER MANAGEMENT ==========
+        case 'orders':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminOrderController.php';
+            $controller = new AdminOrderController($conn);
+            $viewData = $controller->index();
+            $viewFile = 'View/orders/index.php';
+            $pageTitle = 'Quản lý đơn hàng - Admin BookStore';
+            break;
+        
+        case 'order_detail':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminOrderController.php';
+            $controller = new AdminOrderController($conn);
+            $viewData = $controller->show();
+            $viewFile = 'View/orders/detail.php';
+            $pageTitle = 'Chi tiết đơn hàng - Admin BookStore';
+            break;
+        
+        case 'order_update_status':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminOrderController.php';
+            $controller = new AdminOrderController($conn);
+            $controller->updateStatus();
+            break;
+        
+        case 'orders_export':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminOrderController.php';
+            $controller = new AdminOrderController($conn);
+            $controller->exportOrders();
+            break;
+        
+        case 'order_print_invoice':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminOrderController.php';
+            $controller = new AdminOrderController($conn);
+            $controller->printInvoice();
+            break;
+        
+        // ========== CATEGORY MANAGEMENT ==========
+        case 'categories':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminCategoryController.php';
+            $controller = new AdminCategoryController($conn);
+            $viewData = $controller->index();
+            $viewFile = 'View/categories/index.php';
+            $pageTitle = 'Quản lý danh mục - Admin BookStore';
+            break;
+        
+        case 'category_create':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminCategoryController.php';
+            $controller = new AdminCategoryController($conn);
+            
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $controller->store();
+            } else {
+                $viewData = $controller->create();
+                $viewFile = 'View/categories/create.php';
+                $pageTitle = 'Thêm danh mục - Admin BookStore';
+            }
+            break;
+        
+        case 'category_edit':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminCategoryController.php';
+            $controller = new AdminCategoryController($conn);
+            
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $controller->update();
+            } else {
+                $viewData = $controller->edit();
+                $viewFile = 'View/categories/edit.php';
+                $pageTitle = 'Sửa danh mục - Admin BookStore';
+            }
+            break;
+        
+        case 'category_delete':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminCategoryController.php';
+            $controller = new AdminCategoryController($conn);
+            $controller->delete();
+            break;
+        
+        case 'category_update_order':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminCategoryController.php';
+            $controller = new AdminCategoryController($conn);
+            $controller->updateOrder();
+            break;
+        
+        // ========== CUSTOMER MANAGEMENT ==========
+        case 'customers':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminCustomerController.php';
+            $controller = new AdminCustomerController($conn);
+            $viewData = $controller->index();
+            $viewFile = 'View/customers/index.php';
+            $pageTitle = 'Quản lý khách hàng - Admin BookStore';
+            break;
+        
+        case 'customer_detail':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminCustomerController.php';
+            $controller = new AdminCustomerController($conn);
+            $viewData = $controller->show();
+            $viewFile = 'View/customers/detail.php';
+            $pageTitle = 'Chi tiết khách hàng - Admin BookStore';
+            break;
+        
+        case 'customer_update_status':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminCustomerController.php';
+            $controller = new AdminCustomerController($conn);
+            $controller->updateStatus();
+            break;
+        
+        case 'customers_export':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminCustomerController.php';
+            $controller = new AdminCustomerController($conn);
+            $controller->exportCustomers();
+            break;
+        
+        // ========== 404 NOT FOUND ==========
+        default:
+            http_response_code(404);
+            $viewFile = 'View/404.php';
+            $pageTitle = '404 - Không tìm thấy trang';
+            break;
+    }
     
-    <!-- jQuery and Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+} catch (Exception $e) {
+    // Log error
+    error_log("Error in admin routing: " . $e->getMessage());
+    
+    // Show error page
+    SessionHelper::setFlash('error', 'Đã xảy ra lỗi. Vui lòng thử lại.');
+    $viewFile = 'View/error.php';
+    $pageTitle = 'Lỗi - Admin BookStore';
+    $viewData['error'] = $e->getMessage();
+}
+
+// Render view if not already handled by controller (redirect/JSON response)
+if ($viewFile && file_exists(ADMIN_BASE_PATH . $viewFile)) {
+    ?>
+    <!DOCTYPE html>
+    <html lang="vi">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title><?php echo htmlspecialchars($pageTitle); ?></title>
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/bookstore.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/admin.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+    </head>
+    <body class="admin-body">
+        <div class="admin-wrapper">
+            <?php
+            // Include admin sidebar (if exists and user is logged in)
+            if (SessionHelper::isAdminLoggedIn() && file_exists(ADMIN_BASE_PATH . 'View/sidebar.php')) {
+                include_once ADMIN_BASE_PATH . 'View/sidebar.php';
+            }
+            ?>
+            
+            <div class="admin-content-wrapper">
+                <?php
+                // Include admin header (if exists and user is logged in)
+                if (SessionHelper::isAdminLoggedIn() && file_exists(ADMIN_BASE_PATH . 'View/header.php')) {
+                    include_once ADMIN_BASE_PATH . 'View/header.php';
+                }
+                ?>
+                
+                <main class="admin-content">
+                    <?php
+                    // Display flash messages
+                    $flashMessages = SessionHelper::getAllFlash();
+                    if (!empty($flashMessages)) {
+                        foreach ($flashMessages as $type => $message) {
+                            $alertClass = $type === 'error' ? 'danger' : $type;
+                            echo "<div class='alert alert-{$alertClass} alert-dismissible fade show' role='alert'>";
+                            echo htmlspecialchars($message);
+                            echo "<button type='button' class='close' data-dismiss='alert'>&times;</button>";
+                            echo "</div>";
+                        }
+                    }
+                    
+                    // Include the view file
+                    include ADMIN_BASE_PATH . $viewFile;
+                    ?>
+                </main>
+                
+                <?php
+                // Include admin footer (if exists)
+                if (file_exists(ADMIN_BASE_PATH . 'View/footer.php')) {
+                    include_once ADMIN_BASE_PATH . 'View/footer.php';
+                }
+                ?>
+            </div>
+        </div>
+        
+        <!-- jQuery and Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+        
+        <!-- Custom Admin JavaScript -->
+        <script>
+            // AJAX setup for CSRF tokens
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-Token': '<?php echo SessionHelper::get("csrf_token", ""); ?>'
+                }
+            });
+            
+            // Initialize DataTables
+            $(document).ready(function() {
+                if ($.fn.DataTable) {
+                    $('.data-table').DataTable({
+                        "language": {
+                            "url": "//cdn.datatables.net/plug-ins/1.11.5/i18n/vi.json"
+                        }
+                    });
+                }
+            });
+        </script>
+    </body>
+    </html>
+    <?php
+} elseif ($viewFile) {
+    // View file doesn't exist
+    http_response_code(404);
+    echo "<h1>404 - View file not found</h1>";
+    echo "<p>The requested view file does not exist: " . htmlspecialchars($viewFile) . "</p>";
+}

@@ -412,5 +412,194 @@ class Books {
         
         return ($book && $book['stock_quantity'] >= $quantity);
     }
+    
+    /**
+     * Count total books matching filters (for pagination)
+     * 
+     * @param int $categoryId Category filter (0 = all)
+     * @param string $priceRange Price range filter (e.g., "0-100000")
+     * @param int $rating Minimum rating filter
+     * @param string $search Search keyword
+     * @return int Total count
+     */
+    public function countBooks($categoryId = 0, $priceRange = '', $rating = 0, $search = '') {
+        $sql = "SELECT COUNT(DISTINCT s.id_sach) as total 
+                FROM sach s
+                LEFT JOIN theloai tl ON s.id_theloai = tl.id_theloai
+                LEFT JOIN tacgia tg ON s.id_tacgia = tg.id_tacgia
+                LEFT JOIN nhaxuatban nxb ON s.id_nxb = nxb.id_nxb
+                WHERE s.so_luong_ton > 0 AND s.trang_thai = 'available'";
+        
+        $params = [];
+        $types = '';
+        
+        // Category filter
+        if ($categoryId > 0) {
+            $sql .= " AND s.id_theloai = ?";
+            $params[] = $categoryId;
+            $types .= 'i';
+        }
+        
+        // Price range filter
+        if ($priceRange && strpos($priceRange, '-') !== false) {
+            list($min, $max) = explode('-', $priceRange);
+            $sql .= " AND s.gia BETWEEN ? AND ?";
+            $params[] = (int)$min;
+            $params[] = (int)$max;
+            $types .= 'dd';
+        }
+        
+        // Rating filter (assuming there's a rating column or we skip this)
+        // if ($rating > 0) {
+        //     $sql .= " AND s.danh_gia >= ?";
+        //     $params[] = $rating;
+        //     $types .= 'i';
+        // }
+        
+        // Search filter
+        if ($search) {
+            $sql .= " AND (s.ten_sach LIKE ? OR tg.ten_tacgia LIKE ? OR nxb.ten_nxb LIKE ? OR s.isbn LIKE ?)";
+            $searchTerm = "%{$search}%";
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $types .= 'ssss';
+        }
+        
+        $stmt = $this->conn->prepare($sql);
+        
+        if (!empty($params)) {
+            $stmt->bind_param($types, ...$params);
+        }
+        
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        
+        return (int)($row['total'] ?? 0);
+    }
+    
+    /**
+     * Get books with filters and pagination
+     * 
+     * @param int $categoryId Category filter (0 = all)
+     * @param string $priceRange Price range filter
+     * @param int $rating Minimum rating filter
+     * @param string $search Search keyword
+     * @param string $sort Sort by (newest, price_asc, price_desc, bestseller, name)
+     * @param int $limit Items per page
+     * @param int $offset Offset for pagination
+     * @return array Books array
+     */
+    public function getBooks($categoryId = 0, $priceRange = '', $rating = 0, $search = '', $sort = 'newest', $limit = 12, $offset = 0) {
+        $sql = "SELECT s.id_sach as ma_sach,
+                       s.ten_sach,
+                       s.isbn,
+                       s.gia,
+                       s.gia_goc,
+                       s.hinh_anh,
+                       s.mo_ta,
+                       s.so_trang,
+                       s.nam_xuat_ban,
+                       s.so_luong_ton,
+                       s.luot_xem,
+                       s.luot_ban,
+                       s.trang_thai as tinh_trang,
+                       s.noi_bat,
+                       s.ngay_them as ngay_tao,
+                       tg.ten_tacgia as ten_tac_gia,
+                       tg.but_danh,
+                       nxb.ten_nxb as ten_nha_xuat_ban,
+                       tl.ten_theloai as ten_the_loai,
+                       0 as giam_gia,
+                       0 as diem_trung_binh,
+                       0 as so_luong_danh_gia
+                FROM sach s
+                LEFT JOIN theloai tl ON s.id_theloai = tl.id_theloai
+                LEFT JOIN tacgia tg ON s.id_tacgia = tg.id_tacgia
+                LEFT JOIN nhaxuatban nxb ON s.id_nxb = nxb.id_nxb
+                WHERE s.so_luong_ton > 0 AND s.trang_thai = 'available'";
+        
+        $params = [];
+        $types = '';
+        
+        // Category filter
+        if ($categoryId > 0) {
+            $sql .= " AND s.id_theloai = ?";
+            $params[] = $categoryId;
+            $types .= 'i';
+        }
+        
+        // Price range filter
+        if ($priceRange && strpos($priceRange, '-') !== false) {
+            list($min, $max) = explode('-', $priceRange);
+            $sql .= " AND s.gia BETWEEN ? AND ?";
+            $params[] = (int)$min;
+            $params[] = (int)$max;
+            $types .= 'dd';
+        }
+        
+        // Search filter
+        if ($search) {
+            $sql .= " AND (s.ten_sach LIKE ? OR tg.ten_tacgia LIKE ? OR nxb.ten_nxb LIKE ? OR s.isbn LIKE ?)";
+            $searchTerm = "%{$search}%";
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $types .= 'ssss';
+        }
+        
+        // Sort
+        switch ($sort) {
+            case 'price_asc':
+                $sql .= " ORDER BY s.gia ASC";
+                break;
+            case 'price_desc':
+                $sql .= " ORDER BY s.gia DESC";
+                break;
+            case 'bestseller':
+                $sql .= " ORDER BY s.luot_ban DESC";
+                break;
+            case 'name':
+                $sql .= " ORDER BY s.ten_sach ASC";
+                break;
+            case 'newest':
+            default:
+                $sql .= " ORDER BY s.ngay_them DESC";
+                break;
+        }
+        
+        $sql .= " LIMIT ? OFFSET ?";
+        $params[] = $limit;
+        $params[] = $offset;
+        $types .= 'ii';
+        
+        $stmt = $this->conn->prepare($sql);
+        
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $this->conn->error);
+        }
+        
+        if (!empty($params)) {
+            if (!$stmt->bind_param($types, ...$params)) {
+                throw new Exception("Bind param failed: " . $stmt->error);
+            }
+        }
+        
+        if (!$stmt->execute()) {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+        
+        $result = $stmt->get_result();
+        
+        $books = [];
+        while ($row = $result->fetch_assoc()) {
+            $books[] = $row;
+        }
+        
+        return $books;
+    }
 }
 ?>
