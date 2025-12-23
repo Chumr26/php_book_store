@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <style>
+            /* The "Skin" */
+            body {
+                background-color: #f8f9fa; /* Light grey bg */
+            }
+
+            /* Transform the Card */
+            .card {
+                border: none; /* Remove generic border */
+                border-radius: 16px; /* Modern rounding */
+                box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1); /* High-end shadow */
+                transition: transform 0.2s ease;
+            }
+
+            .card:hover {
+                transform: translateY(-5px); /* Interactive feel */
+            }
+
+            /* Transform the Button */
+            .btn-primary {
+                background-color: #2563eb; /* Custom blue */
+                border-radius: 8px;
+                padding: 10px 24px; /* Bigger, better touch target */
+                font-weight: 600;
+                border: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Project Alpha</h5>
+                <p class="card-text">Status: In Progress</p>
+                <button class="btn btn-primary">View Details</button>
+            </div>
+        </div>
+    </body>
+</html>

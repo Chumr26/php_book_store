@@ -1,4 +1,10 @@
 <?php
+$__coverHelperLoaded = false;
+if (file_exists(__DIR__ . '/helpers/cover.php')) {
+    require_once __DIR__ . '/helpers/cover.php';
+    $__coverHelperLoaded = true;
+}
+
 $pageTitle = isset($book) ? htmlspecialchars($book['ten_sach']) : 'Chi tiết sách';
 ?>
 
@@ -21,8 +27,15 @@ $pageTitle = isset($book) ? htmlspecialchars($book['ten_sach']) : 'Chi tiết s�
         <!-- Book Image -->
         <div class="col-md-4 mb-4">
             <div class="book-image-detail sticky-top" style="top: 160px;">
-                <img src="<?php echo htmlspecialchars($book['hinh_anh']); ?>" 
+                <?php
+                $coverUrl = $__coverHelperLoaded
+                    ? book_cover_url($book['isbn'] ?? null, 'large')
+                    : '/book_store/Content/images/books/no-image.jpg';
+                ?>
+                <img src="<?php echo htmlspecialchars($coverUrl); ?>" 
                      alt="<?php echo htmlspecialchars($book['ten_sach']); ?>"
+                 loading="lazy" decoding="async"
+                     onerror="this.onerror=null;this.src='/book_store/Content/images/books/no-image.jpg';"
                      class="img-fluid rounded shadow">
             </div>
         </div>

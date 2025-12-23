@@ -244,68 +244,112 @@ INSERT INTO theloai (ten_theloai, mo_ta, thu_tu) VALUES
 -- SEED DATA - TÁC GIẢ
 -- =============================================
 INSERT INTO tacgia (ten_tacgia, but_danh, tieu_su, ngay_sinh, quoc_tich, hinh_anh) VALUES
-('Nguyễn Nhật Ánh', NULL, 'Nhà văn nổi tiếng Việt Nam với nhiều tác phẩm thiếu nhi và tuổi học trò', '1955-05-07', 'Việt Nam', 'nguyen_nhat_anh.jpg'),
-('Nguyễn Ngọc Tư', NULL, 'Nhà văn nữ với nhiều tác phẩm về miền Tây Nam Bộ', '1976-01-01', 'Việt Nam', 'nguyen_ngoc_tu.jpg'),
-('Nguyễn Du', NULL, 'Đại thi hào Việt Nam, tác giả truyện Kiều', '1766-01-03', 'Việt Nam', 'nguyen_du.jpg'),
-('Paulo Coelho', NULL, 'Nhà văn Brazil nổi tiếng với tác phẩm Nhà giả kim', '1947-08-24', 'Brazil', 'paulo_coelho.jpg'),
-('Haruki Murakami', NULL, 'Nhà văn Nhật Bản đương đại nổi tiếng', '1949-01-12', 'Nhật Bản', 'haruki_murakami.jpg'),
-('Dale Carnegie', NULL, 'Tác giả nổi tiếng về kỹ năng sống và giao tiếp', '1888-11-24', 'Mỹ', 'dale_carnegie.jpg'),
-('Tony Buzan', NULL, 'Chuyên gia về tư duy và trí nhớ', '1942-06-02', 'Anh', 'tony_buzan.jpg'),
-('Robert Kiyosaki', NULL, 'Tác giả sách về tài chính và đầu tư', '1947-04-08', 'Mỹ', 'robert_kiyosaki.jpg'),
-('J.K. Rowling', NULL, 'Tác giả series Harry Potter', '1965-07-31', 'Anh', 'jk_rowling.jpg'),
-('Nam Cao', NULL, 'Nhà văn hiện thực Việt Nam', '1915-10-29', 'Việt Nam', 'nam_cao.jpg');
+('Paulo Coelho', NULL, 'Nhà văn Brazil nổi tiếng với tác phẩm The Alchemist, đã bán hơn 150 triệu bản trên toàn thế giới', '1947-08-24', 'Brazil', 'paulo_coelho.jpg'),
+('Haruki Murakami', NULL, 'Nhà văn Nhật Bản đương đại, tác phẩm của ông được dịch ra hơn 50 ngôn ngữ', '1949-01-12', 'Nhật Bản', 'haruki_murakami.jpg'),
+('J.K. Rowling', NULL, 'Tác giả series Harry Potter - bộ sách bán chạy nhất mọi thời đại với hơn 500 triệu bản', '1965-07-31', 'Anh', 'jk_rowling.jpg'),
+('George R.R. Martin', NULL, 'Tác giả series A Song of Ice and Fire, được chuyển thể thành series Game of Thrones', '1948-09-20', 'Mỹ', 'george_rr_martin.jpg'),
+('Stephen King', NULL, 'Ông hoàng truyện kinh dị với hơn 60 tiểu thuyết và 200 truyện ngắn', '1947-09-21', 'Mỹ', 'stephen_king.jpg'),
+('Agatha Christie', NULL, 'Nữ hoàng truyện trinh thám, đã bán hơn 2 tỷ bản sách trên toàn thế giới', '1890-09-15', 'Anh', 'agatha_christie.jpg'),
+('Dan Brown', NULL, 'Tác giả của The Da Vinci Code và series Robert Langdon', '1964-06-22', 'Mỹ', 'dan_brown.jpg'),
+('John Green', NULL, 'Tác giả trẻ nổi tiếng với The Fault in Our Stars và Looking for Alaska', '1977-08-24', 'Mỹ', 'john_green.jpg'),
+('Yuval Noah Harari', NULL, 'Nhà sử học và tác giả của Sapiens - một trong những cuốn sách hay nhất thế kỷ 21', '1976-02-24', 'Israel', 'yuval_harari.jpg'),
+('Malcolm Gladwell', NULL, 'Nhà báo và tác giả nổi tiếng với các sách về tâm lý xã hội', '1963-09-03', 'Canada', 'malcolm_gladwell.jpg'),
+('Dale Carnegie', NULL, 'Tác giả kinh điển về kỹ năng sống và giao tiếp', '1888-11-24', 'Mỹ', 'dale_carnegie.jpg'),
+('Robert Kiyosaki', NULL, 'Tác giả sách về tài chính cá nhân và đầu tư', '1947-04-08', 'Mỹ', 'robert_kiyosaki.jpg'),
+('James Clear', NULL, 'Tác giả của Atomic Habits - cuốn sách về xây dựng thói quen tốt', '1986-01-22', 'Mỹ', 'james_clear.jpg'),
+('Mark Manson', NULL, 'Tác giả của The Subtle Art of Not Giving a F*ck', '1984-03-09', 'Mỹ', 'mark_manson.jpg'),
+('Suzanne Collins', NULL, 'Tác giả của series The Hunger Games', '1962-08-10', 'Mỹ', 'suzanne_collins.jpg'),
+('Rick Riordan', NULL, 'Tác giả của series Percy Jackson & The Olympians', '1964-06-05', 'Mỹ', 'rick_riordan.jpg'),
+('Jeff Kinney', NULL, 'Tác giả và minh họa của series Diary of a Wimpy Kid', '1971-02-19', 'Mỹ', 'jeff_kinney.jpg'),
+('Dav Pilkey', NULL, 'Tác giả của series Dog Man và Captain Underpants', '1966-03-04', 'Mỹ', 'dav_pilkey.jpg'),
+('Robert C. Martin', NULL, 'Uncle Bob - chuyên gia về kỹ thuật phần mềm và tác giả Clean Code', '1952-12-05', 'Mỹ', 'robert_martin.jpg'),
+('Eric Ries', NULL, 'Tác giả của The Lean Startup, chuyên gia về khởi nghiệp', '1978-09-22', 'Mỹ', 'eric_ries.jpg');
 
 -- =============================================
 -- SEED DATA - NHÀ XUẤT BẢN
 -- =============================================
 INSERT INTO nhaxuatban (ten_nxb, dia_chi, dien_thoai, email, website) VALUES
-('NXB Trẻ', '161B Lý Chính Thắng, Quận 3, TP.HCM', '02839316211', 'info@nxbtre.com.vn', 'https://www.nxbtre.com.vn'),
-('NXB Kim Đồng', '55 Quang Trung, Hai Bà Trưng, Hà Nội', '02439434730', 'info@kimdong.com.vn', 'https://kimdong.com.vn'),
-('NXB Văn học', '18 Nguyễn Trường Tộ, Ba Đình, Hà Nội', '02438223398', 'vanhocsv@hn.vnn.vn', 'http://nxbvanhoc.com.vn'),
-('NXB Lao động', '175 Giảng Võ, Đống Đa, Hà Nội', '02438514238', 'info@nxblaodong.com.vn', 'http://nxblaodong.com.vn'),
-('NXB Thế Giới', '7 Nguyễn Thị Minh Khai, Quận 1, TP.HCM', '02838222446', 'info@thegioipublishers.vn', 'https://thegioipublishers.vn'),
-('NXB Tổng hợp TP.HCM', '62 Nguyễn Thị Minh Khai, Quận 3, TP.HCM', '02839309498', 'info@nxbhcm.com.vn', 'http://www.nxbhcm.com.vn'),
-('NXB Phụ nữ', '39 Hàng Chuối, Hai Bà Trưng, Hà Nội', '02839717979', 'nxbphunu@hn.vnn.vn', 'http://nxbphunu.com.vn'),
-('NXB Hội Nhà văn', '65 Nguyễn Du, Hai Bà Trưng, Hà Nội', '02438222135', 'info@nxbhnv.com.vn', 'http://nxbhoinhavan.com.vn'),
-('NXB Đại học Quốc gia', '16 Hàng Chuối, Hai Bà Trưng, Hà Nội', '02438694256', 'info@nxbdhqg.vn', 'http://nxbdhqg.vn'),
-('First News', '81 Quang Trung, Gò Vấp, TP.HCM', '02838437228', 'info@firstnews.com.vn', 'https://firstnews.com.vn');
+('Penguin Random House', '1745 Broadway, New York, NY 10019, USA', '+1-212-782-9000', 'info@penguinrandomhouse.com', 'https://www.penguinrandomhouse.com'),
+('HarperCollins', '195 Broadway, New York, NY 10007, USA', '+1-212-207-7000', 'info@harpercollins.com', 'https://www.harpercollins.com'),
+('Simon & Schuster', '1230 Avenue of the Americas, New York, NY 10020, USA', '+1-212-698-7000', 'info@simonandschuster.com', 'https://www.simonandschuster.com'),
+('Hachette Book Group', '1290 Avenue of the Americas, New York, NY 10104, USA', '+1-212-364-1100', 'info@hbgusa.com', 'https://www.hachettebookgroup.com'),
+('Macmillan Publishers', '120 Broadway, New York, NY 10271, USA', '+1-646-307-5151', 'info@macmillan.com', 'https://www.macmillan.com'),
+('Scholastic', '557 Broadway, New York, NY 10012, USA', '+1-212-343-6100', 'info@scholastic.com', 'https://www.scholastic.com'),
+('Bloomsbury Publishing', '50 Bedford Square, London WC1B 3DP, UK', '+44-20-7631-5600', 'info@bloomsbury.com', 'https://www.bloomsbury.com'),
+('Oxford University Press', 'Great Clarendon Street, Oxford OX2 6DP, UK', '+44-1865-556767', 'enquiry@oup.com', 'https://global.oup.com'),
+('Pearson Education', '330 Hudson Street, New York, NY 10013, USA', '+1-212-641-2400', 'info@pearson.com', 'https://www.pearson.com'),
+("O'Reilly Media", '1005 Gravenstein Highway North, Sebastopol, CA 95472, USA', '+1-707-827-7000', 'info@oreilly.com', 'https://www.oreilly.com'),
+('Kodansha', '2-12-21 Otowa, Bunkyo-ku, Tokyo 112-8001, Japan', '+81-3-5395-3535', 'info@kodansha.co.jp', 'https://www.kodansha.co.jp'),
+('Vintage Books', '1745 Broadway, New York, NY 10019, USA', '+1-212-751-2600', 'info@penguinrandomhouse.com', 'https://www.penguinrandomhouse.com/imprints/vintage-books'),
+('Crown Publishing', '1745 Broadway, New York, NY 10019, USA', '+1-212-782-9000', 'crownpublicity@penguinrandomhouse.com', 'https://crownpublishing.com'),
+('Portfolio Penguin', '1745 Broadway, New York, NY 10019, USA', '+1-212-366-2000', 'portfolio@penguinrandomhouse.com', 'https://www.penguinrandomhouse.com/publishers/portfolio'),
+('Little, Brown and Company', '1290 Avenue of the Americas, New York, NY 10104, USA', '+1-212-364-1100', 'publicity@littlebrown.com', 'https://www.littlebrown.com');
 
 -- =============================================
 -- SEED DATA - SÁCH
 -- =============================================
 INSERT INTO sach (ten_sach, id_tacgia, id_nxb, id_theloai, isbn, gia, gia_goc, hinh_anh, mo_ta, so_trang, nam_xuat_ban, so_luong_ton, noi_bat) VALUES
--- Văn học Việt Nam
-('Tôi Thấy Hoa Vàng Trên Cỏ Xanh', 1, 1, 1, '9786041027237', 108000, 120000, 'toi_thay_hoa_vang.jpg', 'Truyện kể về tuổi thơ nghèo khó nhưng đẹp đẽ ở miền quê Việt Nam của hai anh em Thiều và Tường cùng với những người bạn.', 368, 2018, 150, TRUE),
-('Cho Tôi Xin Một Vé Đi Tuổi Thơ', 1, 1, 1, '9786041027244', 95000, 105000, 've_di_tuoi_tho.jpg', 'Những mẩu chuyện nhỏ về tuổi thơ thân thương và đầy hoài niệm.', 324, 2018, 120, TRUE),
-('Mắt Biếc', 1, 1, 1, '9786041027251', 110000, 125000, 'mat_biec.jpg', 'Câu chuyện tình đẹp mà buồn giữa Ngạn và Hà Lan, mối tình thầm lặng mà say đắm.', 296, 2019, 200, TRUE),
-('Cánh Đồng Bất Tận', 2, 1, 1, '9786041045293', 120000, 140000, 'canh_dong_bat_tan.jpg', 'Truyện dài về cuộc sống miền Tây Nam Bộ với những con người bình dị.', 368, 2020, 80, FALSE),
-('Truyện Kiều', 3, 3, 1, '9786041046587', 85000, 95000, 'truyen_kieu.jpg', 'Tác phẩm kinh điển của văn học Việt Nam, kể về số phận đau khổ của Thuý Kiều.', 244, 2019, 100, TRUE),
-('Chí Phèo', 10, 3, 1, '9786041047829', 65000, 75000, 'chi_pheo.jpg', 'Truyện ngắn nổi tiếng về cuộc đời cùng cực của Chí Phèo.', 156, 2018, 90, FALSE),
-
 -- Văn học nước ngoài
-('Nhà Giả Kim', 4, 5, 2, '9786041028067', 79000, 89000, 'nha_gia_kim.jpg', 'Câu chuyện về chuyến hành trình tìm kiếm kho báu và ý nghĩa cuộc sống của cậu bé chăn cừu Santiago.', 227, 2020, 250, TRUE),
-('Kafka Bên Bờ Biển', 5, 5, 2, '9786041029132', 155000, 175000, 'kafka_ben_bo_bien.jpg', 'Tiểu thuyết siêu thực về cuộc hành trình của cậu bé Kafka chạy trốn lời nguyền định mệnh.', 568, 2019, 100, TRUE),
-('Rừng Na Uy', 5, 5, 2, '9786041030234', 139000, 155000, 'rung_na_uy.jpg', 'Câu chuyện tình yêu và nỗi đau của tuổi trẻ trong bối cảnh Nhật Bản những năm 1960.', 464, 2020, 150, TRUE),
-('Tôi Là Bêtô', 1, 1, 2, '9786041045385', 92000, 105000, 'toi_la_beto.jpg', 'Chuyện kể từ góc nhìn của chú bò sữa Bêtô, nhân cách hóa để nói về cuộc sống.', 280, 2021, 75, FALSE),
+('The Alchemist', 1, 4, 2, '9780062315007', 285000, 320000, 'the_alchemist.jpg', 'Câu chuyện về hành trình tìm kiếm kho báu và ý nghĩa cuộc sống của cậu bé chăn cừu Santiago qua sa mạc Ai Cập.', 208, 2014, 250, TRUE),
+('Norwegian Wood', 2, 11, 2, '9780375704024', 320000, 360000, 'norwegian_wood.jpg', 'Một câu chuyện tình yêu đầy cảm xúc và nỗi đau của tuổi trẻ trong bối cảnh Nhật Bản những năm 1960s.', 296, 2000, 180, TRUE),
+('Kafka on the Shore', 2, 11, 2, '9781400079278', 380000, 420000, 'kafka_shore.jpg', 'Tiểu thuyết siêu thực kết hợp hiện thực và ảo giác, kể về cuộc hành trình của cậu bé Kafka Tamura.', 505, 2005, 120, TRUE),
+('1Q84', 2, 11, 2, '9780307476463', 450000, 500000, '1q84.jpg', 'Tác phẩm đồ sộ về hai nhân vật sống trong hai thế giới song song của Tokyo năm 1984.', 925, 2011, 95, FALSE),
+
+-- Tiểu thuyết
+('Harry Potter and the Philosopher\'s Stone', 3, 7, 5, '9781408855652', 295000, 330000, 'harry_potter_1.jpg', 'Cuốn sách đầu tiên trong series Harry Potter - câu chuyện về cậu bé phù thủy và cuộc phiêu lưu tại trường Hogwarts.', 352, 2014, 300, TRUE),
+('Harry Potter and the Chamber of Secrets', 3, 7, 5, '9781408855669', 295000, 330000, 'harry_potter_2.jpg', 'Harry Potter tiếp tục cuộc phiêu lưu tại Hogwarts khi bí mật về Phòng Chứa Bí Mật được hé mở.', 384, 2014, 280, TRUE),
+('Harry Potter and the Prisoner of Azkaban', 3, 7, 5, '9781408855676', 320000, 360000, 'harry_potter_3.jpg', 'Harry đối mặt với tên tù nhân nguy hiểm vừa trốn thoát từ nhà tù Azkaban.', 468, 2014, 260, TRUE),
+('A Game of Thrones', 4, 1, 5, '9780553593716', 420000, 470000, 'game_of_thrones.jpg', 'Cuốn đầu tiên của series A Song of Ice and Fire - cuộc chiến giành ngôi Vua của Seven Kingdoms.', 694, 2011, 200, TRUE),
+('The Shining', 5, 2, 5, '9780385121675', 350000, 390000, 'the_shining.jpg', 'Câu chuyện kinh dị về gia đình caretaker tại khách sạn Overlook bị ma ám vào mùa đông.', 447, 1977, 150, TRUE),
+('IT', 5, 2, 5, '9781501142970', 480000, 540000, 'it.jpg', 'Một nhóm trẻ em đối đầu với thực thể ác quỷ xuất hiện dưới dạng chú hề Pennywise.', 1138, 2016, 135, TRUE),
+
+-- Trinh thám
+('Murder on the Orient Express', 6, 2, 5, '9780062693662', 280000, 315000, 'orient_express.jpg', 'Thám tử Hercule Poirot điều tra vụ án giết người trên chuyến tàu Orient Express nổi tiếng.', 256, 2017, 170, TRUE),
+('And Then There Were None', 6, 2, 5, '9780062073488', 260000, 295000, 'and_then_there_were_none.jpg', 'Mười người xa lạ bị mời đến một hòn đảo hẻo lánh và lần lượt bị giết theo một bài thơ đồng dao.', 272, 2011, 160, TRUE),
+('The Da Vinci Code', 7, 1, 5, '9780307474278', 350000, 390000, 'da_vinci_code.jpg', 'Robert Langdon giải mã các biểu tượng bí ẩn để khám phá một bí mật lịch sử kinh thiên động địa.', 597, 2009, 220, TRUE),
+('Angels & Demons', 7, 1, 5, '9781416524793', 340000, 380000, 'angels_demons.jpg', 'Langdon đối đầu với hội Illuminati trong cuộc đua với thời gian tại Vatican.', 736, 2005, 180, FALSE),
+
+-- Tâm lý - Tình cảm
+('The Fault in Our Stars', 8, 2, 6, '9780142424179', 265000, 300000, 'fault_in_our_stars.jpg', 'Câu chuyện tình yêu cảm động giữa hai thiếu niên mắc bệnh ung thư.', 318, 2013, 190, TRUE),
+('Looking for Alaska', 8, 2, 6, '9780142402511', 255000, 290000, 'looking_alaska.jpg', 'Cuộc sống của Miles thay đổi khi anh gặp Alaska Young - cô gái xinh đẹp và bí ẩn.', 221, 2006, 140, FALSE),
+
+-- Lịch sử - Chính trị
+('Sapiens: A Brief History of Humankind', 9, 3, 7, '9780062316097', 420000, 470000, 'sapiens.jpg', 'Lịch sử nhân loại từ Homo Sapiens đến thời đại ngày nay qua góc nhìn độc đáo.', 443, 2015, 250, TRUE),
+('Homo Deus: A Brief History of Tomorrow', 9, 3, 7, '9780062464316', 440000, 490000, 'homo_deus.jpg', 'Tương lai của nhân loại khi công nghệ và trí tuệ nhân tạo phát triển.', 450, 2017, 180, TRUE),
+('21 Lessons for the 21st Century', 9, 3, 7, '9780525512172', 380000, 425000, '21_lessons.jpg', '21 bài học quan trọng về các thách thức lớn của thế kỷ 21.', 372, 2018, 160, TRUE),
 
 -- Kinh tế - Quản lý
-('Dạy Con Làm Giàu (Tập 1)', 8, 4, 3, '9786041031245', 99000, 115000, 'day_con_lam_giau_1.jpg', 'Bài học về tài chính và đầu tư từ "người cha giàu" và "người cha nghèo".', 328, 2020, 180, TRUE),
-('Dạy Con Làm Giàu (Tập 2)', 8, 4, 3, '9786041031252', 99000, 115000, 'day_con_lam_giau_2.jpg', 'Tiếp tục những bài học về tư duy tài chính và đầu tư thông minh.', 352, 2020, 160, FALSE),
-('Đắc Nhân Tâm', 6, 4, 3, '9786041032156', 86000, 98000, 'dac_nhan_tam.jpg', 'Cuốn sách kinh điển về nghệ thuật giao tiếp và ứng xử.', 320, 2019, 300, TRUE),
+('Rich Dad Poor Dad', 12, 14, 3, '9781612680194', 320000, 360000, 'rich_dad_poor_dad.jpg', 'Những bài học về tài chính từ hai người cha với quan điểm khác biệt.', 336, 2017, 280, TRUE),
+('The Lean Startup', 20, 13, 3, '9780307887894', 380000, 425000, 'lean_startup.jpg', 'Phương pháp khởi nghiệp tinh gọn giúp startup tăng tốc và giảm rủi ro.', 336, 2011, 150, TRUE),
+('Outliers', 10, 15, 3, '9780316017930', 350000, 390000, 'outliers.jpg', 'Bí mật đằng sau thành công của những người xuất chúng.', 309, 2008, 170, TRUE),
+('Blink', 10, 15, 3, '9780316010665', 340000, 380000, 'blink.jpg', 'Sức mạnh của tư duy không suy nghĩ - quyết định trong chớp mắt.', 296, 2007, 145, FALSE),
 
 -- Kỹ năng sống
-('Nghĩ Giàu Và Làm Giàu', 8, 4, 4, '9786041033234', 92000, 105000, 'nghi_giau_lam_giau.jpg', 'Bí quyết thành công từ những người giàu có nhất thế giới.', 368, 2020, 120, FALSE),
-('Sức Mạnh Của Tư Duy Tích Cực', 6, 4, 4, '9786041034156', 79000, 89000, 'tu_duy_tich_cuc.jpg', 'Cách thay đổi cuộc sống thông qua tư duy tích cực.', 256, 2019, 95, FALSE),
-('Đọc Vị Bất Kỳ Ai', 6, 4, 4, '9786041035234', 95000, 108000, 'doc_vi_bat_ky_ai.jpg', 'Nghệ thuật đọc hiểu ngôn ngữ cơ thể và tâm lý con người.', 304, 2021, 110, TRUE),
+('How to Win Friends and Influence People', 11, 3, 4, '9780671027032', 295000, 330000, 'how_win_friends.jpg', 'Cuốn sách kinh điển về nghệ thuật giao tiếp và tạo ảnh hưởng.', 288, 1998, 320, TRUE),
+('Atomic Habits', 13, 5, 4, '9780735211292', 350000, 390000, 'atomic_habits.jpg', 'Cách xây dựng thói quen tốt, phá bỏ thói quen xấu một cách khoa học.', 320, 2018, 290, TRUE),
+('The Subtle Art of Not Giving a F*ck', 14, 3, 4, '9780062457714', 320000, 360000, 'subtle_art.jpg', 'Cách sống phản trực quan để có một cuộc sống tốt đẹp.', 224, 2016, 240, TRUE),
+('Think and Grow Rich', 12, 5, 4, '9781585424337', 280000, 315000, 'think_grow_rich.jpg', '13 nguyên tắc để đạt được thành công và sự giàu có.', 238, 2005, 200, FALSE),
 
 -- Khoa học - Công nghệ
-('Clean Code', NULL, 9, 8, '9780132350884', 450000, 500000, 'clean_code.jpg', 'Cẩm nang viết code sạch và chuyên nghiệp cho lập trình viên.', 464, 2020, 60, TRUE),
-('Design Patterns', NULL, 9, 8, '9780201633612', 520000, 580000, 'design_patterns.jpg', 'Các mẫu thiết kế trong lập trình hướng đối tượng.', 395, 2019, 45, FALSE),
+('Clean Code', 19, 10, 8, '9780132350884', 650000, 720000, 'clean_code.jpg', 'Cẩm nang viết code sạch và chuyên nghiệp cho mọi lập trình viên.', 464, 2008, 120, TRUE),
+('The Pragmatic Programmer', 19, 10, 8, '9780135957059', 680000, 750000, 'pragmatic_programmer.jpg', 'Hướng dẫn từ học viên đến bậc thầy trong nghề lập trình.', 352, 2019, 95, TRUE),
+('Design Patterns', 19, 10, 8, '9780201633610', 720000, 800000, 'design_patterns.jpg', 'Các mẫu thiết kế phần mềm tái sử dụng trong lập trình hướng đối tượng.', 416, 1994, 80, FALSE),
+('Cracking the Coding Interview', 19, 10, 8, '9780984782857', 580000, 640000, 'cracking_coding.jpg', '189 câu hỏi lập trình và giải pháp để vượt qua phỏng vấn kỹ thuật.', 687, 2015, 110, TRUE),
 
 -- Thiếu nhi
-('Đắc Nhân Tâm Dành Cho Tuổi Teen', 6, 2, 9, '9786041036123', 78000, 88000, 'dac_nhan_tam_teen.jpg', 'Phiên bản dành cho tuổi teen với ngôn ngữ gần gũi, dễ hiểu.', 256, 2021, 140, TRUE),
-('Nhà Khoa Học Nhỏ Tuổi', NULL, 2, 9, '9786041037234', 65000, 75000, 'nha_khoa_hoc_nho_tuoi.jpg', 'Những thí nghiệm khoa học thú vị dành cho trẻ em.', 180, 2020, 100, FALSE),
-('Thám Tử Lừng Danh Conan (Tập 1)', NULL, 2, 10, '9786041038156', 25000, 30000, 'conan_tap_1.jpg', 'Manga trinh thám nổi tiếng về cậu bé Conan.', 192, 2021, 200, TRUE);
+('The Hunger Games', 15, 6, 9, '9780439023481', 280000, 315000, 'hunger_games.jpg', 'Katniss tham gia vào trò chơi sinh tử trong thế giới tương lai dystopian.', 374, 2008, 240, TRUE),
+('Catching Fire', 15, 6, 9, '9780439023498', 290000, 325000, 'catching_fire.jpg', 'Katniss trở lại đấu trường trong Quý Quarter Quell của The Hunger Games.', 391, 2009, 220, TRUE),
+('The Lightning Thief', 16, 12, 9, '9780786838653', 260000, 295000, 'lightning_thief.jpg', 'Percy Jackson khám phá mình là con của thần Poseidon và phải ngăn chặn cuộc chiến giữa các vị thần.', 377, 2005, 280, TRUE),
+('The Sea of Monsters', 16, 12, 9, '9780786856294', 265000, 300000, 'sea_monsters.jpg', 'Percy và bạn bè phiêu lưu vào Biển quái vật để cứu trại Half-Blood.', 279, 2006, 250, TRUE),
+('Diary of a Wimpy Kid', 17, 6, 9, '9780810993136', 220000, 250000, 'wimpy_kid_1.jpg', 'Nhật ký hài hước về cuộc sống học đường của cậu bé Greg Heffley.', 217, 2007, 300, TRUE),
+('Dog Man', 18, 6, 9, '9780545581608', 210000, 240000, 'dog_man_1.jpg', 'Truyện tranh hài hước về chú chó cảnh sát nửa người nửa chó.', 240, 2016, 270, TRUE),
+
+-- Truyện tranh - Manga
+('One Piece Vol.1', NULL, 11, 10, '9781569319017', 180000, 200000, 'one_piece_1.jpg', 'Monkey D. Luffy bắt đầu hành trình tìm kho báu One Piece để trở thành Vua Hải Tặc.', 216, 2003, 320, TRUE),
+('Naruto Vol.1', NULL, 11, 10, '9781569319000', 180000, 200000, 'naruto_1.jpg', 'Naruto Uzumaki theo đuổi giấc mơ trở thành Hokage của làng Lá.', 192, 2003, 300, TRUE),
+('Attack on Titan Vol.1', NULL, 11, 10, '9781612620244', 195000, 220000, 'aot_1.jpg', 'Nhân loại chiến đấu sinh tồn chống lại Titan trong thế giới hậu tận thế.', 194, 2012, 260, TRUE),
+('Death Note Vol.1', NULL, 11, 10, '9781421501680', 185000, 210000, 'death_note_1.jpg', 'Light Yagami tìm thấy quyển sổ tử thần có thể giết người chỉ bằng cách viết tên.', 200, 2005, 280, TRUE),
+('My Hero Academia Vol.1', NULL, 11, 10, '9781421582696', 180000, 200000, 'mha_1.jpg', 'Izuku Midoriya sinh ra không có siêu năng lực nhưng vẫn mơ ước trở thành anh hùng.', 192, 2015, 290, TRUE);
 
 -- =============================================
 -- SEED DATA - KHÁCH HÀNG
@@ -322,60 +366,67 @@ INSERT INTO khachhang (ten_khachhang, email, password, dien_thoai, dia_chi, ngay
 -- SEED DATA - HÓA ĐƠN
 -- =============================================
 INSERT INTO hoadon (id_khachhang, ma_hoadon, tong_tien, trang_thai, phuong_thuc_thanh_toan, trang_thai_thanh_toan, ten_nguoi_nhan, dia_chi_giao, sdt_giao, email_giao) VALUES
-(1, 'HD001', 295000, 'completed', 'COD', 'paid', 'Nguyễn Văn A', '123 Nguyễn Huệ, Q1, TP.HCM', '0901234567', 'nguyenvana@gmail.com'),
-(2, 'HD002', 467000, 'shipping', 'transfer', 'paid', 'Trần Thị B', '456 Lê Lợi, Q3, TP.HCM', '0912345678', 'tranthib@gmail.com'),
-(3, 'HD003', 203000, 'pending', 'COD', 'unpaid', 'Lê Văn C', '789 Trần Hưng Đạo, Q5, TP.HCM', '0923456789', 'levanc@gmail.com'),
-(4, 'HD004', 534000, 'confirmed', 'momo', 'paid', 'Phạm Thị D', '321 Võ Văn Tần, Q3, TP.HCM', '0934567890', 'phamthid@gmail.com'),
-(5, 'HD005', 174000, 'completed', 'vnpay', 'paid', 'Hoàng Văn E', '654 Pasteur, Q1, TP.HCM', '0945678901', 'hoangvane@gmail.com');
+(1, 'HD001', 580000, 'completed', 'COD', 'paid', 'Nguyễn Văn A', '123 Nguyễn Huệ, Q1, TP.HCM', '0901234567', 'nguyenvana@gmail.com'),
+(2, 'HD002', 1375000, 'shipping', 'transfer', 'paid', 'Trần Thị B', '456 Lê Lợi, Q3, TP.HCM', '0912345678', 'tranthib@gmail.com'),
+(3, 'HD003', 635000, 'pending', 'COD', 'unpaid', 'Lê Văn C', '789 Trần Hưng Đạo, Q5, TP.HCM', '0923456789', 'levanc@gmail.com'),
+(4, 'HD004', 1785000, 'confirmed', 'momo', 'paid', 'Phạm Thị D', '321 Võ Văn Tần, Q3, TP.HCM', '0934567890', 'phamthid@gmail.com'),
+(5, 'HD005', 1165000, 'completed', 'vnpay', 'paid', 'Hoàng Văn E', '654 Pasteur, Q1, TP.HCM', '0945678901', 'hoangvane@gmail.com');
 
 -- =============================================
 -- SEED DATA - CHI TIẾT HÓA ĐƠN
 -- =============================================
 INSERT INTO chitiet_hoadon (id_hoadon, id_sach, so_luong, gia, thanh_tien) VALUES
 -- HD001
-(1, 1, 2, 108000, 216000),
-(1, 5, 1, 79000, 79000),
+(1, 1, 1, 285000, 285000),
+(1, 5, 1, 295000, 295000),
 -- HD002
-(2, 7, 1, 79000, 79000),
-(2, 8, 1, 155000, 155000),
-(2, 13, 1, 86000, 86000),
-(2, 3, 1, 110000, 110000),
-(2, 17, 1, 25000, 25000),
+(2, 21, 1, 320000, 320000),
+(2, 26, 1, 350000, 350000),
+(2, 17, 1, 265000, 265000),
+(2, 35, 1, 260000, 260000),
+(2, 40, 1, 180000, 180000),
 -- HD003
-(3, 1, 1, 108000, 108000),
-(3, 6, 1, 95000, 95000),
+(3, 1, 1, 285000, 285000),
+(3, 14, 1, 350000, 350000),
 -- HD004
-(4, 11, 2, 99000, 198000),
-(4, 8, 1, 155000, 155000),
-(4, 16, 1, 95000, 95000),
-(4, 13, 1, 86000, 86000),
+(4, 19, 1, 420000, 420000),
+(4, 8, 1, 420000, 420000),
+(4, 29, 1, 650000, 650000),
+(4, 25, 1, 295000, 295000),
 -- HD005
-(5, 17, 2, 25000, 50000),
-(5, 19, 1, 65000, 65000),
-(5, 15, 1, 79000, 79000);
+(5, 37, 2, 220000, 440000),
+(5, 40, 3, 180000, 540000),
+(5, 41, 1, 185000, 185000);
 
 -- =============================================
 -- SEED DATA - ĐÁNH GIÁ
 -- =============================================
 INSERT INTO danhgia (id_sach, id_khachhang, so_sao, tieu_de, noi_dung, trang_thai) VALUES
-(1, 1, 5, 'Tuyệt vời!', 'Cuốn sách rất hay, gợi nhớ lại tuổi thơ của mình. Viết rất chân thực và cảm động.', 'approved'),
-(1, 2, 5, 'Đọc mà khóc', 'Đọc xong mà muốn khóc, nhớ lại bao nhiêu kỷ niệm tuổi thơ.', 'approved'),
-(7, 3, 5, 'Kinh điển', 'Nhà giả kim là cuốn sách mà ai cũng nên đọc ít nhất một lần trong đời.', 'approved'),
-(8, 4, 4, 'Hay nhưng hơi khó hiểu', 'Kafka bên bờ biển viết hay nhưng có phần hơi khó hiểu, cần đọc kỹ.', 'approved'),
-(11, 5, 5, 'Must read!', 'Cuốn sách thay đổi tư duy của tôi về tài chính. Rất bổ ích!', 'approved'),
-(13, 1, 5, 'Kinh điển vượt thời gian', 'Đắc nhân tâm là cuốn sách mà mình đọc đi đọc lại nhiều lần.', 'approved'),
-(3, 2, 5, 'Tình yêu đẹp nhất', 'Mắt Biếc là câu chuyện tình đẹp và buồn nhất mà mình từng đọc.', 'approved');
+(1, 1, 5, 'Masterpiece!', 'The Alchemist là một kiệt tác văn học. Mỗi trang sách đều chứa đựng triết lý sâu sắc về cuộc sống.', 'approved'),
+(1, 2, 5, 'Life-changing', 'Cuốn sách thay đổi cách nhìn của tôi về cuộc sống. Must read!', 'approved'),
+(5, 3, 5, 'Magical World', 'Harry Potter là series tuyệt vời nhất mà tôi từng đọc. Thế giới phép thuật quá hấp dẫn!', 'approved'),
+(2, 4, 4, 'Beautiful but melancholic', 'Norwegian Wood viết rất đẹp nhưng có phần buồn. Murakami thật tài năng.', 'approved'),
+(21, 5, 5, 'Best financial book', 'Rich Dad Poor Dad thay đổi tư duy tài chính của tôi hoàn toàn. Highly recommended!', 'approved'),
+(26, 1, 5, 'Game changer', 'Atomic Habits dạy tôi cách xây dựng thói quen hiệu quả. Rất thực tế!', 'approved'),
+(14, 2, 5, 'Gripping mystery', 'The Da Vinci Code hấp dẫn từ trang đầu đến trang cuối. Không thể rời mắt!', 'approved'),
+(17, 3, 5, 'Emotional rollercoaster', 'The Fault in Our Stars làm tôi khóc rất nhiều. Câu chuyện tình yêu đẹp và đau.', 'approved'),
+(19, 4, 5, 'Mind-blowing', 'Sapiens mở mang tầm nhìn về lịch sử loài người. Xuất sắc!', 'approved'),
+(29, 5, 4, 'Essential for developers', 'Clean Code là must-have cho mọi programmer. Viết code clean hơn nhiều sau khi đọc.', 'approved'),
+(8, 1, 5, 'Epic Fantasy', 'Game of Thrones mở đầu series tuyệt vời. Thế giới Westeros thật sống động!', 'approved'),
+(35, 2, 5, 'Addictive series', 'Percy Jackson rất vui và thú vị. Con tôi đọc không thể rời mắt!', 'approved');
 
 -- =============================================
 -- SEED DATA - GIỎ HÀNG
 -- =============================================
 INSERT INTO giohang (id_khachhang, id_sach, so_luong) VALUES
-(1, 9, 1),
-(1, 14, 2),
-(2, 17, 3),
-(3, 7, 1),
-(3, 11, 1),
-(4, 1, 2);
+(1, 10, 1),
+(1, 26, 2),
+(2, 17, 1),
+(3, 1, 1),
+(3, 21, 1),
+(4, 5, 2),
+(5, 29, 1),
+(5, 40, 3);
 
 -- =============================================
 -- SEED DATA - MÃ GIẢM GIÁ
@@ -391,12 +442,15 @@ INSERT INTO magiamgia (ma_code, ten_chuongtrinh, loai_giam, gia_tri_giam, gia_tr
 -- =============================================
 INSERT INTO wishlist (id_khachhang, id_sach) VALUES
 (1, 8),
-(1, 16),
-(2, 11),
+(1, 19),
+(2, 21),
 (3, 1),
-(3, 7),
+(3, 14),
 (4, 9),
-(5, 13);
+(5, 29),
+(5, 35),
+(1, 40),
+(2, 42);
 
 -- =============================================
 -- SEED DATA - BANNER

@@ -109,7 +109,7 @@
                 <div class="col-md-12 text-center">
                     <p class="mb-0 text-muted">
                         &copy; <?php echo date('Y'); ?> BookStore. All rights reserved. 
-                        Designed with <i class="fas fa-heart text-danger"></i> by BookStore Team
+                        Designed with <i class="fas fa-heart text-danger"></i> by Khoa
                     </p>
                 </div>
             </div>
@@ -167,9 +167,12 @@
                                 if (response.success && response.data.length > 0) {
                                     let html = '';
                                     response.data.forEach(function(book) {
+                                        const coverUrl = book.isbn
+                                            ? `/book_store/?page=cover&isbn=${encodeURIComponent(String(book.isbn).replace(/[^0-9Xx]/g, ''))}`
+                                            : '/book_store/Content/images/books/no-image.jpg';
                                         html += `
                                             <a href="?page=book_detail&id=${book.ma_sach}" class="quick-search-item text-decoration-none">
-                                                <img src="${book.hinh_anh}" alt="${book.ten_sach}">
+                                                <img src="${coverUrl}" alt="${book.ten_sach}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/book_store/Content/images/books/no-image.jpg';">
                                                 <div class="book-info">
                                                     <div class="book-title">${book.ten_sach}</div>
                                                     <div class="book-price">${formatPrice(book.gia)} đ</div>

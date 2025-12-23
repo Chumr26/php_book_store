@@ -1,5 +1,7 @@
 <?php
 $pageTitle = "Giỏ hàng";
+
+require_once __DIR__ . '/helpers/cover.php';
 ?>
 
 <div class="container mt-4">
@@ -25,7 +27,9 @@ $pageTitle = "Giỏ hàng";
                         <tr data-cart-item-id="<?php echo $item['ma_sach']; ?>">
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <img src="<?php echo htmlspecialchars($item['hinh_anh']); ?>" 
+                                    <?php $coverUrl = book_cover_url($item['isbn'] ?? null, 'small'); ?>
+                                    <img src="<?php echo htmlspecialchars($coverUrl); ?>" 
+                                 loading="lazy" decoding="async"
                                          style="width: 70px; height: 100px; object-fit: cover;" class="mr-3">
                                     <div>
                                         <h6><?php echo htmlspecialchars($item['ten_sach']); ?></h6>

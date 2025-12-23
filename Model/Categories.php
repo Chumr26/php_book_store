@@ -21,13 +21,14 @@ class Categories {
      * @return array Categories
      */
     public function getAllCategories() {
-        $sql = "SELECT id_theloai as id_category,
-                       ten_theloai as category_name,
-                       mo_ta as description,
-                       thu_tu as sort_order,
-                       trang_thai as status
-                FROM theloai 
-                WHERE trang_thai = 'active' 
+        $sql = "SELECT 
+                    id_theloai   AS ma_danh_muc,
+                    ten_theloai  AS ten_danh_muc,
+                    mo_ta        AS mo_ta,
+                    thu_tu       AS thu_tu,
+                    trang_thai   AS trang_thai
+                FROM theloai
+                WHERE (trang_thai = 'active' OR trang_thai = 1)
                 ORDER BY thu_tu ASC, ten_theloai ASC";
         
         $result = $this->conn->query($sql);
@@ -47,12 +48,14 @@ class Categories {
      * @return array|null Category data or null
      */
     public function getCategoryById($id) {
-        $sql = "SELECT id_theloai as id_category,
-                       ten_theloai as category_name,
-                       mo_ta as description,
-                       thu_tu as sort_order,
-                       trang_thai as status
-                FROM theloai WHERE id_theloai = ?";
+        $sql = "SELECT 
+                    id_theloai   AS ma_danh_muc,
+                    ten_theloai  AS ten_danh_muc,
+                    mo_ta        AS mo_ta,
+                    thu_tu       AS thu_tu,
+                    trang_thai   AS trang_thai
+                FROM theloai
+                WHERE id_theloai = ?";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $id);

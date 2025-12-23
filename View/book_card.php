@@ -2,6 +2,10 @@
 <?php
 // This file is included from other views, expects $book variable to be set
 if (!isset($book)) return;
+
+require_once __DIR__ . '/helpers/cover.php';
+
+$coverUrl = book_cover_url($book['isbn'] ?? null, 'medium');
 ?>
 
 <div class="book-card">
@@ -9,10 +13,12 @@ if (!isset($book)) return;
         <!-- Book Image -->
         <div class="book-image-wrapper position-relative">
             <a href="?page=book_detail&id=<?php echo $book['ma_sach']; ?>">
-                <img src="<?php echo htmlspecialchars($book['hinh_anh'] ?? '/book_store/Content/images/books/no-image.jpg'); ?>" 
+                <img src="<?php echo htmlspecialchars($coverUrl); ?>" 
                      class="card-img-top" 
                      alt="<?php echo htmlspecialchars($book['ten_sach']); ?>"
-                     style="height: 280px; object-fit: cover;">
+                     loading="lazy" decoding="async"
+                     onerror="this.onerror=null;this.src='/book_store/Content/images/books/no-image.jpg';"
+                     style="height: 340px; object-fit: contain; background: #fff;">
             </a>
             
             <!-- Stock badge -->

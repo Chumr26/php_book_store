@@ -24,8 +24,14 @@
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            padding-top: 140px;
-            /* Space for fixed header */
+            /* Space for fixed top-bar + header + nav (avoid overlap) */
+            padding-top: 90px;
+        }
+
+        :root {
+            --topbar-h: 38px;
+            --header-h: 50px;
+            --nav-h: 48px;
         }
 
         /* Top Bar */
@@ -51,11 +57,14 @@
             background-color: #fff;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             position: fixed;
-            top: 40px;
+            top: var(--topbar-h);
             left: 0;
             right: 0;
             z-index: 1000;
             padding: 15px 0;
+            height: var(--header-h);
+            display: flex;
+            align-items: center;
         }
 
         .logo {
@@ -79,6 +88,10 @@
             position: relative;
         }
 
+        .search-bar form {
+            position: relative;
+        }
+
         .search-bar .form-control {
             border-radius: 25px;
             padding-right: 45px;
@@ -86,16 +99,22 @@
         }
 
         .search-bar .btn-search {
+            right: 0;
             position: absolute;
-            right: 5px;
             top: 50%;
             transform: translateY(-50%);
             border-radius: 50%;
-            width: 35px;
-            height: 35px;
+            width: 37px;
+            height: 37px;
             padding: 0;
             background-color: #007bff;
             border: none;
+        }
+
+        .search-bar .btn-search {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .search-bar .btn-search:hover {
@@ -157,6 +176,7 @@
             display: flex;
             align-items: center;
             gap: 20px;
+            justify-content: flex-end;
         }
 
         .header-icon {
@@ -164,6 +184,11 @@
             color: #333;
             font-size: 22px;
             text-decoration: none;
+        }
+
+        .header-icon span {
+            font-size: 14px;
+            font-weight: 500;
         }
 
         .header-icon:hover {
@@ -228,7 +253,7 @@
         .main-nav {
             background-color: #007bff;
             position: fixed;
-            top: 100px;
+            top: calc(var(--topbar-h) + var(--header-h));
             left: 0;
             right: 0;
             z-index: 999;
@@ -250,6 +275,30 @@
 
         .main-nav .navbar-nav .nav-link.active {
             background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Ensure main content starts below fixed nav */
+        .main-content {
+            margin-top: var(--nav-h);
+        }
+
+        @media (max-width: 767.98px) {
+            :root {
+                --header-h: 110px;
+                --nav-h: 52px;
+            }
+
+            body {
+                padding-top: calc(var(--topbar-h) + var(--header-h) + var(--nav-h) + 10px);
+            }
+
+            .header-icons {
+                gap: 12px;
+            }
+
+            .header-icon span {
+                font-size: 13px;
+            }
         }
     </style>
 </head>

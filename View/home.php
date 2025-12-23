@@ -39,11 +39,11 @@ $pageTitle = "Trang chủ";
                          class="d-block w-100" 
                          alt="Welcome"
                          style="height: 450px; object-fit: cover; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <div class="carousel-caption d-none d-md-block">
+                    <!-- <div class="carousel-caption d-none d-md-block">
                         <h2 class="display-4">Chào mừng đến BookStore</h2>
                         <p class="lead">Hàng ngàn đầu sách chất lượng với giá tốt nhất</p>
                         <a href="?page=books" class="btn btn-primary btn-lg">Khám phá ngay</a>
-                    </div>
+                    </div> -->
                 </div>
             <?php endif; ?>
         </div>
@@ -70,18 +70,22 @@ $pageTitle = "Trang chủ";
         <div class="row">
             <?php foreach (array_slice($categories, 0, 8) as $category): ?>
                 <div class="col-md-3 col-sm-6 mb-4">
-                    <a href="?page=books&category=<?php echo $category['ma_danh_muc']; ?>" 
+                    <a href="?page=books&category=<?php echo urlencode((string)($category['ma_danh_muc'] ?? '')); ?>" 
                        class="category-card text-decoration-none">
                         <div class="card h-100 shadow-sm hover-shadow">
                             <div class="card-body text-center">
                                 <div class="category-icon mb-3">
                                     <i class="fas fa-book fa-3x text-primary"></i>
                                 </div>
-                                <h5 class="card-title"><?php echo htmlspecialchars($category['ten_danh_muc']); ?></h5>
-                                <?php if (!empty($category['mo_ta'])): ?>
+                                <?php
+                                $categoryName = (string)($category['ten_danh_muc'] ?? '');
+                                $categoryDesc = (string)($category['mo_ta'] ?? '');
+                                ?>
+                                <h5 class="card-title"><?php echo htmlspecialchars($categoryName); ?></h5>
+                                <?php if ($categoryDesc !== ''): ?>
                                     <p class="card-text text-muted small">
-                                        <?php echo htmlspecialchars(mb_substr($category['mo_ta'], 0, 60)); ?>
-                                        <?php echo mb_strlen($category['mo_ta']) > 60 ? '...' : ''; ?>
+                                        <?php echo htmlspecialchars(mb_substr($categoryDesc, 0, 60)); ?>
+                                        <?php echo mb_strlen($categoryDesc) > 60 ? '...' : ''; ?>
                                     </p>
                                 <?php endif; ?>
                             </div>

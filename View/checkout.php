@@ -1,5 +1,7 @@
 <?php
 $pageTitle = "Thanh toán";
+
+require_once __DIR__ . '/helpers/cover.php';
 ?>
 
 <div class="container mt-4">
@@ -134,7 +136,9 @@ $pageTitle = "Thanh toán";
                         <div class="order-items mb-3" style="max-height: 300px; overflow-y: auto;">
                             <?php foreach ($cartItems as $item): ?>
                             <div class="d-flex mb-3 pb-3 border-bottom">
-                                <img src="<?php echo htmlspecialchars($item['hinh_anh']); ?>" 
+                          <?php $coverUrl = book_cover_url($item['isbn'] ?? null, 'small'); ?>
+                          <img src="<?php echo htmlspecialchars($coverUrl); ?>" 
+                              loading="lazy" decoding="async"
                                      style="width: 60px; height: 80px; object-fit: cover;" class="mr-3">
                                 <div class="flex-grow-1">
                                     <h6 class="mb-1" style="font-size: 14px;">

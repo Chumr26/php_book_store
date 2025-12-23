@@ -47,9 +47,10 @@ class HomeController extends BaseController {
             
             // Prepare data for view
             $data = [
-                'featured_books' => $featuredBooks,
-                'bestselling_books' => $bestsellingBooks,
-                'new_arrivals' => $newArrivals,
+                // Views expect these camelCase keys
+                'featuredBooks' => $featuredBooks,
+                'topSellingBooks' => $bestsellingBooks,
+                'newArrivals' => $newArrivals,
                 'banners' => $banners,
                 'categories' => $categories,
                 'page_title' => 'Trang chủ - Nhà sách trực tuyến'

@@ -1,0 +1,337 @@
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Spotify-Style Navbar (Dark)</title>
+		<style>
+			:root {
+				--bg: #0b0b0f;
+				--panel: #121218;
+				--panel-2: #191922;
+				--text: #eef0f4;
+				--muted: rgba(238, 240, 244, 0.72);
+				--muted-2: rgba(238, 240, 244, 0.55);
+				--stroke: rgba(255, 255, 255, 0.10);
+				--stroke-2: rgba(255, 255, 255, 0.14);
+				--accent: #1ed760; /* Spotify-like neon */
+				--accent-2: #22c55e;
+				--shadow: 0 14px 48px rgba(0, 0, 0, 0.55);
+				--radius: 18px;
+			}
+
+			* { box-sizing: border-box; }
+
+			body {
+				margin: 0;
+				font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+					"Apple Color Emoji", "Segoe UI Emoji";
+				background:
+					radial-gradient(1100px 600px at 15% 0%, rgba(30, 215, 96, 0.14), transparent 60%),
+					radial-gradient(900px 520px at 88% 18%, rgba(99, 102, 241, 0.10), transparent 55%),
+					linear-gradient(180deg, #050507 0%, var(--bg) 35%, #07070a 100%);
+				color: var(--text);
+			}
+
+			a { color: inherit; text-decoration: none; }
+
+			.wrap {
+				max-width: 1100px;
+				margin: 0 auto;
+				padding: 28px 18px;
+			}
+
+			/* Navbar */
+			.nav {
+				background: rgba(18, 18, 24, 0.86);
+				border: 1px solid var(--stroke);
+				backdrop-filter: blur(10px);
+				-webkit-backdrop-filter: blur(10px);
+				border-radius: var(--radius);
+				box-shadow: var(--shadow);
+			}
+
+			.nav-inner {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 14px;
+				padding: 12px 14px;
+			}
+
+			.brand {
+				display: inline-flex;
+				align-items: center;
+				gap: 10px;
+				min-width: max-content;
+			}
+
+			.logo {
+				width: 38px;
+				height: 38px;
+				border-radius: 999px;
+				background:
+					radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.18), transparent 55%),
+					linear-gradient(180deg, #1ed760 0%, #0ea34c 100%);
+				box-shadow: 0 10px 20px rgba(30, 215, 96, 0.18);
+				display: grid;
+				place-items: center;
+			}
+
+			.logo svg { opacity: 0.95; }
+
+			.brand-name {
+				font-weight: 800;
+				letter-spacing: -0.02em;
+			}
+
+			.brand-name span {
+				color: var(--accent);
+			}
+
+			/* Left: links */
+			.links {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				padding: 6px;
+				border-radius: 999px;
+				background: rgba(25, 25, 34, 0.8);
+				border: 1px solid var(--stroke);
+			}
+
+			.nav-link {
+				padding: 10px 12px;
+				border-radius: 999px;
+				color: var(--muted);
+				font-weight: 650;
+				letter-spacing: 0.1px;
+				transition: background 150ms ease, color 150ms ease;
+			}
+
+			.nav-link:hover {
+				background: rgba(255, 255, 255, 0.06);
+				color: var(--text);
+			}
+
+			.nav-link[aria-current="page"] {
+				background: rgba(30, 215, 96, 0.14);
+				border: 1px solid rgba(30, 215, 96, 0.22);
+				color: var(--text);
+			}
+
+			/* Search */
+			.search {
+				flex: 1;
+				min-width: 180px;
+				max-width: 520px;
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				padding: 10px 12px;
+				border-radius: 999px;
+				background: rgba(25, 25, 34, 0.8);
+				border: 1px solid var(--stroke);
+				color: var(--muted);
+			}
+
+			.search input {
+				width: 100%;
+				background: transparent;
+				border: 0;
+				outline: none;
+				color: var(--text);
+				font-size: 0.95rem;
+			}
+
+			.search input::placeholder { color: var(--muted-2); }
+
+			/* Actions */
+			.actions {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				min-width: max-content;
+			}
+
+			.pill {
+				border-radius: 999px;
+				padding: 10px 14px;
+				font-weight: 750;
+				letter-spacing: 0.1px;
+				border: 1px solid var(--stroke);
+				background: rgba(25, 25, 34, 0.8);
+				color: var(--text);
+				transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
+			}
+
+			.pill:hover {
+				transform: translateY(-1px);
+				border-color: var(--stroke-2);
+				background: rgba(255, 255, 255, 0.06);
+			}
+
+			.pill.accent {
+				border: 0;
+				color: #07140b;
+				background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+				box-shadow: 0 10px 24px rgba(30, 215, 96, 0.22);
+			}
+
+			.pill.accent:hover { filter: brightness(1.02); }
+
+			.avatar {
+				width: 40px;
+				height: 40px;
+				border-radius: 999px;
+				border: 1px solid var(--stroke);
+				background:
+					radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25), transparent 55%),
+					linear-gradient(180deg, #232332 0%, #141420 100%);
+				display: grid;
+				place-items: center;
+				color: rgba(238, 240, 244, 0.9);
+			}
+
+			/* Mobile menu */
+			.menu-btn {
+				display: none;
+				width: 44px;
+				height: 44px;
+				border-radius: 999px;
+				border: 1px solid var(--stroke);
+				background: rgba(25, 25, 34, 0.8);
+				color: var(--text);
+				cursor: pointer;
+			}
+
+			.menu {
+				display: none;
+				border-top: 1px solid var(--stroke);
+				padding: 12px 14px 14px;
+			}
+
+			.menu.open { display: block; }
+
+			.menu .menu-links {
+				display: grid;
+				gap: 8px;
+				padding: 10px;
+				border-radius: 14px;
+				background: rgba(25, 25, 34, 0.65);
+				border: 1px solid var(--stroke);
+			}
+
+			/* Focus styles */
+			.nav a:focus-visible,
+			.nav button:focus-visible,
+			.nav input:focus-visible {
+				outline: none;
+				box-shadow: 0 0 0 3px rgba(30, 215, 96, 0.25);
+			}
+
+			/* Responsive */
+			@media (max-width: 860px) {
+				.links,
+				.search {
+					display: none;
+				}
+				.menu-btn { display: inline-grid; place-items: center; }
+			}
+
+			/* Demo content */
+			.demo {
+				margin-top: 18px;
+				padding: 18px;
+				border-radius: var(--radius);
+				border: 1px solid var(--stroke);
+				background: rgba(18, 18, 24, 0.55);
+				color: var(--muted);
+			}
+			.demo strong { color: var(--text); }
+		</style>
+	</head>
+	<body>
+		<div class="wrap">
+			<nav class="nav" aria-label="Primary">
+				<div class="nav-inner">
+					<a class="brand" href="#" aria-label="Home">
+						<div class="logo" aria-hidden="true">
+							<!-- simple soundwave icon -->
+							<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+								<path d="M4 12.7c-.9 0-1.6-.7-1.6-1.6V9c0-.9.7-1.6 1.6-1.6s1.6.7 1.6 1.6v2.1c0 .9-.7 1.6-1.6 1.6Z" fill="#07140b"/>
+								<path d="M9 15c-.9 0-1.6-.7-1.6-1.6V6.6c0-.9.7-1.6 1.6-1.6s1.6.7 1.6 1.6v6.8c0 .9-.7 1.6-1.6 1.6Z" fill="#07140b"/>
+								<path d="M14 12.7c-.9 0-1.6-.7-1.6-1.6V9c0-.9.7-1.6 1.6-1.6s1.6.7 1.6 1.6v2.1c0 .9-.7 1.6-1.6 1.6Z" fill="#07140b"/>
+							</svg>
+						</div>
+						<div class="brand-name">Book<span>ify</span></div>
+					</a>
+
+					<div class="links" role="navigation" aria-label="Sections">
+						<a class="nav-link" href="#" aria-current="page">Home</a>
+						<a class="nav-link" href="#">Browse</a>
+						<a class="nav-link" href="#">Library</a>
+						<a class="nav-link" href="#">Premium</a>
+					</div>
+
+					<label class="search" aria-label="Search">
+						<svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+							<path d="M8.6 15.3a6.7 6.7 0 1 1 0-13.4 6.7 6.7 0 0 1 0 13.4Z" stroke="currentColor" stroke-width="1.6"/>
+							<path d="M13.5 13.5 18 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+						</svg>
+						<input type="search" placeholder="What do you want to read?" />
+					</label>
+
+					<div class="actions">
+						<button class="menu-btn" type="button" aria-expanded="false" aria-controls="mobileMenu" id="menuBtn">
+							<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+								<path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+							</svg>
+						</button>
+
+						<a class="pill" href="#">Log in</a>
+						<a class="pill accent" href="#">Sign up</a>
+						<a class="avatar" href="#" aria-label="Account">
+							<span style="font-weight:800; font-size:0.95rem;">A</span>
+						</a>
+					</div>
+				</div>
+
+				<div id="mobileMenu" class="menu" role="region" aria-label="Mobile menu">
+					<div class="menu-links">
+						<a class="nav-link" href="#" aria-current="page">Home</a>
+						<a class="nav-link" href="#">Browse</a>
+						<a class="nav-link" href="#">Library</a>
+						<a class="nav-link" href="#">Premium</a>
+						<label class="search" style="display:flex;" aria-label="Search">
+							<svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+								<path d="M8.6 15.3a6.7 6.7 0 1 1 0-13.4 6.7 6.7 0 0 1 0 13.4Z" stroke="currentColor" stroke-width="1.6"/>
+								<path d="M13.5 13.5 18 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+							</svg>
+							<input type="search" placeholder="Search" />
+						</label>
+					</div>
+				</div>
+			</nav>
+
+			<section class="demo" aria-label="Demo content">
+				<strong>Tip:</strong> Resize the window under <strong>860px</strong> to see the mobile menu button.
+				This is pure HTML/CSS with a tiny script to toggle the menu.
+			</section>
+		</div>
+
+		<script>
+			(function () {
+				var btn = document.getElementById('menuBtn');
+				var menu = document.getElementById('mobileMenu');
+				if (!btn || !menu) return;
+
+				btn.addEventListener('click', function () {
+					var isOpen = menu.classList.toggle('open');
+					btn.setAttribute('aria-expanded', String(isOpen));
+				});
+			})();
+		</script>
+	</body>
+</html>

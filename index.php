@@ -261,6 +261,15 @@ try {
             $controller = new CartController($conn);
             $controller->getCartSummary();
             break;
+
+        // ========== BOOK COVER REDIRECT (PROXY) ==========
+        // Returns a 302 redirect to a real image URL resolved from the hosted BookCover API.
+        // Usage: ?page=cover&isbn=9780345376596
+        case 'cover':
+            require_once BASE_PATH . 'Controller/CoverController.php';
+            $controller = new CoverController($conn);
+            $controller->redirectByIsbn($_GET['isbn'] ?? '');
+            break;
         
         // ========== 404 NOT FOUND ==========
         default:

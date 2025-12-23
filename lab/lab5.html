@@ -1,0 +1,118 @@
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Glassmorphic Login (Tailwind)</title>
+
+		<!-- TailwindCSS (CDN) -->
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script>
+			tailwind.config = {
+				theme: {
+					extend: {
+						colors: {
+							ink: {
+								950: '#070816'
+							}
+						},
+						boxShadow: {
+							glass: '0 24px 70px rgba(0,0,0,0.35)'
+						}
+					}
+				}
+			};
+		</script>
+	</head>
+
+	<body
+		class="min-h-screen bg-[radial-gradient(1000px_700px_at_15%_20%,rgba(167,139,250,0.45),transparent_60%),radial-gradient(900px_700px_at_85%_20%,rgba(99,102,241,0.35),transparent_55%),radial-gradient(900px_650px_at_50%_90%,rgba(236,72,153,0.22),transparent_60%),linear-gradient(135deg,#0b1020_0%,#0b1229_40%,#0e0f2a_100%)] text-white"
+	>
+		<main class="min-h-screen grid place-items-center px-4 py-10">
+			<div class="w-full max-w-md">
+				<div class="text-center mb-6">
+					<div class="text-xl font-semibold tracking-tight">Book Store</div>
+					<p class="mt-1 text-white/70">Sign in to continue</p>
+				</div>
+
+				<!-- Glass card -->
+				<section
+					class="relative rounded-[18px] bg-white/15 backdrop-blur-[14px] shadow-glass overflow-hidden"
+					aria-label="Login form"
+				>
+					<!-- subtle inner white border (no visible default borders) -->
+					<div
+						class="pointer-events-none absolute inset-0 rounded-[18px] p-px bg-[linear-gradient(180deg,rgba(255,255,255,0.55),rgba(255,255,255,0.12))]"
+						aria-hidden="true"
+					>
+						<div class="h-full w-full rounded-[17px] bg-transparent" aria-hidden="true"></div>
+					</div>
+
+					<div class="relative p-6 sm:p-8">
+						<form action="#" method="post" class="space-y-4" novalidate>
+							<div>
+								<label for="email" class="block text-sm font-medium text-white/90">Email</label>
+								<input
+									id="email"
+									name="email"
+									type="email"
+									autocomplete="email"
+									placeholder="you@example.com"
+									required
+									class="mt-2 w-full rounded-xl border-0 bg-white/10 px-4 py-3 text-white placeholder:text-white/60 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18)] focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.28)]"
+								/>
+							</div>
+
+							<div>
+								<label for="password" class="block text-sm font-medium text-white/90">Password</label>
+								<input
+									id="password"
+									name="password"
+									type="password"
+									autocomplete="current-password"
+									placeholder="••••••••"
+									required
+									class="mt-2 w-full rounded-xl border-0 bg-white/10 px-4 py-3 text-white placeholder:text-white/60 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18)] focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.28)]"
+								/>
+							</div>
+
+							<div class="flex items-center justify-between gap-4">
+								<label class="inline-flex items-center gap-2 text-sm text-white/80">
+									<input
+										type="checkbox"
+										name="remember"
+										value="1"
+										class="h-4 w-4 rounded border-0 bg-white/15 text-purple-500 focus:ring-purple-500/30"
+									/>
+									Remember me
+								</label>
+								<a href="#" class="text-sm text-white/80 hover:text-white underline-offset-4 hover:underline">
+									Forgot password?
+								</a>
+							</div>
+
+							<!-- Primary button: gradient purple -->
+							<button
+								type="submit"
+								class="w-full rounded-xl px-4 py-3 font-semibold text-white bg-gradient-to-br from-purple-500 via-violet-600 to-fuchsia-500 shadow-[0_12px_26px_rgba(124,58,237,0.30)] hover:brightness-[1.04] active:brightness-[0.99] focus:outline-none focus:ring-4 focus:ring-fuchsia-400/25"
+							>
+								Sign in
+							</button>
+
+							<p class="pt-1 text-center text-sm text-white/70">
+								Don’t have an account?
+								<a href="#" class="text-white hover:underline underline-offset-4">Create one</a>
+							</p>
+						</form>
+					</div>
+				</section>
+
+				<p class="mt-6 text-center text-xs text-white/55">
+					This is a Tailwind-only glassmorphic design (no Bootstrap). The “inner border” is created using a
+					1px gradient overlay.
+				</p>
+			</div>
+		</main>
+	</body>
+</html>

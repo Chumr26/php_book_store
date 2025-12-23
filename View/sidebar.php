@@ -158,12 +158,26 @@
             <h5 class="mb-0"><i class="fas fa-fire"></i> Sách bán chạy</h5>
         </div>
         <div class="card-body p-2">
+            <?php
+            $__coverHelperLoaded = false;
+            if (file_exists(__DIR__ . '/helpers/cover.php')) {
+                require_once __DIR__ . '/helpers/cover.php';
+                $__coverHelperLoaded = true;
+            }
+            ?>
             <?php if (isset($bestsellers) && !empty($bestsellers)): ?>
                 <?php foreach (array_slice($bestsellers, 0, 5) as $index => $book): ?>
                     <div class="media mb-3 p-2 border-bottom">
                         <span class="badge badge-danger mr-2 align-self-start"><?php echo $index + 1; ?></span>
-                        <img src="<?php echo htmlspecialchars($book['hinh_anh']); ?>" 
+                        <?php
+                        $coverUrl = $__coverHelperLoaded
+                            ? book_cover_url($book['isbn'] ?? null, 'small')
+                            : '/book_store/Content/images/books/no-image.jpg';
+                        ?>
+                        <img src="<?php echo htmlspecialchars($coverUrl); ?>" 
                              alt="<?php echo htmlspecialchars($book['ten_sach']); ?>"
+                        loading="lazy" decoding="async"
+                             onerror="this.onerror=null;this.src='/book_store/Content/images/books/no-image.jpg';"
                              class="mr-2" style="width: 50px; height: 70px; object-fit: cover;">
                         <div class="media-body">
                             <a href="?page=book_detail&id=<?php echo $book['ma_sach']; ?>" 
