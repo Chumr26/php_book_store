@@ -201,7 +201,7 @@ class BookController extends BaseController {
                 exit;
             }
             
-            // Get book details
+            // Get book details (now includes author, publisher, category, and ratings)
             $book = $this->booksModel->getBookById($bookId);
             
             if (!$book) {
@@ -210,33 +210,58 @@ class BookController extends BaseController {
                 exit;
             }
             
-            // Get author details
-            $author = $this->authorsModel->getAuthorById($book['id_tacgia']);
-            
-            // Get publisher details
-            $publisher = $this->publishersModel->getPublisherById($book['id_nxb']);
-            
-            // Get category details
-            $category = $this->categoriesModel->getCategoryById($book['id_theloai']);
-            
             // Get book reviews
-            $reviews = $this->reviewsModel->getReviewsByBook($bookId);
+            $reviews = [];
+            try {
+                $sql = "SELECT dg.*, kh.ten_khachhang as ten_khach_hang
+                        FROM danhgia dg
+                        LEFT JOIN khachhang kh ON dg.id_khachhang = kh.id_khachhang
+                        WHERE dg.id_sach = ?
+                        ORDER BY dg.ngay_danhgia DESC";
+                $stmt = $this->conn->prepare($sql);
+                $stmt->bind_param("i", $bookId);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                while ($row = $result->fetch_assoc()) {
+                    $reviews[] = [
+                        'ten_khach_hang' => $row['ten_khach_hang'],
+                        'diem' => $row['so_sao'],
+                        'noi_dung' => $row['noi_dung'],
+                        'ngay_danh_gia' => $row['ngay_danhgia']
+                    ];
+                }
+            } catch (Exception $e) {
+                error_log("Error getting reviews: " . $e->getMessage());
+            }
             
-            // Get average rating
-            $avgRating = $this->reviewsModel->getAverageRating($bookId);
-            
-            // Get related books (same category)
-            $relatedBooks = $this->booksModel->getBooksByCategory($book['id_theloai'], 1, 6);
+            // Get related books (same category) - using correct table names
+            $relatedBooks = [];
+            if (!empty($book['ma_danh_muc'])) {
+                try {
+                    $sql = "SELECT s.id_sach as ma_sach, s.ten_sach, s.gia, s.gia_goc, s.isbn,
+                                   tg.ten_tacgia as ten_tac_gia
+                            FROM sach s
+                            LEFT JOIN tacgia tg ON s.id_tacgia = tg.id_tacgia
+                            WHERE s.id_theloai = ? AND s.id_sach != ?
+                            ORDER BY RAND()
+                            LIMIT 6";
+                    $stmt = $this->conn->prepare($sql);
+                    $stmt->bind_param("ii", $book['ma_danh_muc'], $bookId);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    while ($row = $result->fetch_assoc()) {
+                        $relatedBooks[] = $row;
+                    }
+                } catch (Exception $e) {
+                    error_log("Error getting related books: " . $e->getMessage());
+                }
+            }
             
             // Prepare data for view
             $data = [
                 'book' => $book,
-                'author' => $author,
-                'publisher' => $publisher,
-                'category' => $category,
                 'reviews' => $reviews,
-                'avg_rating' => $avgRating,
-                'related_books' => $relatedBooks['data'] ?? [],
+                'related_books' => $relatedBooks,
                 'page_title' => $book['ten_sach']
             ];
             

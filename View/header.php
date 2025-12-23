@@ -31,7 +31,7 @@
         :root {
             --topbar-h: 38px;
             --header-h: 50px;
-            --nav-h: 48px;
+            --nav-h: 46px;
         }
 
         /* Top Bar */

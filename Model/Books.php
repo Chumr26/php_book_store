@@ -70,20 +70,51 @@ class Books {
      * @return array|null Book data or null if not found
      */
     public function getBookById($id) {
-        $sql = "SELECT b.*, 
-                       a.author_name, 
-                       a.pen_name,
-                       p.publisher_name, 
-                       c.category_name
-                FROM books b
-                LEFT JOIN authors a ON b.id_author = a.id_author
-                LEFT JOIN publishers p ON b.id_publisher = p.id_publisher
-                LEFT JOIN categories c ON b.id_category = c.id_category
-                WHERE b.id_book = ? AND b.status = 1";
+        $sql = "SELECT s.*, 
+                       s.id_sach as ma_sach,
+                       s.ten_sach,
+                       s.gia,
+                       s.gia_goc,
+                       s.so_luong_ton,
+                       s.mo_ta,
+                       s.isbn,
+                       s.so_trang,
+                       s.nam_xuat_ban,
+                       CASE 
+                           WHEN s.so_luong_ton > 0 THEN 'Còn hàng'
+                           ELSE 'Hết hàng'
+                       END as tinh_trang,
+                       tg.ten_tacgia as ten_tac_gia,
+                       tg.but_danh,
+                       nxb.ten_nxb,
+                       tl.ten_theloai as ten_danh_muc,
+                       tl.id_theloai as ma_danh_muc,
+                       COALESCE(AVG(CASE WHEN dg.trang_thai = 'approved' THEN dg.so_sao END), 0) as diem_trung_binh,
+                       COUNT(CASE WHEN dg.trang_thai = 'approved' THEN 1 END) as so_luong_danh_gia
+                FROM sach s
+                LEFT JOIN tacgia tg ON s.id_tacgia = tg.id_tacgia
+                LEFT JOIN nhaxuatban nxb ON s.id_nxb = nxb.id_nxb
+                LEFT JOIN theloai tl ON s.id_theloai = tl.id_theloai
+                LEFT JOIN danhgia dg ON s.id_sach = dg.id_sach
+                WHERE s.id_sach = ?
+                GROUP BY s.id_sach, s.ten_sach, s.gia, s.gia_goc, s.so_luong_ton, s.mo_ta, 
+                         s.isbn, s.so_trang, s.nam_xuat_ban, s.id_tacgia, s.id_nxb, s.id_theloai,
+                         tg.ten_tacgia, tg.but_danh, nxb.ten_nxb, tl.ten_theloai, tl.id_theloai";
         
         $stmt = $this->conn->prepare($sql);
+        
+        if (!$stmt) {
+            error_log("SQL Prepare Error in getBookById: " . $this->conn->error);
+            return null;
+        }
+        
         $stmt->bind_param("i", $id);
-        $stmt->execute();
+        
+        if (!$stmt->execute()) {
+            error_log("SQL Execute Error in getBookById: " . $stmt->error);
+            return null;
+        }
+        
         $result = $stmt->get_result();
         
         return $result->fetch_assoc();

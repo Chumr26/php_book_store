@@ -111,25 +111,25 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
             <?php endif; ?>
             
             <!-- Pagination -->
-            <?php if (isset($pagination) && $pagination['total_pages'] > 1): ?>
+            <?php if (isset($pagination) && $pagination->getTotalPages() > 1): ?>
                 <nav aria-label="Page navigation" class="mt-4">
                     <ul class="pagination justify-content-center">
                         <!-- Previous -->
-                        <li class="page-item <?php echo $pagination['current_page'] <= 1 ? 'disabled' : ''; ?>">
+                        <li class="page-item <?php echo $pagination->getCurrentPage() <= 1 ? 'disabled' : ''; ?>">
                             <a class="page-link" 
-                               href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=<?php echo $pagination['current_page'] - 1; ?>">
+                               href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&pg=<?php echo $pagination->getCurrentPage() - 1; ?>">
                                 <i class="fas fa-chevron-left"></i>
                             </a>
                         </li>
                         
                         <!-- Page Numbers -->
                         <?php
-                        $start_page = max(1, $pagination['current_page'] - 2);
-                        $end_page = min($pagination['total_pages'], $pagination['current_page'] + 2);
+                        $start_page = max(1, $pagination->getCurrentPage() - 2);
+                        $end_page = min($pagination->getTotalPages(), $pagination->getCurrentPage() + 2);
                         
                         if ($start_page > 1): ?>
                             <li class="page-item">
-                                <a class="page-link" href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=1">1</a>
+                                <a class="page-link" href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&pg=1">1</a>
                             </li>
                             <?php if ($start_page > 2): ?>
                                 <li class="page-item disabled"><span class="page-link">...</span></li>
@@ -137,27 +137,27 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
                         <?php endif; ?>
                         
                         <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
-                            <li class="page-item <?php echo $i == $pagination['current_page'] ? 'active' : ''; ?>">
+                            <li class="page-item <?php echo $i == $pagination->getCurrentPage() ? 'active' : ''; ?>">
                                 <a class="page-link" 
-                                   href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=<?php echo $i; ?>">
+                                   href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&pg=<?php echo $i; ?>">
                                     <?php echo $i; ?>
                                 </a>
                             </li>
                         <?php endfor; ?>
                         
-                        <?php if ($end_page < $pagination['total_pages']): ?>
-                            <?php if ($end_page < $pagination['total_pages'] - 1): ?>
+                        <?php if ($end_page < $pagination->getTotalPages()): ?>
+                            <?php if ($end_page < $pagination->getTotalPages() - 1): ?>
                                 <li class="page-item disabled"><span class="page-link">...</span></li>
                             <?php endif; ?>
                             <li class="page-item">
-                                <a class="page-link" href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=<?php echo $pagination['total_pages']; ?>"><?php echo $pagination['total_pages']; ?></a>
+                                <a class="page-link" href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&pg=<?php echo $pagination->getTotalPages(); ?>"><?php echo $pagination->getTotalPages(); ?></a>
                             </li>
                         <?php endif; ?>
                         
                         <!-- Next -->
-                        <li class="page-item <?php echo $pagination['current_page'] >= $pagination['total_pages'] ? 'disabled' : ''; ?>">
+                        <li class="page-item <?php echo $pagination->getCurrentPage() >= $pagination->getTotalPages() ? 'disabled' : ''; ?>">
                             <a class="page-link" 
-                               href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=<?php echo $pagination['current_page'] + 1; ?>">
+                               href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&pg=<?php echo $pagination->getCurrentPage() + 1; ?>">
                                 <i class="fas fa-chevron-right"></i>
                             </a>
                         </li>
