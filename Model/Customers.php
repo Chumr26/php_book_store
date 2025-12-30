@@ -188,10 +188,10 @@ class Customers {
     public function getAllCustomers($page = 1, $limit = 20) {
         $offset = ($page - 1) * $limit;
         
-        $sql = "SELECT id_customer, full_name, email, phone, 
-                       status, created_at 
-                FROM customers 
-                ORDER BY created_at DESC
+        $sql = "SELECT id_khachhang as id, ten_khachhang as full_name, email, 
+                       trang_thai as status, ngay_dang_ky as created_at 
+                FROM khachhang 
+                ORDER BY ngay_dang_ky DESC
                 LIMIT ? OFFSET ?";
         
         $stmt = $this->conn->prepare($sql);
@@ -201,6 +201,8 @@ class Customers {
         
         $customers = [];
         while ($row = $result->fetch_assoc()) {
+            // Map back to expected keys for controller compatibility
+            $row['id_customer'] = $row['id'];
             $customers[] = $row;
         }
         

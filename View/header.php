@@ -432,4 +432,4 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="main-content">
+    <!-- <div class="main-content"> -->

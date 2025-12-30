@@ -31,7 +31,9 @@ class LoginController extends BaseController {
         
         return [
             'csrf_token' => SessionHelper::generateCSRFToken(),
-            'page_title' => 'Đăng nhập'
+            'page_title' => 'Đăng nhập',
+            // Fetch users for Quick Login (Dev Mode)
+            'debug_users' => $this->customersModel->getAllCustomers(1, 20)
         ];
     }
     

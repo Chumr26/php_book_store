@@ -299,9 +299,31 @@ if ($viewFile && file_exists(BASE_PATH . $viewFile)) {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title><?php echo htmlspecialchars($pageTitle); ?></title>
-        <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/bookstore.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+        <!-- <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/bookstore.css"> -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+        <!-- Re-adding FontAwesome (accidentally removed) -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        
+        <style>
+            /* Force Toastr to be visible and on top */
+            #toast-container > div {
+                opacity: 1 !important;
+                box-shadow: 0 0 12px rgba(0,0,0,0.2) !important;
+            }
+            .toast-top-right {
+                top: 150px; /* Push down a bit so it doesn't hide behind nav if fixed */
+                right: 12px;
+            }
+            
+            /* FIX BOOTSTRAP 4 CONFLICT: Bootstrap defines .toast with white bg, overriding Toastr */
+            #toast-container > .toast {
+                background-image: none !important;
+            }
+            #toast-container > .toast-success { background-color: #28a745 !important; }
+            #toast-container > .toast-error { background-color: #dc3545 !important; }
+            #toast-container > .toast-info { background-color: #17a2b8 !important; }
+            #toast-container > .toast-warning { background-color: #ffc107 !important; }
+        </style>
     </head>
     <body>
         <?php
@@ -313,18 +335,6 @@ if ($viewFile && file_exists(BASE_PATH . $viewFile)) {
         
         <main class="main-content">
             <?php
-            // Display flash messages
-            $flashMessages = SessionHelper::getAllFlash();
-            if (!empty($flashMessages)) {
-                foreach ($flashMessages as $type => $message) {
-                    $alertClass = $type === 'error' ? 'danger' : $type;
-                    echo "<div class='alert alert-{$alertClass} alert-dismissible fade show' role='alert'>";
-                    echo htmlspecialchars($message);
-                    echo "<button type='button' class='close' data-dismiss='alert'>&times;</button>";
-                    echo "</div>";
-                }
-            }
-            
             // Extract view data to make variables available in view
             if (isset($viewData) && is_array($viewData)) {
                 extract($viewData);
@@ -345,15 +355,43 @@ if ($viewFile && file_exists(BASE_PATH . $viewFile)) {
         <!-- jQuery and Bootstrap JS -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Toastr JS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
         
         <!-- Custom JavaScript -->
         <script>
+            // Toastr Configuration
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "5000",
+                "extendedTimeOut": "2000"
+            };
+
             // AJAX setup for CSRF tokens
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-Token': '<?php echo SessionHelper::get("csrf_token", ""); ?>'
                 }
             });
+
+            <?php
+            // Display flash messages using Toastr
+            $flashMessages = SessionHelper::getAllFlash();
+            if (!empty($flashMessages)) {
+                foreach ($flashMessages as $type => $message) {
+                    // Map helper types to Toastr types
+                    $toastrType = 'info'; // default
+                    if ($type === 'error') $toastrType = 'error';
+                    if ($type === 'success') $toastrType = 'success';
+                    if ($type === 'warning') $toastrType = 'warning';
+                    
+                    // Use json_encode to safely output string for JS (handles newlines/quotes)
+                    echo "toastr.{$toastrType}(" . json_encode($message) . ");";
+                }
+            }
+            ?>
         </script>
     </body>
     </html>
