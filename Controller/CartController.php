@@ -51,8 +51,8 @@ class CartController extends BaseController {
             $summary = $this->calculateCartSummary($cartItems);
             
             return [
-                'items' => $cartItems,
-                'summary' => $summary,
+                'cartItems' => $cartItems,
+                'cartSummary' => $summary,
                 'csrf_token' => SessionHelper::generateCSRFToken()
             ];
             
@@ -60,8 +60,8 @@ class CartController extends BaseController {
             error_log("Error in showCart: " . $e->getMessage());
             SessionHelper::setFlash('error', 'Không thể tải giỏ hàng. Vui lòng thử lại.');
             return [
-                'items' => [],
-                'summary' => [
+                'cartItems' => [],
+                'cartSummary' => [
                     'subtotal' => 0,
                     'shipping' => 0,
                     'tax' => 0,
@@ -388,15 +388,41 @@ class CartController extends BaseController {
                 $this->clearSessionCart();
             }
             
-            SessionHelper::setFlash('success', 'Đã xóa toàn bộ giỏ hàng');
-            header('Location: index.php?page=cart');
-            exit;
+            // Check if AJAX request
+            $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+                      strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+            
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Đã xóa toàn bộ giỏ hàng'
+                ]);
+                exit;
+            } else {
+                SessionHelper::setFlash('success', 'Đã xóa toàn bộ giỏ hàng');
+                header('Location: index.php?page=cart');
+                exit;
+            }
             
         } catch (Exception $e) {
             error_log("Error in clearCart: " . $e->getMessage());
-            SessionHelper::setFlash('error', 'Không thể xóa giỏ hàng. Vui lòng thử lại.');
-            header('Location: index.php?page=cart');
-            exit;
+            
+            $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+                      strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+            
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Không thể xóa giỏ hàng. Vui lòng thử lại.'
+                ]);
+                exit;
+            } else {
+                SessionHelper::setFlash('error', 'Không thể xóa giỏ hàng. Vui lòng thử lại.');
+                header('Location: index.php?page=cart');
+                exit;
+            }
         }
     }
     
@@ -645,7 +671,9 @@ class CartController extends BaseController {
                     'gia' => $book['gia'],
                     'so_luong' => $quantity,
                     'so_luong_ton' => $book['so_luong_ton'],
-                    'tinh_trang' => $book['tinh_trang']
+                    'tinh_trang' => $book['tinh_trang'],
+                    'ten_tac_gia' => $book['ten_tac_gia'] ?? '',
+                    'isbn' => $book['isbn'] ?? ''
                 ];
             }
         }

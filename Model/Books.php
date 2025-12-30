@@ -80,6 +80,7 @@ class Books {
                        s.isbn,
                        s.so_trang,
                        s.nam_xuat_ban,
+                       s.hinh_anh as anh_bia,
                        CASE 
                            WHEN s.so_luong_ton > 0 THEN 'Còn hàng'
                            ELSE 'Hết hàng'

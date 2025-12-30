@@ -45,7 +45,7 @@ $coverUrl = book_cover_url($book['isbn'] ?? null, 'medium');
             $daysDiff = (time() - $createdDate) / (60 * 60 * 24);
             if ($daysDiff <= 30): 
             ?>
-                <span class="badge badge-success position-absolute" style="top: 40px; left: 10px;">
+                <span class="badge badge-success position-absolute" style="top: 10px; left: 10px;">
                     Mới
                 </span>
             <?php endif; ?>

@@ -279,7 +279,7 @@
 
         /* Ensure main content starts below fixed nav */
         .main-content {
-            margin-top: var(--nav-h);
+            margin-top: 46px;
         }
 
         @media (max-width: 767.98px) {
