@@ -76,7 +76,7 @@ class Customers {
      * @return array|null Customer data or null if not found
      */
     public function getCustomerByEmail($email) {
-        $sql = "SELECT * FROM customers WHERE email = ?";
+        $sql = "SELECT * FROM khachhang WHERE email = ?";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("s", $email);

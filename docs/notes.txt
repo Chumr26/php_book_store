@@ -1,0 +1,10 @@
+all the page (the container in the main content) have top margin 20px, except the home page
+why there is no admin user in the list
+Why i get this error (Email hoặc mật khẩu không đúng.) when using the autofill account
+re design the ui of the dropdown selection box
+- don't need to show the toaster when login and logout
+
+- add auto fill account for admin login
+- why there is no admin user in the list
+- i want to have a api for book author so that, i can get their info and their avatar to display, is there any public api for me to use?
+- the "Khách hàng nói gì về chúng tôi" section look simple can you add  avatar to the card,

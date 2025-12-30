@@ -11,7 +11,7 @@
     RewriteRule ^ - [L]
     
     # Prevent direct access to certain directories (except Content for static files)
-    RewriteRule ^(Model|Controller|Admin)/ - [F]
+    RewriteRule ^(Model|Controller)/ - [F]
     
     # Rewrite requests to index.php
     RewriteCond %{REQUEST_FILENAME} !-f

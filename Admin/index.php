@@ -35,7 +35,14 @@ require_once BASE_PATH . 'Controller/helpers/SessionHelper.php';
 SessionHelper::start();
 
 // Get routing parameters
-$page = $_GET['page'] ?? 'dashboard';
+$page = $_GET['page'] ?? '';
+
+// If no page specified and not logged in, default to login
+if (empty($page) && !SessionHelper::isAdminLoggedIn()) {
+    $page = 'login';
+} elseif (empty($page)) {
+    $page = 'dashboard';
+}
 
 // Check admin authentication (except for login page)
 if ($page !== 'login' && !SessionHelper::isAdminLoggedIn()) {

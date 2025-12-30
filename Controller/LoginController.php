@@ -106,7 +106,7 @@ class LoginController extends BaseController {
                     // TODO: Store remember token in database
                 }
                 
-                SessionHelper::setFlash('success', 'Đăng nhập thành công!');
+                // SessionHelper::setFlash('success', 'Đăng nhập thành công!');
                 
                 // Redirect to intended page or homepage
                 $redirectTo = SessionHelper::get('intended_url', 'index.php');
@@ -174,7 +174,7 @@ class LoginController extends BaseController {
             // Logout user
             SessionHelper::logout();
             
-            SessionHelper::setFlash('success', 'Đăng xuất thành công!');
+            // SessionHelper::setFlash('success', 'Đăng xuất thành công!');
             header('Location: index.php');
             exit;
             

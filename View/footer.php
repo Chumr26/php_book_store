@@ -121,12 +121,6 @@
         <i class="fas fa-arrow-up"></i>
     </button>
 
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
-    <!-- Bootstrap 4 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-
     <!-- Custom JavaScript -->
     <script>
         $(document).ready(function() {

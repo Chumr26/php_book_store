@@ -300,6 +300,7 @@ if ($viewFile && file_exists(BASE_PATH . $viewFile)) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title><?php echo htmlspecialchars($pageTitle); ?></title>
         <!-- <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/bookstore.css"> -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
         <!-- Re-adding FontAwesome (accidentally removed) -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -333,7 +334,7 @@ if ($viewFile && file_exists(BASE_PATH . $viewFile)) {
         }
         ?>
         
-        <main class="main-content">
+        <main class="main-content" <?php if ($page !== 'home') echo 'style="margin-top: 60px;"'; ?>>
             <?php
             // Extract view data to make variables available in view
             if (isset($viewData) && is_array($viewData)) {

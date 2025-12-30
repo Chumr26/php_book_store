@@ -15,37 +15,55 @@ $pageTitle = "Đăng nhập";
                         
                         <?php if (isset($debug_users) && !empty($debug_users)): ?>
                         <!-- Quick Login (Dev Mode) -->
-                        <div class="card bg-light mb-4 border-info">
-                            <div class="card-body py-3">
-                                <strong class="text-info"><i class="fas fa-tools"></i> Quick Login (Dev Mode)</strong>
-                                <div class="form-group mt-2 mb-0">
-                                <select class="form-control" id="quickLoginSelect" onchange="autofillUser(this)">
-                                    <option value="">-- Chọn tài khoản để tự động điền --</option>
+                        <div class="mb-4">
+                            <div class="dropdown">
+                                <button class="btn btn-outline-info btn-block dropdown-toggle" type="button" id="quickLoginDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-bolt text-warning"></i> Quick Login (Dev Mode)
+                                </button>
+                                <div class="dropdown-menu w-100" aria-labelledby="quickLoginDropdown" style="max-height: 300px; overflow-y: auto;">
+                                    <h6 class="dropdown-header">Select a test user to autofill:</h6>
+                                    <div class="dropdown-divider"></div>
                                     <?php foreach ($debug_users as $user): ?>
-                                        <option value="<?php echo htmlspecialchars($user['email']); ?>" 
-                                                data-name="<?php echo htmlspecialchars($user['full_name']); ?>">
-                                            <?php echo htmlspecialchars($user['full_name']); ?> (<?php echo htmlspecialchars($user['email']); ?>)
-                                        </option>
+                                        <a class="dropdown-item d-flex justify-content-between align-items-center" href="#" 
+                                           onclick="autofillUser('<?php echo htmlspecialchars($user['email']); ?>'); return false;">
+                                            <span><i class="fas fa-user-circle text-muted mr-2"></i> <?php echo htmlspecialchars($user['full_name']); ?></span>
+                                            <small class="text-muted ml-2"><?php echo htmlspecialchars($user['email']); ?></small>
+                                        </a>
                                     <?php endforeach; ?>
-                                </select>
+                                </div>
                             </div>
+                            
                             <script>
-                                function autofillUser(select) {
-                                    if (select.value) {
-                                        document.getElementById('emailInput').value = select.value;
-                                        document.getElementById('passwordInput').value = '123456'; // Default seed password
-                                        // Optional: Highlight that it was filled
-                                        document.getElementById('emailInput').style.backgroundColor = '#e8f0fe';
-                                        document.getElementById('passwordInput').style.backgroundColor = '#e8f0fe';
-                                    } else {
-                                        document.getElementById('emailInput').value = '';
-                                        document.getElementById('passwordInput').value = '';
-                                        document.getElementById('emailInput').style.backgroundColor = '';
-                                        document.getElementById('passwordInput').style.backgroundColor = '';
+                                function autofillUser(email) {
+                                    if (email) {
+                                        // Update inputs
+                                        const emailInput = document.getElementById('emailInput');
+                                        const passwordInput = document.getElementById('passwordInput');
+                                        
+                                        emailInput.value = email;
+                                        passwordInput.value = 'password'; // Correct seed password
+                                        
+                                        // Visual feedback
+                                        emailInput.style.backgroundColor = '#e8f0fe';
+                                        passwordInput.style.backgroundColor = '#e8f0fe';
+                                        
+                                        // Update dropdown text to show selection
+                                        const btn = document.getElementById('quickLoginDropdown');
+                                        btn.innerHTML = '<i class="fas fa-check text-success"></i> Selected: ' + email;
+                                        btn.classList.remove('btn-outline-info');
+                                        btn.classList.add('btn-info');
+                                        
+                                        // Optional: Flash effect
+                                        setTimeout(() => {
+                                            emailInput.style.backgroundColor = '';
+                                            passwordInput.style.backgroundColor = '';
+                                        }, 1000);
+                                        
+                                        // Show toast notification
+                                        // Toastr notification removed as requested
                                     }
                                 }
                             </script>
-                            </div>
                         </div>
                         <?php endif; ?>
                         <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
