@@ -61,17 +61,19 @@ try {
     switch ($page) {
         // ========== AUTHENTICATION ==========
         case 'login':
-            // TODO: Create AdminAuthController for admin login
-            // For now, redirect to placeholder
+            require_once ADMIN_BASE_PATH . 'Controller/AdminAuthController.php';
+            $controller = new AdminAuthController($conn);
+            $viewData = $controller->login();
+            
             $viewFile = 'View/login.php';
             $pageTitle = 'Admin Login - BookStore';
             break;
         
         case 'logout':
-            SessionHelper::logoutAdmin();
-            SessionHelper::setFlash('success', 'Đăng xuất thành công');
-            header('Location: ' . ADMIN_BASE_URL . 'index.php?page=login');
-            exit;
+            require_once ADMIN_BASE_PATH . 'Controller/AdminAuthController.php';
+            $controller = new AdminAuthController($conn);
+            $controller->logout();
+            break;
         
         // ========== DASHBOARD ==========
         case 'dashboard':
@@ -315,6 +317,11 @@ if ($viewFile && file_exists(ADMIN_BASE_PATH . $viewFile)) {
                             echo "<button type='button' class='close' data-dismiss='alert'>&times;</button>";
                             echo "</div>";
                         }
+                    }
+                    
+                    // Extract view data to make variables available in view
+                    if (isset($viewData) && is_array($viewData)) {
+                        extract($viewData);
                     }
                     
                     // Include the view file

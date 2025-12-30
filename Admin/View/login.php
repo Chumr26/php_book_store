@@ -9,6 +9,46 @@
                     <h3 class="font-weight-light my-0"><i class="fas fa-user-shield"></i> Admin Login</h3>
                 </div>
                 <div class="card-body p-5">
+                    <?php if (isset($debug_users) && !empty($debug_users)): ?>
+                    <div class="mb-4">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-danger btn-block dropdown-toggle" type="button" id="adminQuickLogin" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-shield-alt text-danger"></i> Quick Admin Login (Dev)
+                            </button>
+                            <div class="dropdown-menu w-100" aria-labelledby="adminQuickLogin">
+                                <h6 class="dropdown-header">Select an admin account:</h6>
+                                <div class="dropdown-divider"></div>
+                                <?php foreach ($debug_users as $user): ?>
+                                    <a class="dropdown-item d-flex justify-content-between align-items-center" href="#" 
+                                       onclick="autofillAdmin('<?php echo htmlspecialchars($user['username']); ?>', '<?php echo htmlspecialchars($user['password']); ?>', '<?php echo htmlspecialchars($user['full_name']); ?>'); return false;">
+                                        <span><i class="fas fa-user-tie text-muted mr-2"></i> <?php echo htmlspecialchars($user['full_name']); ?></span>
+                                        <small class="text-muted ml-2">@<?php echo htmlspecialchars($user['username']); ?></small>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <script>
+                            function autofillAdmin(username, password, name) {
+                                document.getElementById('username').value = username;
+                                document.getElementById('password').value = password;
+                                
+                                // Visual feedback
+                                const btn = document.getElementById('adminQuickLogin');
+                                btn.innerHTML = '<i class="fas fa-check"></i> Selected: ' + name;
+                                btn.classList.remove('btn-outline-danger');
+                                btn.classList.add('btn-danger');
+                                
+                                // Highlight inputs
+                                document.getElementById('username').style.backgroundColor = '#f8d7da';
+                                document.getElementById('password').style.backgroundColor = '#f8d7da';
+                                setTimeout(() => {
+                                    document.getElementById('username').style.backgroundColor = '';
+                                    document.getElementById('password').style.backgroundColor = '';
+                                }, 1000);
+                            }
+                        </script>
+                    </div>
+                    <?php endif; ?>
                     <form method="POST" action="?page=login">
                         <input type="hidden" name="csrf_token" value="<?php echo SessionHelper::generateCSRFToken(); ?>">
                         
