@@ -80,31 +80,31 @@ class AdminDashboardController extends BaseController {
             $dateCondition = $this->getDateCondition($period);
             
             // Tổng doanh thu
-            $revenueQuery = "SELECT COALESCE(SUM(tong_thanh_toan), 0) as total_revenue 
-                           FROM don_hang 
-                           WHERE trang_thai_thanh_toan = 'Đã thanh toán' 
-                           AND trang_thai_don_hang != 'Đã hủy'
+            $revenueQuery = "SELECT COALESCE(SUM(tong_tien), 0) as total_revenue 
+                           FROM hoadon 
+                           WHERE trang_thai_thanh_toan = 'paid' 
+                           AND trang_thai != 'cancelled'
                            $dateCondition";
             $revenueResult = $this->conn->query($revenueQuery);
             $totalRevenue = $revenueResult->fetch_assoc()['total_revenue'];
             
             // Tổng số đơn hàng
             $orderQuery = "SELECT COUNT(*) as total_orders 
-                         FROM don_hang 
+                         FROM hoadon 
                          WHERE 1=1 $dateCondition";
             $orderResult = $this->conn->query($orderQuery);
             $totalOrders = $orderResult->fetch_assoc()['total_orders'];
             
             // Tổng số đơn hàng thành công
             $successOrderQuery = "SELECT COUNT(*) as success_orders 
-                                FROM don_hang 
-                                WHERE trang_thai_don_hang = 'Đã giao' 
+                                FROM hoadon 
+                                WHERE trang_thai = 'completed' 
                                 $dateCondition";
             $successOrderResult = $this->conn->query($successOrderQuery);
             $successOrders = $successOrderResult->fetch_assoc()['success_orders'];
             
             // Tổng số khách hàng
-            $customerQuery = "SELECT COUNT(*) as total_customers FROM khach_hang WHERE 1=1 $dateCondition";
+            $customerQuery = "SELECT COUNT(*) as total_customers FROM khachhang WHERE 1=1 $dateCondition";
             $customerResult = $this->conn->query($customerQuery);
             $totalCustomers = $customerResult->fetch_assoc()['total_customers'];
             
@@ -120,8 +120,8 @@ class AdminDashboardController extends BaseController {
             
             // Đơn hàng chờ xử lý
             $pendingQuery = "SELECT COUNT(*) as pending_orders 
-                           FROM don_hang 
-                           WHERE trang_thai_don_hang = 'Chờ xác nhận'";
+                           FROM hoadon 
+                           WHERE trang_thai = 'pending'";
             $pendingResult = $this->conn->query($pendingQuery);
             $pendingOrders = $pendingResult->fetch_assoc()['pending_orders'];
             
@@ -163,13 +163,13 @@ class AdminDashboardController extends BaseController {
                 case 'day':
                     // 24 giờ qua
                     $query = "SELECT 
-                                HOUR(ngay_dat) as hour,
-                                COALESCE(SUM(tong_thanh_toan), 0) as revenue,
+                                HOUR(ngay_dat_hang) as hour,
+                                COALESCE(SUM(tong_tien), 0) as revenue,
                                 COUNT(*) as order_count
-                            FROM don_hang
-                            WHERE DATE(ngay_dat) = CURDATE()
-                            AND trang_thai_thanh_toan = 'Đã thanh toán'
-                            AND trang_thai_don_hang != 'Đã hủy'
+                            FROM hoadon
+                            WHERE DATE(ngay_dat_hang) = CURDATE()
+                            AND trang_thai_thanh_toan = 'paid'
+                            AND trang_thai != 'cancelled'
                             GROUP BY hour
                             ORDER BY hour";
                     break;
@@ -177,14 +177,14 @@ class AdminDashboardController extends BaseController {
                 case 'week':
                     // 7 ngày qua
                     $query = "SELECT 
-                                DATE(ngay_dat) as date,
-                                DAYNAME(ngay_dat) as day_name,
-                                COALESCE(SUM(tong_thanh_toan), 0) as revenue,
+                                DATE(ngay_dat_hang) as date,
+                                DAYNAME(ngay_dat_hang) as day_name,
+                                COALESCE(SUM(tong_tien), 0) as revenue,
                                 COUNT(*) as order_count
-                            FROM don_hang
-                            WHERE ngay_dat >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
-                            AND trang_thai_thanh_toan = 'Đã thanh toán'
-                            AND trang_thai_don_hang != 'Đã hủy'
+                            FROM hoadon
+                            WHERE ngay_dat_hang >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+                            AND trang_thai_thanh_toan = 'paid'
+                            AND trang_thai != 'cancelled'
                             GROUP BY date, day_name
                             ORDER BY date";
                     break;
@@ -192,14 +192,14 @@ class AdminDashboardController extends BaseController {
                 case 'year':
                     // 12 tháng qua
                     $query = "SELECT 
-                                MONTH(ngay_dat) as month,
-                                YEAR(ngay_dat) as year,
-                                COALESCE(SUM(tong_thanh_toan), 0) as revenue,
+                                MONTH(ngay_dat_hang) as month,
+                                YEAR(ngay_dat_hang) as year,
+                                COALESCE(SUM(tong_tien), 0) as revenue,
                                 COUNT(*) as order_count
-                            FROM don_hang
-                            WHERE ngay_dat >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
-                            AND trang_thai_thanh_toan = 'Đã thanh toán'
-                            AND trang_thai_don_hang != 'Đã hủy'
+                            FROM hoadon
+                            WHERE ngay_dat_hang >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+                            AND trang_thai_thanh_toan = 'paid'
+                            AND trang_thai != 'cancelled'
                             GROUP BY year, month
                             ORDER BY year, month";
                     break;
@@ -208,13 +208,13 @@ class AdminDashboardController extends BaseController {
                 default:
                     // 30 ngày qua
                     $query = "SELECT 
-                                DATE(ngay_dat) as date,
-                                COALESCE(SUM(tong_thanh_toan), 0) as revenue,
+                                DATE(ngay_dat_hang) as date,
+                                COALESCE(SUM(tong_tien), 0) as revenue,
                                 COUNT(*) as order_count
-                            FROM don_hang
-                            WHERE ngay_dat >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-                            AND trang_thai_thanh_toan = 'Đã thanh toán'
-                            AND trang_thai_don_hang != 'Đã hủy'
+                            FROM hoadon
+                            WHERE ngay_dat_hang >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+                            AND trang_thai_thanh_toan = 'paid'
+                            AND trang_thai != 'cancelled'
                             GROUP BY date
                             ORDER BY date";
                     break;
@@ -243,14 +243,14 @@ class AdminDashboardController extends BaseController {
     public function getTopSellingBooks($limit = 10) {
         try {
             $query = "SELECT s.*, 
-                           COUNT(ct.ma_chi_tiet_don_hang) as order_count,
+                           COUNT(ct.id_chitiet) as order_count,
                            SUM(ct.so_luong) as total_sold,
                            SUM(ct.thanh_tien) as total_revenue
                     FROM sach s
-                    LEFT JOIN chi_tiet_don_hang ct ON s.ma_sach = ct.ma_sach
-                    LEFT JOIN don_hang d ON ct.ma_don_hang = d.ma_don_hang
-                    WHERE d.trang_thai_don_hang != 'Đã hủy'
-                    GROUP BY s.ma_sach
+                    LEFT JOIN chitiet_hoadon ct ON s.id_sach = ct.id_sach
+                    LEFT JOIN hoadon d ON ct.id_hoadon = d.id_hoadon
+                    WHERE d.trang_thai != 'cancelled'
+                    GROUP BY s.id_sach
                     ORDER BY total_sold DESC
                     LIMIT ?";
             
@@ -280,10 +280,10 @@ class AdminDashboardController extends BaseController {
      */
     public function getRecentOrders($limit = 10) {
         try {
-            $query = "SELECT d.*, k.ho_ten, k.email
-                    FROM don_hang d
-                    JOIN khach_hang k ON d.ma_khach_hang = k.ma_khach_hang
-                    ORDER BY d.ngay_dat DESC
+            $query = "SELECT d.*, k.ten_khachhang as ho_ten, k.email
+                    FROM hoadon d
+                    JOIN khachhang k ON d.id_khachhang = k.id_khachhang
+                    ORDER BY d.ngay_dat_hang DESC
                     LIMIT ?";
             
             $stmt = $this->conn->prepare($query);
@@ -313,12 +313,12 @@ class AdminDashboardController extends BaseController {
     public function getNewCustomers($limit = 10) {
         try {
             $query = "SELECT k.*,
-                           COUNT(d.ma_don_hang) as order_count,
-                           COALESCE(SUM(d.tong_thanh_toan), 0) as total_spent
-                    FROM khach_hang k
-                    LEFT JOIN don_hang d ON k.ma_khach_hang = d.ma_khach_hang
-                    GROUP BY k.ma_khach_hang
-                    ORDER BY k.ngay_tao DESC
+                           COUNT(d.id_hoadon) as order_count,
+                           COALESCE(SUM(d.tong_tien), 0) as total_spent
+                    FROM khachhang k
+                    LEFT JOIN hoadon d ON k.id_khachhang = d.id_khachhang
+                    GROUP BY k.id_khachhang
+                    ORDER BY k.ngay_dang_ky DESC
                     LIMIT ?";
             
             $stmt = $this->conn->prepare($query);
@@ -349,7 +349,7 @@ class AdminDashboardController extends BaseController {
         try {
             $query = "SELECT * FROM sach 
                     WHERE so_luong_ton <= 10 
-                    AND tinh_trang = 'Còn hàng'
+                    AND trang_thai = 'available'
                     ORDER BY so_luong_ton ASC
                     LIMIT ?";
             
@@ -379,11 +379,11 @@ class AdminDashboardController extends BaseController {
     public function getOrderStatusSummary() {
         try {
             $query = "SELECT 
-                        trang_thai_don_hang,
+                        trang_thai as trang_thai_don_hang,
                         COUNT(*) as count,
-                        COALESCE(SUM(tong_thanh_toan), 0) as total_amount
-                    FROM don_hang
-                    GROUP BY trang_thai_don_hang";
+                        COALESCE(SUM(tong_tien), 0) as total_amount
+                    FROM hoadon
+                    GROUP BY trang_thai";
             
             $result = $this->conn->query($query);
             
