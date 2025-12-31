@@ -117,21 +117,52 @@ require_once __DIR__ . '/helpers/cover.php';
 <script>
 $(document).ready(function() {
     // Update quantity
+    // Helper to format currency
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
+    }
+
+    // Update quantity
     $('.quantity-input').change(function() {
-        const bookId = $(this).data('book-id');
-        const quantity = $(this).val();
+        const input = $(this);
+        const bookId = input.data('book-id');
+        const quantity = input.val();
+        
+        // Disable input while processing
+        input.prop('disabled', true);
         
         $.post('?page=update_cart', {
             book_id: bookId,
             quantity: quantity,
             csrf_token: '<?php echo $_SESSION["csrf_token"] ?? ""; ?>'
         }, function(response) {
+            input.prop('disabled', false);
+            
             if (response.success) {
-                location.reload();
+                const data = response.data;
+                const summary = data.summary;
+                
+                // 1. Update item total
+                const row = input.closest('tr');
+                row.find('.item-total').text(formatCurrency(data.item_total));
+                
+                // 2. Update cart summary
+                $('#subtotal').text(formatCurrency(summary.subtotal));
+                $('#shipping').text(formatCurrency(summary.shipping));
+                $('#tax').text(formatCurrency(summary.tax));
+                $('#total').text(formatCurrency(summary.total));
             } else {
+                // If error (e.g. out of stock), reset to previous value or just alert
                 alert(response.message || 'Có lỗi xảy ra');
+                // Optional: Reload to reset invalid state if needed, or just let user fix it
+                if (response.message.includes('tồn kho')) {
+                    // Could reset input value here if we tracked previous value
+                }
             }
-        }, 'json');
+        }, 'json').fail(function() {
+            input.prop('disabled', false);
+            alert('Lỗi kết nối');
+        });
     });
     
     // Remove item

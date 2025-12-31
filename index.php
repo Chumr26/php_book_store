@@ -31,6 +31,7 @@ require_once BASE_PATH . 'Controller/helpers/SessionHelper.php';
 
 // Start session via SessionHelper
 SessionHelper::start();
+SessionHelper::generateCSRFToken();
 
 // Get routing parameters
 $page = $_GET['page'] ?? 'home';
@@ -328,6 +329,37 @@ if ($viewFile && file_exists(BASE_PATH . $viewFile)) {
     </head>
     <body>
         <?php
+        // Execute global logic like calculating cart count
+        $globalCartCount = 0;
+        
+        // Check if user is logged in
+        if (SessionHelper::isLoggedIn()) {
+            require_once BASE_PATH . 'Model/ShoppingCart.php';
+            // Check if class exists to avoid error if file issue
+            if (class_exists('ShoppingCart')) {
+                $cartModelGlobal = new ShoppingCart($conn);
+                $globalCartCount = $cartModelGlobal->getItemCount(SessionHelper::getCustomerId());
+            }
+        } else {
+            // Get from session
+            $sessionCart = SessionHelper::get('cart', []);
+            if (is_array($sessionCart)) {
+                $globalCartCount = count($sessionCart);
+            }
+        }
+        
+        $globalCartBookIds = [];
+        if (SessionHelper::isLoggedIn()) {
+            if (isset($cartModelGlobal)) {
+                $globalCartBookIds = $cartModelGlobal->getCartBookIds(SessionHelper::getCustomerId());
+            }
+        } else {
+            $sessionCart = SessionHelper::get('cart', []);
+            if (is_array($sessionCart)) {
+                $globalCartBookIds = array_keys($sessionCart);
+            }
+        }
+        
         // Include header (if exists)
         if (file_exists(BASE_PATH . 'View/header.php')) {
             include_once BASE_PATH . 'View/header.php';
@@ -393,6 +425,49 @@ if ($viewFile && file_exists(BASE_PATH . $viewFile)) {
                 }
             }
             ?>
+
+            // Global Add to Cart Logic (Event Delegation)
+            $(document).on('click', '.add-to-cart-btn', function(e) {
+                e.preventDefault();
+                const bookId = $(this).data('book-id');
+                const bookName = $(this).data('book-name');
+                const button = $(this);
+                const originalHtml = button.html();
+                
+                // Disable button and show loading
+                button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+                
+                $.ajax({
+                    url: '?page=add_to_cart',
+                    method: 'POST',
+                    data: {
+                        book_id: bookId,
+                        quantity: 1,
+                        csrf_token: '<?php echo SessionHelper::get("csrf_token", ""); ?>'
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            // Update cart badge
+                            $('#cartBadge').text(response.data.item_count);
+                            
+                            // Show success state on button
+                            button.html('<i class="fas fa-check"></i> Đã thêm vào giỏ');
+                            button.removeClass('btn-primary').addClass('btn-success');
+                            
+                            // Show toast notification
+                            toastr.success('Đã thêm "' + bookName + '" vào giỏ hàng!');
+                        } else {
+                            toastr.error(response.message || 'Có lỗi xảy ra, vui lòng thử lại!');
+                            button.prop('disabled', false).html(originalHtml);
+                        }
+                    },
+                    error: function() {
+                        toastr.error('Có lỗi xảy ra, vui lòng thử lại!');
+                        button.prop('disabled', false).html(originalHtml);
+                    }
+                });
+            });
         </script>
     </body>
     </html>

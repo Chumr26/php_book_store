@@ -141,12 +141,29 @@ $coverUrl = book_cover_url($book['isbn'] ?? null, 'medium');
                 
                 <!-- Add to Cart Button -->
                 <?php if (isset($book['so_luong_ton']) && $book['so_luong_ton'] > 0): ?>
-                    <button type="button" 
-                            class="btn btn-primary btn-block add-to-cart-btn"
-                            data-book-id="<?php echo $book['ma_sach']; ?>"
-                            data-book-name="<?php echo htmlspecialchars($book['ten_sach']); ?>">
-                        <i class="fas fa-cart-plus"></i> <span class="btn-text">Thêm vào giỏ</span>
-                    </button>
+                    <?php 
+                    $isInCart = false;
+                    if (isset($GLOBALS['globalCartBookIds']) && in_array($book['ma_sach'], $GLOBALS['globalCartBookIds'])) {
+                        $isInCart = true;
+                    } elseif (isset($globalCartBookIds) && in_array($book['ma_sach'], $globalCartBookIds)) {
+                        $isInCart = true;
+                    }
+                    ?>
+                    
+                    <?php if ($isInCart): ?>
+                        <button type="button" 
+                                class="btn btn-success btn-block add-to-cart-btn"
+                                disabled>
+                            <i class="fas fa-check"></i> <span class="btn-text">Đã thêm vào giỏ</span>
+                        </button>
+                    <?php else: ?>
+                        <button type="button" 
+                                class="btn btn-primary btn-block add-to-cart-btn"
+                                data-book-id="<?php echo $book['ma_sach']; ?>"
+                                data-book-name="<?php echo htmlspecialchars($book['ten_sach']); ?>">
+                            <i class="fas fa-cart-plus"></i> <span class="btn-text">Thêm vào giỏ</span>
+                        </button>
+                    <?php endif; ?>
                 <?php else: ?>
                     <button type="button" class="btn btn-secondary btn-block" disabled>
                         <i class="fas fa-times"></i> Hết hàng
@@ -204,90 +221,3 @@ $coverUrl = book_cover_url($book['isbn'] ?? null, 'medium');
         }
     }
 </style>
-
-<script>
-$(document).ready(function() {
-    // Add to cart functionality
-    $('.add-to-cart-btn').click(function() {
-        const bookId = $(this).data('book-id');
-        const bookName = $(this).data('book-name');
-        const button = $(this);
-        
-        // Disable button and show loading
-        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang thêm...');
-        
-        $.ajax({
-            url: '?page=add_to_cart',
-            method: 'POST',
-            data: {
-                book_id: bookId,
-                quantity: 1,
-                csrf_token: '<?php echo $_SESSION["csrf_token"] ?? ""; ?>'
-            },
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    // Update cart badge
-                    $('#cartBadge').text(response.data.item_count);
-                    
-                    // Show success message
-                    button.html('<i class="fas fa-check"></i> Đã thêm');
-                    button.removeClass('btn-primary').addClass('btn-success');
-                    
-                    // Show toast notification
-                    showToast('success', 'Đã thêm "' + bookName + '" vào giỏ hàng!');
-                    
-                    // Reset button after 2 seconds
-                    setTimeout(function() {
-                        button.prop('disabled', false)
-                              .html('<i class="fas fa-cart-plus"></i> Thêm vào giỏ')
-                              .removeClass('btn-success').addClass('btn-primary');
-                    }, 2000);
-                } else {
-                    showToast('error', response.message || 'Có lỗi xảy ra, vui lòng thử lại!');
-                    button.prop('disabled', false)
-                          .html('<i class="fas fa-cart-plus"></i> Thêm vào giỏ');
-                }
-            },
-            error: function() {
-                showToast('error', 'Có lỗi xảy ra, vui lòng thử lại!');
-                button.prop('disabled', false)
-                      .html('<i class="fas fa-cart-plus"></i> Thêm vào giỏ');
-            }
-        });
-    });
-    
-    // Toast notification function
-    function showToast(type, message) {
-        const bgColor = type === 'success' ? '#28a745' : '#dc3545';
-        const icon = type === 'success' ? 'check-circle' : 'exclamation-circle';
-        
-        const toast = $(`
-            <div class="toast-notification" style="
-                position: fixed;
-                top: 100px;
-                right: 20px;
-                background: ${bgColor};
-                color: white;
-                padding: 15px 20px;
-                border-radius: 5px;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                z-index: 9999;
-                animation: slideIn 0.3s ease;
-            ">
-                <i class="fas fa-${icon} mr-2"></i> ${message}
-            </div>
-        `);
-        
-        $('body').append(toast);
-        
-        setTimeout(function() {
-            toast.fadeOut(function() {
-                $(this).remove();
-            });
-        }, 3000);
-    }
-});
-</script>
-
-

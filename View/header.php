@@ -387,7 +387,7 @@
 
                         <a href="?page=cart" class="header-icon">
                             <i class="fas fa-shopping-cart"></i>
-                            <span class="cart-badge" id="cartBadge">0</span>
+                            <span class="cart-badge" id="cartBadge"><?php echo $globalCartCount ?? 0; ?></span>
                         </a>
                     </div>
                 </div>
@@ -411,7 +411,7 @@
                         <i class="fas fa-book"></i> Sách
                     </a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link <?php echo (isset($_GET['page']) && $_GET['page'] == 'category') ? 'active' : ''; ?>"
                         href="?page=books&category=all">
                         <i class="fas fa-list"></i> Danh mục
@@ -431,7 +431,7 @@
                     <a class="nav-link" href="?page=books&sort=discount">
                         <i class="fas fa-gift"></i> Khuyến mãi
                     </a>
-                </li>
+                </li> -->
             </ul>
         </div>
     </nav>

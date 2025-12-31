@@ -245,6 +245,15 @@ class CartController extends BaseController {
             $cartItems = $this->getCartItems();
             $summary = $this->calculateCartSummary($cartItems);
             
+            // Tìm thành tiền của sản phẩm vừa cập nhật
+            $itemTotal = 0;
+            foreach ($cartItems as $item) {
+                if ($item['ma_sach'] == $bookId) {
+                    $itemTotal = $item['gia'] * $item['so_luong'];
+                    break;
+                }
+            }
+
             // Trả về kết quả
             $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
                       strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
@@ -254,7 +263,10 @@ class CartController extends BaseController {
                 echo json_encode([
                     'success' => true,
                     'message' => 'Đã cập nhật số lượng',
-                    'summary' => $summary
+                    'data' => [
+                        'item_total' => $itemTotal,
+                        'summary' => $summary
+                    ]
                 ]);
                 exit;
             } else {
@@ -569,7 +581,7 @@ class CartController extends BaseController {
             return $this->cartModel->getItemCount($customerId);
         } else {
             $sessionCart = SessionHelper::get('cart', []);
-            return array_sum($sessionCart);
+            return count($sessionCart);
         }
     }
     
