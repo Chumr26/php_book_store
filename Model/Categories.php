@@ -72,17 +72,18 @@ class Categories {
      * @return int|false New category ID or false
      */
     public function addCategory($data) {
-        $sql = "INSERT INTO categories (category_name, description, sort_order, status) 
+        $sql = "INSERT INTO theloai (ten_theloai, mo_ta, thu_tu, trang_thai) 
                 VALUES (?, ?, ?, ?)";
         
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param(
-            "ssii",
-            $data['category_name'],
-            $data['description'],
-            $data['sort_order'],
-            $data['status']
-        );
+        
+        // Handle input keys flexible
+        $name = $data['ten_theloai'] ?? $data['category_name'];
+        $desc = $data['mo_ta'] ?? $data['description'];
+        $order = $data['thu_tu'] ?? $data['sort_order'] ?? 0;
+        $status = $data['trang_thai'] ?? $data['status'] ?? 1;
+        
+        $stmt->bind_param("ssii", $name, $desc, $order, $status);
         
         if ($stmt->execute()) {
             return $this->conn->insert_id;
@@ -99,19 +100,18 @@ class Categories {
      * @return bool Success status
      */
     public function updateCategory($id, $data) {
-        $sql = "UPDATE categories 
-                SET category_name = ?, description = ?, sort_order = ?, status = ? 
-                WHERE id_category = ?";
+        $sql = "UPDATE theloai 
+                SET ten_theloai = ?, mo_ta = ?, thu_tu = ?, trang_thai = ? 
+                WHERE id_theloai = ?";
         
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param(
-            "ssiii",
-            $data['category_name'],
-            $data['description'],
-            $data['sort_order'],
-            $data['status'],
-            $id
-        );
+        
+        $name = $data['ten_theloai'] ?? $data['category_name'];
+        $desc = $data['mo_ta'] ?? $data['description'];
+        $order = $data['thu_tu'] ?? $data['sort_order'] ?? 0;
+        $status = $data['trang_thai'] ?? $data['status'] ?? 1;
+        
+        $stmt->bind_param("ssiii", $name, $desc, $order, $status, $id);
         
         return $stmt->execute();
     }
@@ -123,7 +123,8 @@ class Categories {
      * @return bool Success status
      */
     public function deleteCategory($id) {
-        $sql = "UPDATE categories SET status = 0 WHERE id_category = ?";
+        // Soft delete
+        $sql = "UPDATE theloai SET trang_thai = 'deleted' WHERE id_theloai = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $id);
         return $stmt->execute();
@@ -135,12 +136,14 @@ class Categories {
      * @return array Categories with book counts
      */
     public function getCategoriesWithBookCount() {
-        $sql = "SELECT c.*, COUNT(b.id_book) as book_count
-                FROM categories c
-                LEFT JOIN books b ON c.id_category = b.id_category AND b.status = 1
-                WHERE c.status = 1
-                GROUP BY c.id_category
-                ORDER BY c.sort_order ASC, c.category_name ASC";
+        $sql = "SELECT c.id_theloai as ma_danh_muc, 
+                       c.ten_theloai as ten_danh_muc, 
+                       COUNT(s.id_sach) as book_count
+                FROM theloai c
+                LEFT JOIN sach s ON c.id_theloai = s.id_theloai AND s.trang_thai = 'available'
+                WHERE c.trang_thai != 'deleted'
+                GROUP BY c.id_theloai
+                ORDER BY c.thu_tu ASC, c.ten_theloai ASC";
         
         $result = $this->conn->query($sql);
         

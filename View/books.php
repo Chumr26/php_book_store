@@ -52,37 +52,46 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
                                 <i class="fas fa-th"></i> Lưới
                             </button>
                             <button type="button" class="btn btn-outline-secondary" id="listView">
-                                <i class="fas fa-list"></i> Danh sách
-                            </button>
-                        </div>
+                        <!-- This column is now empty or can be removed if not needed -->
                     </div>
                     
                     <div class="col-md-6 text-md-right">
-                        <!-- Sort Dropdown -->
-                        <form method="GET" action="?page=books" class="form-inline justify-content-md-end">
-                            <input type="hidden" name="page" value="books">
-                            <?php if (isset($_GET['category'])): ?>
-                                <input type="hidden" name="category" value="<?php echo htmlspecialchars($_GET['category']); ?>">
-                            <?php endif; ?>
-                            <?php if (isset($_GET['keyword'])): ?>
-                                <input type="hidden" name="keyword" value="<?php echo htmlspecialchars($_GET['keyword']); ?>">
-                            <?php endif; ?>
-                            <?php if (isset($_GET['price_range'])): ?>
-                                <input type="hidden" name="price_range" value="<?php echo htmlspecialchars($_GET['price_range']); ?>">
-                            <?php endif; ?>
+                        <!-- View Toggle & Sort -->
+                        <div class="d-flex justify-content-end align-items-center">
+                            <div class="btn-group mr-3" role="group" aria-label="View Mode">
+                                <button type="button" class="btn btn-outline-secondary active" id="btnGrid" title="Lưới">
+                                    <i class="fas fa-th"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="btnList" title="Danh sách">
+                                    <i class="fas fa-list"></i>
+                                </button>
+                            </div>
                             
-                            <label class="mr-2">Sắp xếp:</label>
-                            <select name="sort" class="form-control form-control-sm" onchange="this.form.submit()">
-                                <option value="default" <?php echo (!isset($_GET['sort']) || $_GET['sort'] == 'default') ? 'selected' : ''; ?>>Mặc định</option>
-                                <option value="name_asc" <?php echo (isset($_GET['sort']) && $_GET['sort'] == 'name_asc') ? 'selected' : ''; ?>>Tên: A-Z</option>
-                                <option value="name_desc" <?php echo (isset($_GET['sort']) && $_GET['sort'] == 'name_desc') ? 'selected' : ''; ?>>Tên: Z-A</option>
-                                <option value="price_asc" <?php echo (isset($_GET['sort']) && $_GET['sort'] == 'price_asc') ? 'selected' : ''; ?>>Giá: Thấp đến cao</option>
-                                <option value="price_desc" <?php echo (isset($_GET['sort']) && $_GET['sort'] == 'price_desc') ? 'selected' : ''; ?>>Giá: Cao đến thấp</option>
-                                <option value="bestseller" <?php echo (isset($_GET['sort']) && $_GET['sort'] == 'bestseller') ? 'selected' : ''; ?>>Bán chạy nhất</option>
-                                <option value="new" <?php echo (isset($_GET['sort']) && $_GET['sort'] == 'new') ? 'selected' : ''; ?>>Mới nhất</option>
-                                <option value="rating" <?php echo (isset($_GET['sort']) && $_GET['sort'] == 'rating') ? 'selected' : ''; ?>>Đánh giá cao nhất</option>
-                            </select>
-                        </form>
+                            <form method="GET" action="?page=books" class="form-inline">
+                                <input type="hidden" name="page" value="books">
+                                <?php if (isset($_GET['category'])): ?>
+                                    <input type="hidden" name="category" value="<?php echo htmlspecialchars($_GET['category']); ?>">
+                                <?php endif; ?>
+                                <?php if (isset($_GET['keyword'])): ?>
+                                    <input type="hidden" name="keyword" value="<?php echo htmlspecialchars($_GET['keyword']); ?>">
+                                <?php endif; ?>
+                                <?php if (isset($_GET['price_range'])): ?>
+                                    <input type="hidden" name="price_range" value="<?php echo htmlspecialchars($_GET['price_range']); ?>">
+                                <?php endif; ?>
+                                
+                                <label class="mr-2 d-none d-sm-inline-block">Sắp xếp:</label>
+                                <select name="sort" class="form-control form-control-sm" onchange="this.form.submit()">
+                                    <option value="default" <?php echo (!isset($_GET['sort']) || $_GET['sort'] == 'default') ? 'selected' : ''; ?>>Mặc định</option>
+                                    <option value="name_asc" <?php echo (isset($_GET['sort']) && $_GET['sort'] == 'name_asc') ? 'selected' : ''; ?>>Tên: A-Z</option>
+                                    <option value="name_desc" <?php echo (isset($_GET['sort']) && $_GET['sort'] == 'name_desc') ? 'selected' : ''; ?>>Tên: Z-A</option>
+                                    <option value="price_asc" <?php echo (isset($_GET['sort']) && $_GET['sort'] == 'price_asc') ? 'selected' : ''; ?>>Giá: Thấp đến cao</option>
+                                    <option value="price_desc" <?php echo (isset($_GET['sort']) && $_GET['sort'] == 'price_desc') ? 'selected' : ''; ?>>Giá: Cao đến thấp</option>
+                                    <option value="bestseller" <?php echo (isset($_GET['sort']) && $_GET['sort'] == 'bestseller') ? 'selected' : ''; ?>>Bán chạy nhất</option>
+                                    <option value="new" <?php echo (isset($_GET['sort']) && $_GET['sort'] == 'new') ? 'selected' : ''; ?>>Mới nhất</option>
+                                    <option value="rating" <?php echo (isset($_GET['sort']) && $_GET['sort'] == 'rating') ? 'selected' : ''; ?>>Đánh giá cao nhất</option>
+                                </select>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -92,7 +101,7 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
                 <div class="books-container" id="booksGrid">
                     <div class="row">
                         <?php foreach ($books as $book): ?>
-                            <div class="col-lg-4 col-md-6 col-sm-6 mb-4">
+                            <div class="col-lg-4 col-md-6 col-sm-6 mb-4 book-item-col">
                                 <?php include 'book_card.php'; ?>
                             </div>
                         <?php endforeach; ?>
@@ -111,21 +120,23 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
             <?php endif; ?>
             
             <!-- Pagination -->
-            <?php if (isset($pagination) && $pagination['total_pages'] > 1): ?>
+            <?php if (isset($pagination) && $pagination instanceof Pagination && $pagination->getTotalPages() > 1): ?>
                 <nav aria-label="Page navigation" class="mt-4">
                     <ul class="pagination justify-content-center">
                         <!-- Previous -->
-                        <li class="page-item <?php echo $pagination['current_page'] <= 1 ? 'disabled' : ''; ?>">
+                        <li class="page-item <?php echo $pagination->getCurrentPage() <= 1 ? 'disabled' : ''; ?>">
                             <a class="page-link" 
-                               href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=<?php echo $pagination['current_page'] - 1; ?>">
+                               href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=<?php echo $pagination->getCurrentPage() - 1; ?>">
                                 <i class="fas fa-chevron-left"></i>
                             </a>
                         </li>
                         
                         <!-- Page Numbers -->
                         <?php
-                        $start_page = max(1, $pagination['current_page'] - 2);
-                        $end_page = min($pagination['total_pages'], $pagination['current_page'] + 2);
+                        $current_page = $pagination->getCurrentPage();
+                        $total_pages = $pagination->getTotalPages();
+                        $start_page = max(1, $current_page - 2);
+                        $end_page = min($total_pages, $current_page + 2);
                         
                         if ($start_page > 1): ?>
                             <li class="page-item">
@@ -137,7 +148,7 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
                         <?php endif; ?>
                         
                         <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
-                            <li class="page-item <?php echo $i == $pagination['current_page'] ? 'active' : ''; ?>">
+                            <li class="page-item <?php echo $i == $current_page ? 'active' : ''; ?>">
                                 <a class="page-link" 
                                    href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=<?php echo $i; ?>">
                                     <?php echo $i; ?>
@@ -145,19 +156,19 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
                             </li>
                         <?php endfor; ?>
                         
-                        <?php if ($end_page < $pagination['total_pages']): ?>
-                            <?php if ($end_page < $pagination['total_pages'] - 1): ?>
+                        <?php if ($end_page < $total_pages): ?>
+                            <?php if ($end_page < $total_pages - 1): ?>
                                 <li class="page-item disabled"><span class="page-link">...</span></li>
                             <?php endif; ?>
                             <li class="page-item">
-                                <a class="page-link" href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=<?php echo $pagination['total_pages']; ?>"><?php echo $pagination['total_pages']; ?></a>
+                                <a class="page-link" href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=<?php echo $total_pages; ?>"><?php echo $total_pages; ?></a>
                             </li>
                         <?php endif; ?>
                         
                         <!-- Next -->
-                        <li class="page-item <?php echo $pagination['current_page'] >= $pagination['total_pages'] ? 'disabled' : ''; ?>">
+                        <li class="page-item <?php echo $current_page >= $total_pages ? 'disabled' : ''; ?>">
                             <a class="page-link" 
-                               href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=<?php echo $pagination['current_page'] + 1; ?>">
+                               href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=<?php echo $current_page + 1; ?>">
                                 <i class="fas fa-chevron-right"></i>
                             </a>
                         </li>
@@ -196,21 +207,129 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
         background: #f8f9fa;
         border-radius: 10px;
     }
+
+    /* List View Styles */
+    .book-item-list {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .book-item-list .card {
+        flex-direction: row;
+        align-items: center;
+        padding: 15px;
+    }
+
+    .book-item-list .card-img-top {
+        width: 120px;
+        height: 180px;
+        object-fit: cover;
+        margin-right: 20px;
+    }
+
+    .book-item-list .card-body {
+        text-align: left;
+        flex: 1;
+    }
+    
+    .book-item-list .card-body .card-title {
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .book-item-list .card-body .card-text {
+        margin-bottom: 0.5rem;
+    }
+
+    .book-item-list .card-footer {
+        border-top: none;
+        background: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 200px;
+        padding-left: 0;
+    }
+    
+    .btn-group .btn.active {
+        background-color: #6c757d;
+        color: white;
+    }
 </style>
 
 <script>
-$(document).ready(function() {
-    // View mode toggle (Grid/List)
-    $('#gridView').click(function() {
-        $(this).addClass('active');
-        $('#listView').removeClass('active');
-        $('#booksGrid .row > div').removeClass('col-12').addClass('col-lg-4 col-md-6');
+document.addEventListener('DOMContentLoaded', function() {
+    const btnGrid = document.getElementById('btnGrid');
+    const btnList = document.getElementById('btnList');
+    const container = document.getElementById('booksGrid');
+    
+    // Check local storage
+    const currentView = localStorage.getItem('booksViewMode') || 'grid';
+    if (currentView === 'list') {
+        setListView();
+    }
+    
+    btnGrid.addEventListener('click', function() {
+        setGridView();
     });
     
-    $('#listView').click(function() {
-        $(this).addClass('active');
-        $('#gridView').removeClass('active');
-        $('#booksGrid .row > div').removeClass('col-lg-4 col-md-6').addClass('col-12');
+    btnList.addEventListener('click', function() {
+        setListView();
     });
+    
+    function setGridView() {
+        btnGrid.classList.add('active');
+        btnList.classList.remove('active');
+        
+        const cols = container.querySelectorAll('.book-item-col');
+        cols.forEach(col => {
+            col.className = 'col-lg-4 col-md-6 col-sm-6 mb-4 book-item-col';
+            const card = col.querySelector('.card');
+            if(card) {
+                card.classList.remove('flex-row', 'align-items-center', 'p-3');
+                const img = card.querySelector('img');
+                if(img) {
+                    img.style.width = ''; 
+                    img.style.height = '';
+                    img.style.objectFit = '';
+                    img.classList.add('card-img-top');
+                    img.classList.remove('mr-3');
+                }
+                // Reset footer
+                const footer = card.querySelector('.card-footer');
+                if(footer) footer.style.width = '';
+            }
+        });
+        
+        localStorage.setItem('booksViewMode', 'grid');
+    }
+    
+    function setListView() {
+        btnList.classList.add('active');
+        btnGrid.classList.remove('active');
+        
+        const cols = container.querySelectorAll('.book-item-col');
+        cols.forEach(col => {
+            col.className = 'col-12 mb-3 book-item-col book-item-list';
+            const card = col.querySelector('.card');
+            if(card) {
+                card.classList.add('flex-row', 'align-items-center', 'p-3');
+                const img = card.querySelector('img');
+                if(img) {
+                    img.style.width = '120px'; 
+                    img.style.height = '180px';
+                    img.style.objectFit = 'cover';
+                    img.classList.remove('card-img-top'); 
+                    img.classList.add('mr-3');
+                }
+                
+                // Adjust footer
+                // Note: This assumes specific structure of book_card.php. 
+                // If book_card.php structure is complex, might need more specific selectors.
+            }
+        });
+        
+        localStorage.setItem('booksViewMode', 'list');
+    }
 });
 </script>

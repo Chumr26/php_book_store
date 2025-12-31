@@ -39,11 +39,11 @@ class BookController extends BaseController {
             
             // Get filters from query string
             $category = isset($_GET['category']) ? (int)$_GET['category'] : 0;
-            $priceRange = isset($_GET['price']) ? $_GET['price'] : '';
+            $priceRange = isset($_GET['price_range']) ? $_GET['price_range'] : '';
             $rating = isset($_GET['rating']) ? (int)$_GET['rating'] : 0;
-            $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+            $search = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
             $sort = isset($_GET['sort']) ? $_GET['sort'] : 'newest';
-            $page = isset($_GET['pg']) ? (int)$_GET['pg'] : 1;
+            $page = isset($_GET['p']) ? (int)$_GET['p'] : 1;
             $limit = 12;
             
             // Get total count FIRST
@@ -62,6 +62,9 @@ class BookController extends BaseController {
             // Get publishers for filter
             $publishers = $this->publishersModel->getAllPublishers();
             
+            // Get bestsellers for sidebar
+            $bestsellers = $this->booksModel->getTopSellingBooks(5);
+            
             // Prepare data for view
             $data = [
                 'books' => $books,
@@ -71,6 +74,7 @@ class BookController extends BaseController {
                 'pagination' => $pagination,
                 'categories' => $categories,
                 'publishers' => $publishers ?? [],
+                'bestsellers' => $bestsellers,
                 'current_category' => $category,
                 'current_price' => $priceRange,
                 'current_rating' => $rating,

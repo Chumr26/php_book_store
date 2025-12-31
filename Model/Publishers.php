@@ -21,10 +21,10 @@ class Publishers {
      * @return array Publishers
      */
     public function getAllPublishers() {
-        $sql = "SELECT id_nxb as id_publisher,
-                       ten_nxb as publisher_name,
-                       dia_chi as address,
-                       dien_thoai as phone,
+        $sql = "SELECT id_nxb as ma_nxb,
+                       ten_nxb,
+                       dia_chi,
+                       dien_thoai,
                        email,
                        website
                 FROM nhaxuatban 
@@ -46,10 +46,10 @@ class Publishers {
      * @return array|null Publisher data or null
      */
     public function getPublisherById($id) {
-        $sql = "SELECT id_nxb as id_publisher,
-                       ten_nxb as publisher_name,
-                       dia_chi as address,
-                       dien_thoai as phone,
+        $sql = "SELECT id_nxb as ma_nxb,
+                       ten_nxb,
+                       dia_chi,
+                       dien_thoai,
                        email,
                        website
                 FROM nhaxuatban 
@@ -60,7 +60,15 @@ class Publishers {
         $stmt->execute();
         $result = $stmt->get_result();
         
-        return $result->fetch_assoc();
+        $row = $result->fetch_assoc();
+        
+        // Add alias for backward compatibility if needed in admin
+        if ($row) {
+            $row['id_publisher'] = $row['ma_nxb'];
+            $row['publisher_name'] = $row['ten_nxb'];
+        }
+        
+        return $row;
     }
     
     /**
@@ -70,18 +78,19 @@ class Publishers {
      * @return int|false New publisher ID or false
      */
     public function addPublisher($data) {
-        $sql = "INSERT INTO publishers (publisher_name, address, phone, email, website) 
+        $sql = "INSERT INTO nhaxuatban (ten_nxb, dia_chi, dien_thoai, email, website) 
                 VALUES (?, ?, ?, ?, ?)";
         
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param(
-            "sssss",
-            $data['publisher_name'],
-            $data['address'],
-            $data['phone'],
-            $data['email'],
-            $data['website']
-        );
+        
+        // Handle input keys flexible (either new Vietnamese or old English keys)
+        $name = $data['ten_nxb'] ?? $data['publisher_name'];
+        $addr = $data['dia_chi'] ?? $data['address'];
+        $phone = $data['dien_thoai'] ?? $data['phone'];
+        $email = $data['email'];
+        $web = $data['website'];
+        
+        $stmt->bind_param("sssss", $name, $addr, $phone, $email, $web);
         
         if ($stmt->execute()) {
             return $this->conn->insert_id;
@@ -98,20 +107,19 @@ class Publishers {
      * @return bool Success status
      */
     public function updatePublisher($id, $data) {
-        $sql = "UPDATE publishers 
-                SET publisher_name = ?, address = ?, phone = ?, email = ?, website = ? 
-                WHERE id_publisher = ?";
+        $sql = "UPDATE nhaxuatban 
+                SET ten_nxb = ?, dia_chi = ?, dien_thoai = ?, email = ?, website = ? 
+                WHERE id_nxb = ?";
         
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param(
-            "sssssi",
-            $data['publisher_name'],
-            $data['address'],
-            $data['phone'],
-            $data['email'],
-            $data['website'],
-            $id
-        );
+        
+        $name = $data['ten_nxb'] ?? $data['publisher_name'];
+        $addr = $data['dia_chi'] ?? $data['address'];
+        $phone = $data['dien_thoai'] ?? $data['phone'];
+        $email = $data['email'];
+        $web = $data['website'];
+        
+        $stmt->bind_param("sssssi", $name, $addr, $phone, $email, $web, $id);
         
         return $stmt->execute();
     }
@@ -123,7 +131,7 @@ class Publishers {
      * @return bool Success status
      */
     public function deletePublisher($id) {
-        $sql = "DELETE FROM publishers WHERE id_publisher = ?";
+        $sql = "DELETE FROM nhaxuatban WHERE id_nxb = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $id);
         return $stmt->execute();
@@ -138,9 +146,10 @@ class Publishers {
     public function searchPublishers($keyword) {
         $searchTerm = "%{$keyword}%";
         
-        $sql = "SELECT * FROM publishers 
-                WHERE publisher_name LIKE ?
-                ORDER BY publisher_name ASC";
+        $sql = "SELECT id_nxb as ma_nxb, ten_nxb, dia_chi, dien_thoai, email, website 
+                FROM nhaxuatban 
+                WHERE ten_nxb LIKE ?
+                ORDER BY ten_nxb ASC";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("s", $searchTerm);

@@ -201,7 +201,7 @@
     <div class="card">
         <div class="card-body p-0">
             <a href="?page=books&sort=discount">
-                <img src="<?php echo $baseUrl ?? '/book_store'; ?>/Content/images/banners/sidebar-banner.jpg" 
+                <img src="<?php echo $baseUrl ?? '/book_store'; ?>/Content/images/banners/banner_special_offer_1766452645672.png" 
                      alt="Khuyến mãi" class="img-fluid">
             </a>
         </div>

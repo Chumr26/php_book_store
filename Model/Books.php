@@ -26,16 +26,17 @@ class Books {
     public function getAllBooks($page = 1, $limit = 12) {
         $offset = ($page - 1) * $limit;
         
-        $sql = "SELECT b.*, 
-                       a.author_name, 
-                       p.publisher_name, 
-                       c.category_name
-                FROM books b
-                LEFT JOIN authors a ON b.id_author = a.id_author
-                LEFT JOIN publishers p ON b.id_publisher = p.id_publisher
-                LEFT JOIN categories c ON b.id_category = c.id_category
-                WHERE b.status = 1
-                ORDER BY b.created_at DESC
+        $sql = "SELECT s.*, 
+                       s.id_sach as ma_sach,
+                       tg.ten_tacgia as author_name,
+                       nxb.ten_nxb as publisher_name,
+                       tl.ten_theloai as category_name
+                FROM sach s
+                LEFT JOIN tacgia tg ON s.id_tacgia = tg.id_tacgia
+                LEFT JOIN nhaxuatban nxb ON s.id_nxb = nxb.id_nxb
+                LEFT JOIN theloai tl ON s.id_theloai = tl.id_theloai
+                WHERE s.trang_thai = 'available'
+                ORDER BY s.ngay_them DESC
                 LIMIT ? OFFSET ?";
         
         $stmt = $this->conn->prepare($sql);
@@ -57,7 +58,7 @@ class Books {
      * @return int Total count
      */
     public function getTotalBooks() {
-        $sql = "SELECT COUNT(*) as total FROM books WHERE status = 1";
+        $sql = "SELECT COUNT(*) as total FROM sach WHERE trang_thai = 'available'";
         $result = $this->conn->query($sql);
         $row = $result->fetch_assoc();
         return $row['total'];
@@ -133,17 +134,18 @@ class Books {
         $offset = ($page - 1) * $limit;
         $searchTerm = "%{$keyword}%";
         
-        $sql = "SELECT b.*, 
-                       a.author_name, 
-                       p.publisher_name, 
-                       c.category_name
-                FROM books b
-                LEFT JOIN authors a ON b.id_author = a.id_author
-                LEFT JOIN publishers p ON b.id_publisher = p.id_publisher
-                LEFT JOIN categories c ON b.id_category = c.id_category
-                WHERE b.status = 1 
-                AND (b.title LIKE ? OR a.author_name LIKE ? OR b.isbn LIKE ?)
-                ORDER BY b.title ASC
+        $sql = "SELECT s.*, 
+                       s.id_sach as ma_sach,
+                       tg.ten_tacgia as author_name,
+                       nxb.ten_nxb as publisher_name,
+                       tl.ten_theloai as category_name
+                FROM sach s
+                LEFT JOIN tacgia tg ON s.id_tacgia = tg.id_tacgia
+                LEFT JOIN nhaxuatban nxb ON s.id_nxb = nxb.id_nxb
+                LEFT JOIN theloai tl ON s.id_theloai = tl.id_theloai
+                WHERE s.trang_thai = 'available' 
+                AND (s.ten_sach LIKE ? OR tg.ten_tacgia LIKE ? OR s.isbn LIKE ?)
+                ORDER BY s.ten_sach ASC
                 LIMIT ? OFFSET ?";
         
         $stmt = $this->conn->prepare($sql);
@@ -202,16 +204,17 @@ class Books {
      * @return array Featured books
      */
     public function getFeaturedBooks($limit = 8) {
-        $sql = "SELECT b.*, 
-                       a.author_name, 
-                       p.publisher_name, 
-                       c.category_name
-                FROM books b
-                LEFT JOIN authors a ON b.id_author = a.id_author
-                LEFT JOIN publishers p ON b.id_publisher = p.id_publisher
-                LEFT JOIN categories c ON b.id_category = c.id_category
-                WHERE b.is_featured = 1 AND b.status = 1
-                ORDER BY b.created_at DESC
+        $sql = "SELECT s.*, 
+                       s.id_sach as ma_sach,
+                       tg.ten_tacgia as author_name,
+                       nxb.ten_nxb as publisher_name,
+                       tl.ten_theloai as category_name
+                FROM sach s
+                LEFT JOIN tacgia tg ON s.id_tacgia = tg.id_tacgia
+                LEFT JOIN nhaxuatban nxb ON s.id_nxb = nxb.id_nxb
+                LEFT JOIN theloai tl ON s.id_theloai = tl.id_theloai
+                WHERE s.noi_bat = 1 AND s.trang_thai = 'available'
+                ORDER BY s.ngay_them DESC
                 LIMIT ?";
         
         $stmt = $this->conn->prepare($sql);
@@ -234,16 +237,17 @@ class Books {
      * @return array Best-selling books
      */
     public function getTopSellingBooks($limit = 8) {
-        $sql = "SELECT b.*, 
-                       a.author_name, 
-                       p.publisher_name, 
-                       c.category_name
-                FROM books b
-                LEFT JOIN authors a ON b.id_author = a.id_author
-                LEFT JOIN publishers p ON b.id_publisher = p.id_publisher
-                LEFT JOIN categories c ON b.id_category = c.id_category
-                WHERE b.status = 1
-                ORDER BY b.sale_count DESC, b.view_count DESC
+        $sql = "SELECT s.*, 
+                       s.id_sach as ma_sach,
+                       tg.ten_tacgia as author_name,
+                       nxb.ten_nxb as publisher_name,
+                       tl.ten_theloai as category_name
+                FROM sach s
+                LEFT JOIN tacgia tg ON s.id_tacgia = tg.id_tacgia
+                LEFT JOIN nhaxuatban nxb ON s.id_nxb = nxb.id_nxb
+                LEFT JOIN theloai tl ON s.id_theloai = tl.id_theloai
+                WHERE s.trang_thai = 'available'
+                ORDER BY s.luot_ban DESC, s.luot_xem DESC
                 LIMIT ?";
         
         $stmt = $this->conn->prepare($sql);
@@ -266,16 +270,17 @@ class Books {
      * @return array Newest books
      */
     public function getNewArrivals($limit = 8) {
-        $sql = "SELECT b.*, 
-                       a.author_name, 
-                       p.publisher_name, 
-                       c.category_name
-                FROM books b
-                LEFT JOIN authors a ON b.id_author = a.id_author
-                LEFT JOIN publishers p ON b.id_publisher = p.id_publisher
-                LEFT JOIN categories c ON b.id_category = c.id_category
-                WHERE b.status = 1
-                ORDER BY b.created_at DESC
+        $sql = "SELECT s.*, 
+                       s.id_sach as ma_sach,
+                       tg.ten_tacgia as author_name,
+                       nxb.ten_nxb as publisher_name,
+                       tl.ten_theloai as category_name
+                FROM sach s
+                LEFT JOIN tacgia tg ON s.id_tacgia = tg.id_tacgia
+                LEFT JOIN nhaxuatban nxb ON s.id_nxb = nxb.id_nxb
+                LEFT JOIN theloai tl ON s.id_theloai = tl.id_theloai
+                WHERE s.trang_thai = 'available'
+                ORDER BY s.ngay_them DESC
                 LIMIT ?";
         
         $stmt = $this->conn->prepare($sql);
@@ -404,10 +409,10 @@ class Books {
      * @return bool Success status
      */
     public function updateStock($id, $quantity) {
-        $sql = "UPDATE books SET 
-                    stock_quantity = stock_quantity - ?,
-                    sale_count = sale_count + ?
-                WHERE id_book = ? AND stock_quantity >= ?";
+        $sql = "UPDATE sach SET 
+                    so_luong_ton = so_luong_ton - ?,
+                    luot_ban = luot_ban + ?
+                WHERE id_sach = ? AND so_luong_ton >= ?";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("iiii", $quantity, $quantity, $id, $quantity);
@@ -421,7 +426,7 @@ class Books {
      * @return bool Success status
      */
     public function incrementViewCount($id) {
-        $sql = "UPDATE books SET view_count = view_count + 1 WHERE id_book = ?";
+        $sql = "UPDATE sach SET luot_xem = luot_xem + 1 WHERE id_sach = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $id);
         return $stmt->execute();
@@ -435,14 +440,14 @@ class Books {
      * @return bool True if stock available
      */
     public function checkStock($id, $quantity) {
-        $sql = "SELECT stock_quantity FROM books WHERE id_book = ?";
+        $sql = "SELECT so_luong_ton FROM sach WHERE id_sach = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $id);
         $stmt->execute();
         $result = $stmt->get_result();
         $book = $result->fetch_assoc();
         
-        return ($book && $book['stock_quantity'] >= $quantity);
+        return ($book && $book['so_luong_ton'] >= $quantity);
     }
     
     /**

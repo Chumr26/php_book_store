@@ -52,7 +52,7 @@ $staticBanners = [
 ?>
 
 <!-- Hero Slider -->
-<section class="hero-slider">
+<section class="hero-slider" style="overflow: hidden;">
     <div id="heroCarousel" class="carousel slide" data-ride="carousel">
         <ol class="carousel-indicators">
             <?php foreach ($staticBanners as $index => $banner): ?>
@@ -62,17 +62,19 @@ $staticBanners = [
         <div class="carousel-inner">
             <?php foreach ($staticBanners as $index => $banner): ?>
                 <div class="carousel-item <?php echo $index == 0 ? 'active' : ''; ?>">
-                    <img src="<?php echo htmlspecialchars($banner['image']); ?>" 
-                         class="d-block w-100" 
-                         alt="<?php echo htmlspecialchars($banner['title']); ?>"
-                         style="height: 450px; object-fit: cover;">
-                    <div class="carousel-caption d-none d-md-block">
-                        <h2 class="display-4"><?php echo htmlspecialchars($banner['title']); ?></h2>
-                        <p class="lead"><?php echo htmlspecialchars($banner['description']); ?></p>
-                        <a href="<?php echo htmlspecialchars($banner['link']); ?>" 
-                           class="btn <?php echo $banner['btn_class']; ?> btn-lg">
-                            <i class="fas <?php echo $banner['btn_icon']; ?>"></i> <?php echo htmlspecialchars($banner['btn_text']); ?>
-                        </a>
+                    <div style="height: 450px; overflow: hidden; position: relative;">
+                        <img src="<?php echo htmlspecialchars($banner['image']); ?>" 
+                             class="d-block w-100" 
+                             alt="<?php echo htmlspecialchars($banner['title']); ?>"
+                             style="height: 100%; object-fit: cover; object-position: center;">
+                        <div class="carousel-caption d-none d-md-block" style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; bottom: 50px;">
+                            <h2 class="display-4 font-weight-bold"><?php echo htmlspecialchars($banner['title']); ?></h2>
+                            <p class="lead text-white"><?php echo htmlspecialchars($banner['description']); ?></p>
+                            <a href="<?php echo htmlspecialchars($banner['link']); ?>" 
+                               class="btn <?php echo $banner['btn_class']; ?> btn-lg shadow">
+                                <i class="fas <?php echo $banner['btn_icon']; ?>"></i> <?php echo htmlspecialchars($banner['btn_text']); ?>
+                            </a>
+                        </div>
                     </div>
                 </div>
             <?php endforeach; ?>
