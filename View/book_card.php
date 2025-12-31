@@ -52,80 +52,100 @@ $coverUrl = book_cover_url($book['isbn'] ?? null, 'medium');
         </div>
         
         <div class="card-body d-flex flex-column">
-            <!-- Book Title -->
-            <h5 class="card-title text-line-clamp-2 mb-2" style="height: 44px; overflow: hidden;">
-                <a href="?page=book_detail&id=<?php echo $book['ma_sach']; ?>" 
-                   class="text-decoration-none text-dark" 
-                   title="<?php echo htmlspecialchars($book['ten_sach']); ?>">
-                    <?php echo htmlspecialchars($book['ten_sach']); ?>
-                </a>
-            </h5>
-            
-            <!-- Author -->
-            <?php if (isset($book['ten_tac_gia'])): ?>
-                <p class="text-muted small mb-2 text-truncate">
-                    <i class="fas fa-user"></i> <?php echo htmlspecialchars($book['ten_tac_gia']); ?>
-                </p>
-            <?php else: ?>
-                <!-- Spacer for books without author to maintain alignment -->
-                <p class="text-muted small mb-2 invisible">
-                    <i class="fas fa-user"></i> Unknown
-                </p>
-            <?php endif; ?>
-            
-            <!-- Rating -->
-            <div class="book-rating mb-2">
-                <?php 
-                $rating = isset($book['diem_trung_binh']) ? floatval($book['diem_trung_binh']) : 0;
-                $fullStars = floor($rating);
-                $halfStar = ($rating - $fullStars) >= 0.5 ? 1 : 0;
-                $emptyStars = 5 - $fullStars - $halfStar;
-                ?>
-                <span class="text-warning">
-                    <?php for ($i = 0; $i < $fullStars; $i++): ?>
-                        <i class="fas fa-star"></i>
-                    <?php endfor; ?>
-                    <?php if ($halfStar): ?>
-                        <i class="fas fa-star-half-alt"></i>
-                    <?php endif; ?>
-                    <?php for ($i = 0; $i < $emptyStars; $i++): ?>
-                        <i class="far fa-star"></i>
-                    <?php endfor; ?>
-                </span>
-                <small class="text-muted">
-                    (<?php echo isset($book['so_luong_danh_gia']) ? $book['so_luong_danh_gia'] : 0; ?>)
-                </small>
-            </div>
-            
-            <!-- Price -->
-            <div class="book-price mt-auto">
-                <?php if (isset($book['giam_gia']) && $book['giam_gia'] > 0): ?>
-                    <span class="text-muted" style="text-decoration: line-through;">
-                        <?php echo number_format($book['gia'], 0, ',', '.'); ?>đ
-                    </span>
-                    <br>
-                    <?php 
-                    $discountedPrice = $book['gia'] * (1 - $book['giam_gia'] / 100);
-                    ?>
-                    <span class="text-danger font-weight-bold h5 mb-0">
-                        <?php echo number_format($discountedPrice, 0, ',', '.'); ?>đ
-                    </span>
+            <div class="book-info-main">
+                <!-- Book Title -->
+                <h5 class="card-title text-line-clamp-2 mb-2" style="height: 44px; overflow: hidden;">
+                    <a href="?page=book_detail&id=<?php echo $book['ma_sach']; ?>" 
+                       class="text-decoration-none text-dark" 
+                       title="<?php echo htmlspecialchars($book['ten_sach']); ?>">
+                        <?php echo htmlspecialchars($book['ten_sach']); ?>
+                    </a>
+                </h5>
+                
+                <!-- Author -->
+                <?php if (isset($book['ten_tac_gia']) || isset($book['author_name'])): ?>
+                    <p class="text-muted small mb-2 text-truncate">
+                        <i class="fas fa-user"></i> <?php echo htmlspecialchars($book['ten_tac_gia'] ?? $book['author_name']); ?>
+                    </p>
                 <?php else: ?>
-                    <div style="height: 24px;"></div> <!-- Spacer for non-discounted items alignment -->
-                    <span class="text-danger font-weight-bold h5 mb-0">
-                        <?php echo number_format($book['gia'], 0, ',', '.'); ?>đ
-                    </span>
+                    <p class="text-muted small mb-2 invisible">
+                        <i class="fas fa-user"></i> Unknown
+                    </p>
                 <?php endif; ?>
+                
+                <!-- Rating -->
+                <div class="book-rating mb-2">
+                    <?php 
+                    $rating = isset($book['diem_trung_binh']) ? floatval($book['diem_trung_binh']) : 0;
+                    $fullStars = floor($rating);
+                    $halfStar = ($rating - $fullStars) >= 0.5 ? 1 : 0;
+                    $emptyStars = 5 - $fullStars - $halfStar;
+                    ?>
+                    <span class="text-warning">
+                        <?php for ($i = 0; $i < $fullStars; $i++): ?>
+                            <i class="fas fa-star"></i>
+                        <?php endfor; ?>
+                        <?php if ($halfStar): ?>
+                            <i class="fas fa-star-half-alt"></i>
+                        <?php endif; ?>
+                        <?php for ($i = 0; $i < $emptyStars; $i++): ?>
+                            <i class="far fa-star"></i>
+                        <?php endfor; ?>
+                    </span>
+                    <small class="text-muted">
+                        (<?php echo isset($book['so_luong_danh_gia']) ? $book['so_luong_danh_gia'] : 0; ?>)
+                    </small>
+                </div>
+
+                <!-- Extra Info for List View (Hidden in Grid) -->
+                <div class="book-extra-info d-none mt-3">
+                    <?php if (isset($book['mo_ta'])): ?>
+                        <p class="text-muted small text-line-clamp-2 mb-2">
+                            <?php echo htmlspecialchars(strip_tags($book['mo_ta'])); ?>
+                        </p>
+                    <?php endif; ?>
+                    
+                    <div class="small text-muted mb-1">
+                        <?php if (isset($book['ten_nxb']) || isset($book['publisher_name'])): ?>
+                            <span class="mr-3"><i class="fas fa-building"></i> <?php echo htmlspecialchars($book['ten_nxb'] ?? $book['publisher_name']); ?></span>
+                        <?php endif; ?>
+                        
+                        <?php if (isset($book['ten_theloai']) || isset($book['category_name'])): ?>
+                            <span><i class="fas fa-bookmark"></i> <?php echo htmlspecialchars($book['ten_theloai'] ?? $book['category_name']); ?></span>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
             
-            <!-- Add to Cart Button -->
-            <div class="mt-3">
+            <!-- Price & Actions -->
+            <div class="book-actions mt-auto">
+                <!-- Price -->
+                <div class="book-price mb-3">
+                    <?php if (isset($book['giam_gia']) && $book['giam_gia'] > 0): ?>
+                        <span class="text-muted" style="text-decoration: line-through;">
+                            <?php echo number_format($book['gia'], 0, ',', '.'); ?>đ
+                        </span>
+                        <br>
+                        <?php 
+                        $discountedPrice = $book['gia'] * (1 - $book['giam_gia'] / 100);
+                        ?>
+                        <span class="text-danger font-weight-bold h5 mb-0">
+                            <?php echo number_format($discountedPrice, 0, ',', '.'); ?>đ
+                        </span>
+                    <?php else: ?>
+                        <span class="text-danger font-weight-bold h5 mb-0">
+                            <?php echo number_format($book['gia'], 0, ',', '.'); ?>đ
+                        </span>
+                    <?php endif; ?>
+                </div>
+                
+                <!-- Add to Cart Button -->
                 <?php if (isset($book['so_luong_ton']) && $book['so_luong_ton'] > 0): ?>
                     <button type="button" 
                             class="btn btn-primary btn-block add-to-cart-btn"
                             data-book-id="<?php echo $book['ma_sach']; ?>"
                             data-book-name="<?php echo htmlspecialchars($book['ten_sach']); ?>">
-                        <i class="fas fa-cart-plus"></i> Thêm vào giỏ
+                        <i class="fas fa-cart-plus"></i> <span class="btn-text">Thêm vào giỏ</span>
                     </button>
                 <?php else: ?>
                     <button type="button" class="btn btn-secondary btn-block" disabled>

@@ -45,19 +45,9 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
             <!-- Filter & Sort Bar -->
             <div class="filter-sort-bar mb-4">
                 <div class="row align-items-center">
-                    <div class="col-md-6 mb-3 mb-md-0">
-                        <!-- View Mode -->
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-outline-secondary active" id="gridView">
-                                <i class="fas fa-th"></i> Lưới
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary" id="listView">
-                        <!-- This column is now empty or can be removed if not needed -->
-                    </div>
-                    
-                    <div class="col-md-6 text-md-right">
+                    <div class="col-md-12 text-md-right">
                         <!-- View Toggle & Sort -->
-                        <div class="d-flex justify-content-end align-items-center">
+                        <div class="d-flex justify-content-between align-items-center">
                             <div class="btn-group mr-3" role="group" aria-label="View Mode">
                                 <button type="button" class="btn btn-outline-secondary active" id="btnGrid" title="Lưới">
                                     <i class="fas fa-th"></i>
@@ -208,47 +198,139 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
         border-radius: 10px;
     }
 
-    /* List View Styles */
+    /* --- List View Styles --- */
+    /* Wrapper */
     .book-item-list {
         flex: 0 0 100%;
         max-width: 100%;
     }
 
     .book-item-list .card {
-        flex-direction: row;
-        align-items: center;
-        padding: 15px;
+        flex-direction: row; /* Image | Body */
+        align-items: stretch;
+        border: 1px solid #e0e0e0;
     }
 
-    .book-item-list .card-img-top {
-        width: 120px;
-        height: 180px;
-        object-fit: cover;
-        margin-right: 20px;
+    /* Image - Left Side */
+    .book-item-list .book-image-wrapper {
+        width: 200px;
+        flex-shrink: 0;
+        height: auto !important; /* Override default grid height */
     }
 
+    .book-item-list .book-image-wrapper a {
+        display: block;
+        height: 100%;
+    }
+
+    .book-item-list .book-image-wrapper img {
+        height: 100% !important;
+        object-fit: contain !important; /* Keep contain to show full book cover */
+        padding: 10px;
+    }
+    
+    /* Badges position fix for list view */
+    .book-item-list .book-image-wrapper .badge {
+        top: 10px;
+        left: 10px;
+    }
+    .book-item-list .book-image-wrapper .badge-danger[style*="right"] {
+        left: auto;
+        right: 10px;
+    }
+
+    /* Card Body - Center & Right Side */
     .book-item-list .card-body {
-        text-align: left;
+        display: flex;
+        flex-direction: row; /* Info | Actions */
+        padding: 20px;
         flex: 1;
     }
-    
-    .book-item-list .card-body .card-title {
-        font-size: 1.25rem;
-        margin-bottom: 0.75rem;
-    }
-    
-    .book-item-list .card-body .card-text {
-        margin-bottom: 0.5rem;
-    }
 
-    .book-item-list .card-footer {
-        border-top: none;
-        background: none;
+    /* Info Column (Center) */
+    .book-item-list .book-info-main {
+        flex: 1;
+        text-align: left;
+        padding-right: 25px;
+        border-right: 1px solid #f0f0f0;
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        width: 200px;
-        padding-left: 0;
+        justify-content: flex-start;
+    }
+
+    .book-item-list .card-title a {
+        font-size: 1.4rem;
+        font-weight: 700;
+    }
+
+    /* Actions Column (Right) */
+    .book-item-list .book-actions {
+        width: auto; /* Allow flexibility */
+        min-width: 300px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: row; /* Horizontal layout */
+        justify-content: flex-end; /* Align right */
+        align-items: center;
+        padding-left: 25px;
+        margin-top: 0 !important; /* Reset mt-auto */
+    }
+
+    /* Child adjustments for horizontal layout */
+    .book-item-list .book-price {
+        margin-bottom: 0 !important;
+        margin-right: 20px;
+    }
+    
+    .book-item-list .book-actions > div[class*="mt-"] {
+        margin-top: 0 !important; /* Remove top margin from button container */
+    }
+    
+    .book-item-list .add-to-cart-btn {
+        width: auto; /* Auto width instead of block */
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    /* Reveal Hidden Elements */
+    .book-item-list .book-extra-info {
+        display: block !important;
+    }
+    
+    .book-item-list .btn-text {
+        display: inline;
+    }
+
+    /* Mobile Responsive for List View */
+    @media (max-width: 768px) {
+        .book-item-list .card {
+            flex-direction: column;
+        }
+        .book-item-list .book-image-wrapper {
+            width: 100%;
+            height: 250px !important;
+        }
+        .book-item-list .card-body {
+            flex-direction: column;
+        }
+        .book-item-list .book-info-main {
+            border-right: none;
+            padding-right: 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        .book-item-list .book-actions {
+            width: 100%;
+            min-width: 0;
+            padding-left: 0;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .book-item-list .book-price {
+            margin-right: 15px;
+        }
     }
     
     .btn-group .btn.active {
@@ -265,71 +347,48 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Check local storage
     const currentView = localStorage.getItem('booksViewMode') || 'grid';
-    if (currentView === 'list') {
-        setListView();
-    }
+    applyViewMode(currentView);
     
     btnGrid.addEventListener('click', function() {
-        setGridView();
+        applyViewMode('grid');
     });
     
     btnList.addEventListener('click', function() {
-        setListView();
+        applyViewMode('list');
     });
     
-    function setGridView() {
-        btnGrid.classList.add('active');
-        btnList.classList.remove('active');
-        
-        const cols = container.querySelectorAll('.book-item-col');
-        cols.forEach(col => {
-            col.className = 'col-lg-4 col-md-6 col-sm-6 mb-4 book-item-col';
-            const card = col.querySelector('.card');
-            if(card) {
-                card.classList.remove('flex-row', 'align-items-center', 'p-3');
-                const img = card.querySelector('img');
-                if(img) {
-                    img.style.width = ''; 
-                    img.style.height = '';
-                    img.style.objectFit = '';
-                    img.classList.add('card-img-top');
-                    img.classList.remove('mr-3');
-                }
-                // Reset footer
-                const footer = card.querySelector('.card-footer');
-                if(footer) footer.style.width = '';
-            }
-        });
-        
-        localStorage.setItem('booksViewMode', 'grid');
-    }
-    
-    function setListView() {
-        btnList.classList.add('active');
-        btnGrid.classList.remove('active');
-        
-        const cols = container.querySelectorAll('.book-item-col');
-        cols.forEach(col => {
-            col.className = 'col-12 mb-3 book-item-col book-item-list';
-            const card = col.querySelector('.card');
-            if(card) {
-                card.classList.add('flex-row', 'align-items-center', 'p-3');
-                const img = card.querySelector('img');
-                if(img) {
-                    img.style.width = '120px'; 
-                    img.style.height = '180px';
-                    img.style.objectFit = 'cover';
-                    img.classList.remove('card-img-top'); 
-                    img.classList.add('mr-3');
-                }
-                
-                // Adjust footer
-                // Note: This assumes specific structure of book_card.php. 
-                // If book_card.php structure is complex, might need more specific selectors.
-            }
-        });
-        
-        localStorage.setItem('booksViewMode', 'list');
+    function applyViewMode(mode) {
+        if (mode === 'list') {
+            // Activate Button
+            btnList.classList.add('active');
+            btnGrid.classList.remove('active');
+            
+            // Apply List Classes
+            const cols = container.querySelectorAll('.book-item-col');
+            cols.forEach(col => {
+                col.className = 'col-12 mb-3 book-item-col book-item-list';
+                // Reset any inline styles if they exist (cleanup)
+                const img = col.querySelector('img');
+                if (img) img.style = '';
+            });
+            
+            localStorage.setItem('booksViewMode', 'list');
+        } else {
+            // Activate Button
+            btnGrid.classList.add('active');
+            btnList.classList.remove('active');
+            
+            // Apply Grid Classes
+            const cols = container.querySelectorAll('.book-item-col');
+            cols.forEach(col => {
+                col.className = 'col-lg-4 col-md-6 col-sm-6 mb-4 book-item-col';
+                // Reset any inline styles
+                const img = col.querySelector('img');
+                if (img) img.style = 'height: 340px; object-fit: contain; background: #fff;';
+            });
+            
+            localStorage.setItem('booksViewMode', 'grid');
+        }
     }
 });
 </script>
