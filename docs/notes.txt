@@ -8,4 +8,3 @@ re design the ui of the dropdown selection box
 - in the index.php file at the root directory, there is no route for admin login page, how the website reute me to there?
 
 - i want to have a api for book author so that, i can get their info and their avatar to display, is there any public api for me to use?
-- the "Khách hàng nói gì về chúng tôi" section look simple can you add  avatar to the card,

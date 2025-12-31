@@ -296,7 +296,14 @@ $staticBanners = [
                     <div class="author-card card h-100 shadow-sm">
                         <div class="card-body">
                             <div class="author-avatar mb-3">
-                                <i class="fas fa-user-circle fa-5x text-primary"></i>
+                                <img src="Content/images/authors/default-author.png" 
+                                     alt="<?php echo htmlspecialchars($author['ten_tac_gia']); ?>"
+                                     class="rounded-circle author-img"
+                                     data-author-name="<?php echo htmlspecialchars($author['ten_tac_gia']); ?>"
+                                     style="width: 120px; height: 120px; object-fit: cover; display: none;"
+                                     onload="if(this.naturalWidth > 1) { this.style.display='inline-block'; this.nextElementSibling.style.display='none'; } else { this.style.display='none'; this.nextElementSibling.style.display='inline-block'; }"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                                <i class="fas fa-user-circle fa-5x text-primary default-icon"></i>
                             </div>
                             <h5 class="author-name"><?php echo htmlspecialchars($author['ten_tac_gia']); ?></h5>
                             <?php if (!empty($author['but_danh'])): ?>
@@ -716,7 +723,7 @@ $staticBanners = [
         font-size: 24px;
         font-weight: 700;
         color: #333;
-        margin: 0;
+        margin-left: 40px;
     }
     
     /* Category Cards */
@@ -1002,6 +1009,37 @@ $(document).ready(function() {
     $('#testimonialsCarousel').carousel({
         interval: 5000,
         ride: 'carousel'
+    });
+    
+    // Fetch author images from Open Library
+    const authorImages = document.querySelectorAll('.author-img');
+    
+    authorImages.forEach(img => {
+        const authorName = img.getAttribute('data-author-name');
+        if (authorName) {
+            // Search for author to get OLID
+            fetch(`https://openlibrary.org/search/authors.json?q=${encodeURIComponent(authorName)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.numFound > 0 && data.docs && data.docs.length > 0) {
+                        // Sort by work_count descending to get the most popular author profile
+                        data.docs.sort((a, b) => (b.work_count || 0) - (a.work_count || 0));
+                        
+                        // Get the most relevant result (first one after sorting)
+                        const authorDoc = data.docs[0];
+                        const olid = authorDoc.key;
+                        
+                        // Check if image exists by trying to load it
+                        // Size L for large quality
+                        const imageUrl = `https://covers.openlibrary.org/a/olid/${olid}-L.jpg`;
+                        img.src = imageUrl;
+                    }
+                })
+                .catch(err => {
+                    console.log('Error fetching author image:', err);
+                    // Default icon will stay visible due to onerror handler
+                });
+        }
     });
 });
 </script>
