@@ -53,21 +53,23 @@ $coverUrl = book_cover_url($book['isbn'] ?? null, 'medium');
         
         <div class="card-body d-flex flex-column">
             <!-- Book Title -->
-            <h5 class="card-title">
+            <h5 class="card-title text-line-clamp-2 mb-2" style="height: 44px; overflow: hidden;">
                 <a href="?page=book_detail&id=<?php echo $book['ma_sach']; ?>" 
                    class="text-decoration-none text-dark" 
                    title="<?php echo htmlspecialchars($book['ten_sach']); ?>">
-                    <?php 
-                    $title = htmlspecialchars($book['ten_sach']);
-                    echo mb_strlen($title) > 50 ? mb_substr($title, 0, 50) . '...' : $title;
-                    ?>
+                    <?php echo htmlspecialchars($book['ten_sach']); ?>
                 </a>
             </h5>
             
             <!-- Author -->
             <?php if (isset($book['ten_tac_gia'])): ?>
-                <p class="text-muted small mb-2">
+                <p class="text-muted small mb-2 text-truncate">
                     <i class="fas fa-user"></i> <?php echo htmlspecialchars($book['ten_tac_gia']); ?>
+                </p>
+            <?php else: ?>
+                <!-- Spacer for books without author to maintain alignment -->
+                <p class="text-muted small mb-2 invisible">
+                    <i class="fas fa-user"></i> Unknown
                 </p>
             <?php endif; ?>
             
@@ -109,6 +111,7 @@ $coverUrl = book_cover_url($book['isbn'] ?? null, 'medium');
                         <?php echo number_format($discountedPrice, 0, ',', '.'); ?>đ
                     </span>
                 <?php else: ?>
+                    <div style="height: 24px;"></div> <!-- Spacer for non-discounted items alignment -->
                     <span class="text-danger font-weight-bold h5 mb-0">
                         <?php echo number_format($book['gia'], 0, ',', '.'); ?>đ
                     </span>
@@ -161,6 +164,24 @@ $coverUrl = book_cover_url($book['isbn'] ?? null, 'medium');
     
     .card-title a:hover {
         color: #007bff !important;
+    }
+    
+    .text-line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
     }
 </style>
 
@@ -249,15 +270,4 @@ $(document).ready(function() {
 });
 </script>
 
-<style>
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-</style>
+

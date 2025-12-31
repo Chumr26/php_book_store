@@ -194,9 +194,9 @@ $staticBanners = [
             <?php foreach (array_slice($categories, 0, 8) as $category): ?>
                 <div class="col-md-3 col-sm-6 mb-4">
                     <a href="?page=books&category=<?php echo urlencode((string)($category['ma_danh_muc'] ?? '')); ?>" 
-                       class="category-card text-decoration-none">
+                       class="category-card text-decoration-none h-100 d-block">
                         <div class="card h-100 shadow-sm hover-shadow">
-                            <div class="card-body text-center">
+                            <div class="card-body text-center d-flex flex-column">
                                 <div class="category-icon mb-3">
                                     <i class="fas fa-book fa-3x text-primary"></i>
                                 </div>
@@ -204,11 +204,15 @@ $staticBanners = [
                                 $categoryName = (string)($category['ten_danh_muc'] ?? '');
                                 $categoryDesc = (string)($category['mo_ta'] ?? '');
                                 ?>
-                                <h5 class="card-title"><?php echo htmlspecialchars($categoryName); ?></h5>
+                                <h5 class="card-title text-line-clamp-2 mb-2" style="height: 48px; overflow: hidden;"><?php echo htmlspecialchars($categoryName); ?></h5>
                                 <?php if ($categoryDesc !== ''): ?>
-                                    <p class="card-text text-muted small">
-                                        <?php echo htmlspecialchars(mb_substr($categoryDesc, 0, 60)); ?>
-                                        <?php echo mb_strlen($categoryDesc) > 60 ? '...' : ''; ?>
+                                    <p class="card-text text-muted small text-line-clamp-2 mb-0 mb-auto">
+                                        <?php echo htmlspecialchars($categoryDesc); ?>
+                                    </p>
+                                <?php else: ?>
+                                    <!-- Spacer to maintain alignment if no description -->
+                                     <p class="card-text small mb-0 mt-auto invisible">
+                                        &nbsp;<br>&nbsp;
                                     </p>
                                 <?php endif; ?>
                             </div>
@@ -294,7 +298,7 @@ $staticBanners = [
             <?php foreach ($featuredAuthors as $author): ?>
                 <div class="col-md-4 col-sm-6 mb-4">
                     <div class="author-card card h-100 shadow-sm">
-                        <div class="card-body">
+                        <div class="card-body d-flex flex-column">
                             <div class="author-avatar mb-3">
                                 <img src="Content/images/authors/default-author.png" 
                                      alt="<?php echo htmlspecialchars($author['ten_tac_gia']); ?>"
@@ -325,12 +329,12 @@ $staticBanners = [
                                 </span>
                             </div>
                             <?php if (!empty($author['tieu_su'])): ?>
-                                <p class="author-bio mt-3 text-muted small">
-                                    <?php echo htmlspecialchars(mb_substr($author['tieu_su'], 0, 100)); ?>...
+                                <p class="author-bio mt-3 text-muted small text-line-clamp-3">
+                                    <?php echo htmlspecialchars($author['tieu_su']); ?>
                                 </p>
                             <?php endif; ?>
                             <a href="?page=books&author=<?php echo $author['ma_tac_gia']; ?>" 
-                               class="btn btn-sm btn-outline-primary btn-block mt-3">
+                               class="btn btn-sm btn-outline-primary btn-block mt-auto">
                                 Xem sách của tác giả
                             </a>
                         </div>
@@ -931,6 +935,21 @@ $staticBanners = [
     }
     
     /* Responsive */
+    /* Utility Classes for Text Truncation */
+    .text-line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .text-line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
     @media (max-width: 767.98px) {
         .stat-number {
             font-size: 36px;
