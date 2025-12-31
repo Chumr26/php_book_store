@@ -60,7 +60,7 @@
             top: var(--topbar-h);
             left: 0;
             right: 0;
-            z-index: 1000;
+            z-index: 1030;
             padding: 15px 0;
             height: var(--header-h);
             display: flex;
@@ -133,7 +133,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             max-height: 400px;
             overflow-y: auto;
-            z-index: 1001;
+            z-index: 1040;
             display: none;
         }
 
@@ -226,7 +226,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             min-width: 200px;
             margin-top: 10px;
-            z-index: 1001;
+            z-index: 1040;
         }
 
         .user-menu.show {
@@ -256,7 +256,7 @@
             top: calc(var(--topbar-h) + var(--header-h));
             left: 0;
             right: 0;
-            z-index: 999;
+            z-index: 1020;
         }
 
         .main-nav .navbar {

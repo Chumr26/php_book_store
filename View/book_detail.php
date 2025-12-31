@@ -25,8 +25,8 @@ $pageTitle = isset($book) ? htmlspecialchars($book['ten_sach']) : 'Chi ti·∫øt s√
     <!-- Book Detail -->
     <div class="row">
         <!-- Book Image -->
-        <div class="col-md-4 mb-4">
-            <div class="book-image-detail sticky-top" style="top: 160px;">
+        <div class="col-md-6 mb-4">
+            <div class="book-image-detail sticky-top" style="top: 160px; z-index: 900;">
                 <?php
                 $coverUrl = $__coverHelperLoaded
                     ? book_cover_url($book['isbn'] ?? null, 'large')
@@ -41,7 +41,7 @@ $pageTitle = isset($book) ? htmlspecialchars($book['ten_sach']) : 'Chi ti·∫øt s√
         </div>
         
         <!-- Book Info -->
-        <div class="col-md-8">
+        <div class="col-md-6">
             <h1 class="book-title mb-3"><?php echo htmlspecialchars($book['ten_sach']); ?></h1>
             
             <!-- Rating & Reviews -->
