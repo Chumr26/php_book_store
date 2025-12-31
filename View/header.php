@@ -300,6 +300,16 @@
                 font-size: 13px;
             }
         }
+
+        /* Button Animations */
+        .transition-3d-hover {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .transition-3d-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 11px rgba(0, 123, 255, 0.35) !important;
+        }
     </style>
 </head>
 
@@ -370,13 +380,8 @@
                             </div>
                         <?php else: ?>
                             <!-- Guest user -->
-                            <a href="?page=login" class="header-icon">
-                                <i class="fas fa-sign-in-alt"></i>
-                                <span class="ml-2">Đăng nhập</span>
-                            </a>
-                            <a href="?page=register" class="header-icon">
-                                <i class="fas fa-user-plus"></i>
-                                <span class="ml-2">Đăng ký</span>
+                            <a href="?page=login" class="btn btn-outline-primary btn-sm rounded-pill px-3 font-weight-bold transition-3d-hover">
+                                <i class="fas fa-sign-in-alt mr-1"></i> Đăng nhập
                             </a>
                         <?php endif; ?>
 
