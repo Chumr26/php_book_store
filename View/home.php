@@ -52,7 +52,8 @@ $staticBanners = [
 ?>
 
 <!-- Hero Slider -->
-<section class="hero-slider" style="overflow: hidden;">
+<!-- Hero Slider -->
+<section class="hero-slider">
     <div id="heroCarousel" class="carousel slide" data-ride="carousel">
         <ol class="carousel-indicators">
             <?php foreach ($staticBanners as $index => $banner): ?>
@@ -62,12 +63,11 @@ $staticBanners = [
         <div class="carousel-inner">
             <?php foreach ($staticBanners as $index => $banner): ?>
                 <div class="carousel-item <?php echo $index == 0 ? 'active' : ''; ?>">
-                    <div style="height: 450px; overflow: hidden; position: relative;">
+                    <div class="hero-image-wrapper">
                         <img src="<?php echo htmlspecialchars($banner['image']); ?>" 
-                             class="d-block w-100" 
-                             alt="<?php echo htmlspecialchars($banner['title']); ?>"
-                             style="height: 100%; object-fit: cover; object-position: center;">
-                        <div class="carousel-caption d-none d-md-block" style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; bottom: 50px;">
+                             class="d-block w-100 hero-img" 
+                             alt="<?php echo htmlspecialchars($banner['title']); ?>">
+                        <div class="carousel-caption d-none d-md-block">
                             <h2 class="display-4 font-weight-bold"><?php echo htmlspecialchars($banner['title']); ?></h2>
                             <p class="lead text-white"><?php echo htmlspecialchars($banner['description']); ?></p>
                             <a href="<?php echo htmlspecialchars($banner['link']); ?>" 
@@ -89,6 +89,49 @@ $staticBanners = [
         </a>
     </div>
 </section>
+
+<style>
+    /* Hero Slider Styles */
+    .hero-slider {
+        overflow: hidden;
+        position: relative;
+    }
+
+    .hero-slider .carousel-inner {
+        overflow: hidden; /* Ensure content doesn't spill out */
+        border-radius: 0 0 10px 10px; /* Optional rounded corners bottom */
+    }
+
+    .hero-slider .hero-image-wrapper {
+        height: 450px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-slider .hero-img {
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+
+    .hero-slider .carousel-caption {
+        background: rgba(0,0,0,0.3);
+        padding: 20px;
+        border-radius: 10px;
+        bottom: 50px;
+        backdrop-filter: blur(3px);
+    }
+    
+    @media (max-width: 768px) {
+        .hero-slider .hero-image-wrapper {
+            height: 300px; /* Smaller height for mobile */
+        }
+        
+        .hero-slider .display-4 {
+            font-size: 2rem;
+        }
+    }
+</style>
 
 <!-- Statistics Counter Section - Redesigned -->
 <?php if (isset($statistics) && !empty($statistics)): ?>
@@ -919,15 +962,7 @@ $staticBanners = [
     }
     
     /* Hero Slider - Full Width */
-    .hero-slider {
-        width: 100vw;
-        position: relative;
-        left: 50%;
-        right: 50%;
-        margin-left: -50vw;
-        margin-right: -50vw;
-        margin-bottom: 0 !important;
-    }
+    /* Hero Slider - Full Width rule removed to prevent overflow */
     
     /* Carousel Caption */
     .carousel-caption {
