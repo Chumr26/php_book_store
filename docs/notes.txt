@@ -11,6 +11,5 @@ re design the ui of the dropdown selection box
 - implement the display list or grid button
 - the hero slider over flow y, cause vertical scroll bar to appear
 - implement the remaining pages
-
 - the badge of the cart in the header only account for distinct book, not one book with quatity
 - use modal not use browser default confirm dialog
