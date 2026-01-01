@@ -247,10 +247,14 @@ $(document).ready(function() {
             csrf_token: '<?php echo $_SESSION["csrf_token"] ?? ""; ?>'
         }, function(response) {
             if (response.success) {
-                alert('Đã thêm vào giỏ hàng!');
+                // Update UI button state
+                const $btn = $('#addToCartForm button[type="submit"]');
+                $btn.removeClass('btn-primary').addClass('btn-success').prop('disabled', true);
+                $btn.html('<i class="fas fa-check"></i> Đã thêm vào giỏ hàng');
+                
                 $('#cartBadge').text(response.data.item_count);
             } else {
-                alert(response.message || 'Có lỗi xảy ra');
+                window.showMessageModal('Thông báo', response.message || 'Có lỗi xảy ra');
             }
         }, 'json');
     });
@@ -260,10 +264,12 @@ $(document).ready(function() {
         e.preventDefault();
         $.post('?page=ajax_submit_review', $(this).serialize() + '&csrf_token=<?php echo $_SESSION["csrf_token"] ?? ""; ?>', function(response) {
             if (response.success) {
-                alert('Cảm ơn bạn đã đánh giá!');
-                location.reload();
+                window.showMessageModal('Cảm ơn', 'Cảm ơn bạn đã đánh giá!');
+                $('#globalMessageModal').on('hidden.bs.modal', function () {
+                    location.reload();
+                });
             } else {
-                alert(response.message || 'Có lỗi xảy ra');
+                window.showMessageModal('Lỗi', response.message || 'Có lỗi xảy ra');
             }
         }, 'json');
     });

@@ -116,6 +116,47 @@
         </div>
     </footer>
 
+    <!-- Global Confirmation Modal -->
+    <div class="modal fade" id="globalConfirmModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="globalConfirmTitle">Xác nhận</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="globalConfirmMessage">Bạn có chắc chắn muốn thực hiện hành động này?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-danger" id="globalConfirmBtn">Đồng ý</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Message Modal -->
+    <div class="modal fade" id="globalMessageModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="globalMessageTitle">Thông báo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="globalMessageContent"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Back to Top Button -->
     <button id="backToTop" class="btn btn-primary" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 1000; border-radius: 50%; width: 50px; height: 50px;">
         <i class="fas fa-arrow-up"></i>
@@ -235,6 +276,28 @@
             setTimeout(function() {
                 $('.alert').fadeOut('slow');
             }, 5000);
+
+            // Global Modal Helpers
+            window.showMessageModal = function(title, message) {
+                $('#globalMessageTitle').text(title);
+                $('#globalMessageContent').html(message);
+                $('#globalMessageModal').modal('show');
+            };
+
+            let globalConfirmCallback = null;
+            window.showConfirmModal = function(message, callback) {
+                $('#globalConfirmMessage').text(message);
+                $('#globalConfirmModal').modal('show');
+                globalConfirmCallback = callback;
+            };
+
+            $('#globalConfirmBtn').click(function() {
+                if (globalConfirmCallback) {
+                    globalConfirmCallback();
+                    $('#globalConfirmModal').modal('hide');
+                    globalConfirmCallback = null;
+                }
+            });
         });
     </script>
 
