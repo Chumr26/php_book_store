@@ -302,30 +302,34 @@ class AdminOrderController extends BaseController {
             $types = '';
             
             if (!empty($status)) {
-                $conditions[] = "d.trang_thai_don_hang = ?";
+                $conditions[] = "d.trang_thai = ?";
                 $params[] = $status;
                 $types .= 's';
             }
             
             if (!empty($fromDate)) {
-                $conditions[] = "DATE(d.ngay_dat) >= ?";
+                $conditions[] = "DATE(d.ngay_dat_hang) >= ?";
                 $params[] = $fromDate;
                 $types .= 's';
             }
             
             if (!empty($toDate)) {
-                $conditions[] = "DATE(d.ngay_dat) <= ?";
+                $conditions[] = "DATE(d.ngay_dat_hang) <= ?";
                 $params[] = $toDate;
                 $types .= 's';
             }
             
             $whereClause = !empty($conditions) ? 'WHERE ' . implode(' AND ', $conditions) : '';
             
-            $query = "SELECT d.*, k.ho_ten, k.email
-                     FROM don_hang d
-                     JOIN khach_hang k ON d.ma_khach_hang = k.ma_khach_hang
+            // Corrected table names: don_hang -> hoadon, khach_hang -> khachhang
+            // Corrected columns: ngay_dat -> ngay_dat_hang, ma_don_hang -> ma_hoadon
+            $query = "SELECT d.ma_hoadon, k.ten_khachhang as ho_ten, k.email, 
+                             d.ngay_dat_hang, d.tong_tien, d.trang_thai, 
+                             d.trang_thai_thanh_toan, d.phuong_thuc_thanh_toan
+                     FROM hoadon d
+                     JOIN khachhang k ON d.id_khachhang = k.id_khachhang
                      $whereClause
-                     ORDER BY d.ngay_dat DESC";
+                     ORDER BY d.ngay_dat_hang DESC";
             
             $stmt = $this->conn->prepare($query);
             if (!empty($params)) {
@@ -359,12 +363,12 @@ class AdminOrderController extends BaseController {
             // Add data
             while ($row = $result->fetch_assoc()) {
                 fputcsv($output, [
-                    $row['ma_don_hang'],
+                    $row['ma_hoadon'],
                     $row['ho_ten'],
                     $row['email'],
-                    $row['ngay_dat'],
-                    $row['tong_thanh_toan'],
-                    $row['trang_thai_don_hang'],
+                    $row['ngay_dat_hang'],
+                    number_format($row['tong_tien']) . 'đ',
+                    $row['trang_thai'],
                     $row['trang_thai_thanh_toan'],
                     $row['phuong_thuc_thanh_toan']
                 ]);
