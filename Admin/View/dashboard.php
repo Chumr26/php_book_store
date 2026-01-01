@@ -117,9 +117,15 @@
                         <canvas id="myPieChart"></canvas>
                     </div>
                     <div class="mt-4 text-center small">
-                        <?php foreach ($order_status_summary as $status => $data): ?>
+                        <?php 
+                        $colors = ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'];
+                        $i = 0;
+                        foreach ($order_status_summary as $status => $data): 
+                            $color = $colors[$i % count($colors)];
+                            $i++;
+                        ?>
                         <span class="mr-2">
-                            <i class="fas fa-circle text-primary"></i> <?php echo ucfirst($status); ?>
+                            <i class="fas fa-circle" style="color: <?php echo $color; ?>"></i> <?php echo ucfirst($status); ?>
                         </span>
                         <?php endforeach; ?>
                     </div>
@@ -204,7 +210,7 @@
 </div>
 
 <!-- Page level plugins -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
 
 <script>
 // Set new default font family and font color to mimic Bootstrap's default styling

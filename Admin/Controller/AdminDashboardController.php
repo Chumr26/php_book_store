@@ -77,21 +77,22 @@ class AdminDashboardController extends BaseController {
      */
     public function getStatistics($period = 'month') {
         try {
-            $dateCondition = $this->getDateCondition($period);
+            $orderDateCondition = $this->getDateCondition($period, 'ngay_dat_hang');
+            $customerDateCondition = $this->getDateCondition($period, 'ngay_dang_ky');
             
             // Tổng doanh thu
             $revenueQuery = "SELECT COALESCE(SUM(tong_tien), 0) as total_revenue 
                            FROM hoadon 
                            WHERE trang_thai_thanh_toan = 'paid' 
                            AND trang_thai != 'cancelled'
-                           $dateCondition";
+                           $orderDateCondition";
             $revenueResult = $this->conn->query($revenueQuery);
             $totalRevenue = $revenueResult->fetch_assoc()['total_revenue'];
             
             // Tổng số đơn hàng
             $orderQuery = "SELECT COUNT(*) as total_orders 
                          FROM hoadon 
-                         WHERE 1=1 $dateCondition";
+                         WHERE 1=1 $orderDateCondition";
             $orderResult = $this->conn->query($orderQuery);
             $totalOrders = $orderResult->fetch_assoc()['total_orders'];
             
@@ -99,12 +100,12 @@ class AdminDashboardController extends BaseController {
             $successOrderQuery = "SELECT COUNT(*) as success_orders 
                                 FROM hoadon 
                                 WHERE trang_thai = 'completed' 
-                                $dateCondition";
+                                $orderDateCondition";
             $successOrderResult = $this->conn->query($successOrderQuery);
             $successOrders = $successOrderResult->fetch_assoc()['success_orders'];
             
-            // Tổng số khách hàng
-            $customerQuery = "SELECT COUNT(*) as total_customers FROM khachhang WHERE 1=1 $dateCondition";
+            // Tổng số khách hàng (mới trong kỳ)
+            $customerQuery = "SELECT COUNT(*) as total_customers FROM khachhang WHERE 1=1 $customerDateCondition";
             $customerResult = $this->conn->query($customerQuery);
             $totalCustomers = $customerResult->fetch_assoc()['total_customers'];
             
@@ -451,17 +452,17 @@ class AdminDashboardController extends BaseController {
      * @param string $period
      * @return string
      */
-    private function getDateCondition($period) {
+    private function getDateCondition($period, $column = 'ngay_dat_hang') {
         switch ($period) {
             case 'day':
-                return "AND DATE(ngay_dat) = CURDATE()";
+                return "AND DATE($column) = CURDATE()";
             case 'week':
-                return "AND ngay_dat >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
+                return "AND $column >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
             case 'year':
-                return "AND ngay_dat >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)";
+                return "AND $column >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)";
             case 'month':
             default:
-                return "AND ngay_dat >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)";
+                return "AND $column >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)";
         }
     }
 }
