@@ -36,7 +36,7 @@ $pageTitle = isset($book) ? htmlspecialchars($book['ten_sach']) : 'Chi tiết s�
                      alt="<?php echo htmlspecialchars($book['ten_sach']); ?>"
                  loading="lazy" decoding="async"
                      onerror="this.onerror=null;this.src='/book_store/Content/images/books/no-image.jpg';"
-                     class="img-fluid rounded shadow">
+                     class="img-fluid rounded shadow w-100">
             </div>
         </div>
         
@@ -108,29 +108,38 @@ $pageTitle = isset($book) ? htmlspecialchars($book['ten_sach']) : 'Chi tiết s�
             </table>
             
             <!-- Add to Cart Form -->
+            <!-- Add to Cart Form -->
             <?php if ($book['so_luong_ton'] > 0): ?>
-            <form id="addToCartForm" class="mb-4">
-                <div class="row align-items-center">
-                    <div class="col-md-3">
-                        <label>Số lượng:</label>
-                        <input type="number" 
-                               class="form-control" 
-                               name="quantity" 
-                               id="quantity"
-                               value="1" 
-                               min="1" 
-                               max="<?php echo $book['so_luong_ton']; ?>">
-                    </div>
-                    <div class="col-md-9">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-cart-plus"></i> Thêm vào giỏ hàng
+                <?php 
+                $isInCart = false;
+                if (isset($GLOBALS['globalCartBookIds']) && in_array($book['ma_sach'], $GLOBALS['globalCartBookIds'])) {
+                    $isInCart = true;
+                } elseif (isset($globalCartBookIds) && in_array($book['ma_sach'], $globalCartBookIds)) {
+                    $isInCart = true;
+                }
+                ?>
+
+                <?php if ($isInCart): ?>
+                    <div class="mb-4">
+                        <button type="button" class="btn btn-success btn-lg" disabled>
+                            <i class="fas fa-check"></i> Đã thêm vào giỏ hàng
                         </button>
                         <button type="button" class="btn btn-outline-danger btn-lg ml-2">
-                            <i class="far fa-heart"></i> Yêu thích
+                             <i class="far fa-heart"></i> Yêu thích
                         </button>
                     </div>
-                </div>
-            </form>
+                <?php else: ?>
+                    <form id="addToCartForm" class="mb-4">
+                        <div class="d-flex">
+                            <button type="submit" class="btn btn-primary btn-lg mr-3 px-5">
+                                <i class="fas fa-cart-plus"></i> Thêm vào giỏ hàng
+                            </button>
+                            <button type="button" class="btn btn-outline-danger btn-lg" title="Yêu thích">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                    </form>
+                <?php endif; ?>
             <?php else: ?>
             <div class="alert alert-danger">
                 <i class="fas fa-exclamation-circle"></i> Sản phẩm hiện đang hết hàng
@@ -231,7 +240,7 @@ $(document).ready(function() {
     // Add to cart
     $('#addToCartForm').submit(function(e) {
         e.preventDefault();
-        const quantity = $('#quantity').val();
+        const quantity = 1;
         $.post('?page=add_to_cart', {
             book_id: <?php echo $book['ma_sach'] ?? 0; ?>,
             quantity: quantity,

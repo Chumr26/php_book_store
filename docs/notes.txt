@@ -16,4 +16,6 @@ re design the ui of the dropdown selection box
 - the same problem of the book cover in the book details page, also enlarge the book cover in the book details page
 - remove the top bar ui, and update the layout of the header
 - redesing the account button in the header
-- the cover of some book is small, i know that the cover api sometime return small cover, that is ok, 
+- the cover of some book is small, i know that the cover api sometime return small cover, that is ok, but if the iamge is small we can expand it to fill the container, i want to have a consistent size cover despire the resolution
+- the "add to cart" button is not consistent, for example, it show "Đã thêm vào giỏ hàng" but when naviget to the book detail of that book the button still show "Thêm vào giỏ", i want it consistent, 
+- remove the quatity input in the book detail page because user can't update quantity in cart page, update the layout accordingly after that

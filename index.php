@@ -366,7 +366,7 @@ if ($viewFile && file_exists(BASE_PATH . $viewFile)) {
         }
         ?>
         
-        <main class="main-content" <?php if ($page !== 'home') echo 'style="margin-top: 60px;"'; ?>>
+        <main class="main-content" <?php if ($page !== 'home') echo 'style="margin-top: 30px;"'; ?>>
             <?php
             // Extract view data to make variables available in view
             if (isset($viewData) && is_array($viewData)) {
