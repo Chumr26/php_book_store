@@ -135,12 +135,14 @@
             $('#userDropdownBtn').click(function(e) {
                 e.preventDefault();
                 $('#userMenu').toggleClass('show');
+                $(this).toggleClass('active');
             });
 
             // Close dropdown when clicking outside
             $(document).click(function(e) {
                 if (!$(e.target).closest('.user-dropdown').length) {
                     $('#userMenu').removeClass('show');
+                    $('#userDropdownBtn').removeClass('active');
                 }
             });
 

@@ -39,6 +39,7 @@ access.log
 tmp/
 temp/
 cache/
+docs/notes.txt
 *.tmp
 *.bak
 

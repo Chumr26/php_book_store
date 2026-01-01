@@ -16,3 +16,4 @@ re design the ui of the dropdown selection box
 - the same problem of the book cover in the book details page, also enlarge the book cover in the book details page
 - remove the top bar ui, and update the layout of the header
 - redesing the account button in the header
+- the cover of some book is small, i know that the cover api sometime return small cover, that is ok, 

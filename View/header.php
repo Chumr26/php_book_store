@@ -315,6 +315,134 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 11px rgba(0, 123, 255, 0.35) !important;
         }
+
+        /* User Profile Pill Redesign */
+        .user-profile-pill {
+            display: inline-flex;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 5px 12px 5px 5px;
+            border-radius: 30px;
+            text-decoration: none;
+            color: #333 !important;
+            transition: all 0.2s ease;
+            border: 1px solid #e9ecef;
+            cursor: pointer;
+        }
+
+        .user-profile-pill:hover,
+        .user-dropdown.show .user-profile-pill {
+            background-color: #e9ecef;
+            color: #007bff !important;
+            text-decoration: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .user-avatar-circle {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            margin-right: 10px;
+            box-shadow: 0 2px 5px rgba(102, 126, 234, 0.3);
+            flex-shrink: 0;
+        }
+
+        .user-name-text {
+            font-weight: 500;
+            font-size: 14px;
+            max-width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .dropdown-arrow {
+            font-size: 12px;
+            color: #6c757d;
+            transition: transform 0.2s ease;
+        }
+
+        .user-profile-pill.active .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Enhanced Dropdown Menu */
+        .user-menu {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            min-width: 240px;
+            padding: 8px 0;
+            margin-top: 10px;
+            display: none;
+            background: #fff;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            z-index: 1050;
+            animation: dropdownSlideIn 0.2s ease;
+        }
+
+        .user-menu.show {
+            display: block;
+        }
+
+        @keyframes dropdownSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-menu-header {
+            padding: 12px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            margin-top: -8px;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .user-menu a {
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            color: #495057;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            border-bottom: none;
+        }
+
+        .user-menu a:hover {
+            background-color: #f8f9fa;
+            color: #007bff;
+            padding-left: 25px;
+        }
+
+        .user-menu a i {
+            width: 20px;
+            margin-right: 10px;
+            text-align: center;
+        }
+
+        .user-info-mini strong {
+            font-size: 15px;
+            color: #333;
+        }
     </style>
 </head>
 
@@ -354,18 +482,32 @@
                 <!-- Header Icons -->
                 <div class="col-md-3 text-right">
                     <div class="header-icons">
-                        <?php if (isset($_SESSION['customer_id'])): ?>
+<?php if (isset($_SESSION['customer_id'])): ?>
                             <!-- Logged in user -->
                             <div class="user-dropdown">
-                                <a href="#" class="header-icon" id="userDropdownBtn">
-                                    <i class="fas fa-user-circle"></i>
-                                    <span class="ml-2"><?php echo htmlspecialchars($_SESSION['customer_name'] ?? 'Tài khoản'); ?></span>
+                                <a href="#" class="user-profile-pill" id="userDropdownBtn">
+                                    <div class="user-avatar-circle">
+                                        <?php 
+                                        $initial = mb_substr($_SESSION['customer_name'] ?? 'U', 0, 1, 'UTF-8');
+                                        echo strtoupper($initial);
+                                        ?>
+                                    </div>
+                                    <span class="user-name-text"><?php echo htmlspecialchars($_SESSION['customer_name'] ?? 'Tài khoản'); ?></span>
+                                    <i class="fas fa-chevron-down dropdown-arrow"></i>
                                 </a>
                                 <div class="user-menu" id="userMenu">
-                                    <a href="?page=orders"><i class="fas fa-box"></i> Đơn hàng của tôi</a>
-                                    <a href="?page=profile"><i class="fas fa-user"></i> Thông tin cá nhân</a>
-                                    <a href="?page=change_password"><i class="fas fa-key"></i> Đổi mật khẩu</a>
-                                    <a href="?page=logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                                    <div class="user-menu-header">
+                                        <div class="user-info-mini">
+                                            <strong><?php echo htmlspecialchars($_SESSION['customer_name'] ?? 'Khách hàng'); ?></strong>
+                                            <small class="text-muted d-block"><?php echo htmlspecialchars($_SESSION['customer_email'] ?? ''); ?></small>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown-divider"></div>
+                                    <a href="?page=orders"><i class="fas fa-box text-primary"></i> Đơn hàng của tôi</a>
+                                    <a href="?page=profile"><i class="fas fa-user text-info"></i> Thông tin cá nhân</a>
+                                    <a href="?page=change_password"><i class="fas fa-key text-warning"></i> Đổi mật khẩu</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a href="?page=logout" class="text-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
                                 </div>
                             </div>
                         <?php else: ?>
