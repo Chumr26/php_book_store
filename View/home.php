@@ -99,7 +99,7 @@ $staticBanners = [
 
     .hero-slider .carousel-inner {
         overflow: hidden; /* Ensure content doesn't spill out */
-        border-radius: 0 0 10px 10px; /* Optional rounded corners bottom */
+        /* border-radius: 0 0 10px 10px; Optional rounded corners bottom */
     }
 
     .hero-slider .hero-image-wrapper {

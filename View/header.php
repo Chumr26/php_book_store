@@ -25,31 +25,12 @@
         body {
             font-family: 'Roboto', sans-serif;
             /* Space for fixed top-bar + header + nav (avoid overlap) */
-            padding-top: 90px;
+            padding-top: calc(var(--header-h) + var(--nav-h) - 1px);
         }
 
         :root {
-            --topbar-h: 38px;
-            --header-h: 50px;
-            --nav-h: 46px;
-        }
-
-        /* Top Bar */
-        .top-bar {
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-            padding: 8px 0;
-            font-size: 14px;
-        }
-
-        .top-bar a {
-            color: #6c757d;
-            text-decoration: none;
-            margin: 0 10px;
-        }
-
-        .top-bar a:hover {
-            color: #007bff;
+            --header-h: 60px;
+            --nav-h: 43px;
         }
 
         /* Main Header */
@@ -57,21 +38,23 @@
             background-color: #fff;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             position: fixed;
-            top: var(--topbar-h);
+            top: 0;
             left: 0;
             right: 0;
             z-index: 1030;
-            padding: 15px 0;
+            padding: 0;
             height: var(--header-h);
             display: flex;
             align-items: center;
         }
 
         .logo {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 700;
             color: #007bff;
             text-decoration: none;
+            display: flex;
+            align-items: center;
         }
 
         .logo:hover {
@@ -81,6 +64,7 @@
 
         .logo i {
             margin-right: 8px;
+            font-size: 28px;
         }
 
         /* Search Bar */
@@ -96,6 +80,7 @@
             border-radius: 25px;
             padding-right: 45px;
             border: 2px solid #007bff;
+            height: 40px;
         }
 
         .search-bar .btn-search {
@@ -104,14 +89,11 @@
             top: 50%;
             transform: translateY(-50%);
             border-radius: 50%;
-            width: 37px;
-            height: 37px;
+            width: 36px;
+            height: 36px;
             padding: 0;
             background-color: #007bff;
             border: none;
-        }
-
-        .search-bar .btn-search {
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -135,6 +117,7 @@
             overflow-y: auto;
             z-index: 1040;
             display: none;
+            margin-top: 5px;
         }
 
         .quick-search-item {
@@ -150,8 +133,8 @@
         }
 
         .quick-search-item img {
-            width: 50px;
-            height: 70px;
+            width: 40px;
+            height: 60px;
             object-fit: cover;
             margin-right: 15px;
         }
@@ -163,27 +146,31 @@
         .quick-search-item .book-title {
             font-weight: 500;
             color: #333;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
+            font-size: 14px;
         }
 
         .quick-search-item .book-price {
             color: #dc3545;
             font-weight: 600;
+            font-size: 13px;
         }
 
         /* Header Icons */
         .header-icons {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
             justify-content: flex-end;
         }
 
         .header-icon {
             position: relative;
             color: #333;
-            font-size: 22px;
+            font-size: 20px;
             text-decoration: none;
+            display: flex;
+            align-items: center;
         }
 
         .header-icon span {
@@ -197,17 +184,17 @@
 
         .cart-badge {
             position: absolute;
-            top: -8px;
+            top: -5px;
             right: -8px;
             background-color: #dc3545;
             color: #fff;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
         }
 
@@ -239,6 +226,7 @@
             color: #333;
             text-decoration: none;
             border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
         }
 
         .user-menu a:hover {
@@ -253,10 +241,11 @@
         .main-nav {
             background-color: #007bff;
             position: fixed;
-            top: calc(var(--topbar-h) + var(--header-h));
+            top: var(--header-h);
             left: 0;
             right: 0;
             z-index: 1020;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .main-nav .navbar {
@@ -265,39 +254,55 @@
 
         .main-nav .navbar-nav .nav-link {
             color: #fff !important;
-            padding: 12px 20px;
+            padding: 10px 18px;
             font-weight: 500;
+            font-size: 15px;
+            transition: all 0.2s;
         }
 
         .main-nav .navbar-nav .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.15);
         }
 
         .main-nav .navbar-nav .nav-link.active {
-            background-color: rgba(255, 255, 255, 0.2);
+            background-color: rgba(255, 255, 255, 0.25);
+            font-weight: 600;
         }
 
         /* Ensure main content starts below fixed nav */
         .main-content {
-            margin-top: 46px;
+            margin-top: 0;
+            padding-top: 0;
         }
 
         @media (max-width: 767.98px) {
             :root {
-                --header-h: 110px;
-                --nav-h: 52px;
+                --header-h: 60px;
+                --nav-h: 50px;
             }
 
             body {
-                padding-top: calc(var(--topbar-h) + var(--header-h) + var(--nav-h) + 10px);
+                padding-top: calc(var(--header-h) + var(--nav-h));
+            }
+
+            .main-header {
+                padding: 5px 0;
+            }
+
+            .logo {
+                font-size: 20px;
+            }
+            
+            .logo i {
+                font-size: 24px;
             }
 
             .header-icons {
-                gap: 12px;
+                gap: 10px;
             }
 
-            .header-icon span {
-                font-size: 13px;
+            .header-icon {
+                font-size: 18px;
             }
         }
 
@@ -314,21 +319,6 @@
 </head>
 
 <body>
-    <!-- Top Bar -->
-    <div class="top-bar fixed-top">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <span><i class="fas fa-phone"></i> Hotline: 1900-xxxx</span>
-                    <span class="ml-3"><i class="fas fa-envelope"></i> support@bookstore.vn</span>
-                </div>
-                <div class="col-md-6 text-right">
-                    <a href="?page=orders"><i class="fas fa-box"></i> Đơn hàng của tôi</a>
-                    <a href="#"><i class="fas fa-question-circle"></i> Trợ giúp</a>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Main Header -->
     <header class="main-header">
@@ -343,7 +333,7 @@
                 </div>
 
                 <!-- Search Bar -->
-                <div class="col-md-5">
+                <div class="col-md-6">
                     <div class="search-bar">
                         <form action="?page=search" method="GET">
                             <input type="hidden" name="page" value="search">
@@ -362,7 +352,7 @@
                 </div>
 
                 <!-- Header Icons -->
-                <div class="col-md-4 text-right">
+                <div class="col-md-3 text-right">
                     <div class="header-icons">
                         <?php if (isset($_SESSION['customer_id'])): ?>
                             <!-- Logged in user -->

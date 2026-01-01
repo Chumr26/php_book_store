@@ -14,4 +14,5 @@ re design the ui of the dropdown selection box
 - the badge of the cart in the header only account for distinct book, not one book with quatity
 - use modal not use browser default confirm dialog
 - the same problem of the book cover in the book details page, also enlarge the book cover in the book details page
+- remove the top bar ui, and update the layout of the header
 - redesing the account button in the header
