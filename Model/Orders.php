@@ -2,7 +2,7 @@
 /**
  * Orders Model Class
  * 
- * Handles all order-related operations
+ * Handles all order-related operations using 'hoadon' table
  */
 
 class Orders {
@@ -21,9 +21,8 @@ class Orders {
      * @return string Order number (format: ORD-YYYYMMDD-XXXXX)
      */
     public function generateOrderNumber() {
-        $date = date('Ymd');
-        $random = str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
-        return "ORD-{$date}-{$random}";
+        // Based on SQL proc: HD + 6 random digits
+        return 'HD' . str_pad(mt_rand(1, 999999), 6, '0', STR_PAD_LEFT);
     }
     
     /**
@@ -46,63 +45,77 @@ class Orders {
             $totalAmount = $this->calculateTotal($items);
             
             // Insert order
-            $sql = "INSERT INTO orders (
-                        id_customer, order_number, total_amount, status, 
-                        payment_method, payment_status, recipient_name, 
-                        delivery_address, phone
-                    ) VALUES (?, ?, ?, 'pending', ?, 'pending', ?, ?, ?)";
+            // Note: Schema has id_khachhang, ma_hoadon, tong_tien, trang_thai, phuong_thuc_thanh_toan, ...
+            $sql = "INSERT INTO hoadon (
+                        id_khachhang, ma_hoadon, tong_tien, trang_thai, 
+                        phuong_thuc_thanh_toan, trang_thai_thanh_toan, ten_nguoi_nhan, 
+                        dia_chi_giao, sdt_giao, email_giao, ghi_chu
+                    ) VALUES (?, ?, ?, 'pending', ?, 'pending', ?, ?, ?, ?, ?)";
             
             $stmt = $this->conn->prepare($sql);
+            
+            // Defaults
+            $email = $orderData['email'] ?? '';
+            $note = $orderData['note'] ?? '';
+            
             $stmt->bind_param(
-                "isdsssss",
+                "isdsssssss",
                 $customerId,
                 $orderNumber,
                 $totalAmount,
                 $orderData['payment_method'],
                 $orderData['recipient_name'],
                 $orderData['delivery_address'],
-                $orderData['phone']
+                $orderData['phone'],
+                $email,
+                $note
             );
             
             if (!$stmt->execute()) {
-                throw new Exception("Failed to create order");
+                throw new Exception("Failed to create order: " . $stmt->error);
             }
             
             $orderId = $this->conn->insert_id;
             
             // Insert order items
             foreach ($items as $item) {
-                $itemTotal = $item['quantity'] * $item['price'];
+                // item keys from frontend/cart might differ. Assume standard keys.
+                // Cart usually has 'id_sach', 'gia', 'so_luong'.
+                $bookId = $item['id_book'] ?? $item['id_sach'];
+                $quantity = $item['quantity'] ?? $item['so_luong'];
+                $price = $item['price'] ?? $item['gia'];
                 
-                $sqlItem = "INSERT INTO order_items (
-                                id_order, id_book, quantity, unit_price, total_price
+                $itemTotal = $quantity * $price;
+                
+                $sqlItem = "INSERT INTO chitiet_hoadon (
+                                id_hoadon, id_sach, so_luong, gia, thanh_tien
                             ) VALUES (?, ?, ?, ?, ?)";
                 
                 $stmtItem = $this->conn->prepare($sqlItem);
                 $stmtItem->bind_param(
                     "iiidd",
                     $orderId,
-                    $item['id_book'],
-                    $item['quantity'],
-                    $item['price'],
+                    $bookId,
+                    $quantity,
+                    $price,
                     $itemTotal
                 );
                 
                 if (!$stmtItem->execute()) {
-                    throw new Exception("Failed to add order item");
+                    throw new Exception("Failed to add order item: " . $stmtItem->error);
                 }
                 
-                // Update book stock
-                $sqlStock = "UPDATE books 
-                             SET stock_quantity = stock_quantity - ?,
-                                 sale_count = sale_count + ?
-                             WHERE id_book = ?";
+                // Update book stock (sach table)
+                $sqlStock = "UPDATE sach 
+                             SET so_luong_ton = so_luong_ton - ?,
+                                 luot_ban = luot_ban + ?
+                             WHERE id_sach = ? AND so_luong_ton >= ?";
                 
                 $stmtStock = $this->conn->prepare($sqlStock);
-                $stmtStock->bind_param("iii", $item['quantity'], $item['quantity'], $item['id_book']);
+                $stmtStock->bind_param("iiii", $quantity, $quantity, $bookId, $quantity);
                 
                 if (!$stmtStock->execute()) {
-                    throw new Exception("Failed to update stock");
+                    throw new Exception("Failed to update stock for book " . $bookId);
                 }
             }
             
@@ -127,7 +140,9 @@ class Orders {
     public function calculateTotal($items) {
         $total = 0;
         foreach ($items as $item) {
-            $total += $item['quantity'] * $item['price'];
+            $quantity = $item['quantity'] ?? $item['so_luong'];
+            $price = $item['price'] ?? $item['gia'];
+            $total += $quantity * $price;
         }
         return $total;
     }
@@ -139,10 +154,30 @@ class Orders {
      * @return array|null Order data or null
      */
     public function getOrderById($orderId) {
-        $sql = "SELECT o.*, c.full_name, c.email
-                FROM orders o
-                INNER JOIN customers c ON o.id_customer = c.id_customer
-                WHERE o.id_order = ?";
+        $sql = "SELECT o.*, 
+                       o.id_hoadon as id_order,
+                       o.ma_hoadon as order_number,
+                       o.ngay_dat_hang as order_date,
+                       o.trang_thai as status,
+                       o.phuong_thuc_thanh_toan as payment_method,
+                       o.trang_thai_thanh_toan as payment_status,
+                       o.tong_tien as total_amount,
+                       o.ten_nguoi_nhan as recipient_name,
+                       o.dia_chi_giao as delivery_address,
+                       o.sdt_giao as phone,
+                       o.dia_chi_giao as dia_chi_giao_hang,
+                       o.sdt_giao as sdt_nguoi_nhan,
+                       o.trang_thai as trang_thai_don_hang,
+                       o.tong_tien as tong_thanh_toan,
+                       o.id_khachhang as ma_khach_hang,
+                       c.ten_khachhang,
+                       c.ten_khachhang as full_name, 
+                       c.ten_khachhang as ho_ten,
+                       c.dien_thoai as so_dien_thoai,
+                       c.email
+                FROM hoadon o
+                INNER JOIN khachhang c ON o.id_khachhang = c.id_khachhang
+                WHERE o.id_hoadon = ?";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $orderId);
@@ -153,17 +188,38 @@ class Orders {
     }
     
     /**
+     * Get order by Order Number (ma_hoadon)
+     */
+    public function getOrderByNumber($orderNumber) {
+        $sql = "SELECT * FROM hoadon WHERE ma_hoadon = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("s", $orderNumber);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_assoc();
+    }
+    
+    /**
      * Get order items
      * 
      * @param int $orderId Order ID
      * @return array Order items
      */
     public function getOrderItems($orderId) {
-        $sql = "SELECT oi.*, b.title, b.cover_image, a.author_name
-                FROM order_items oi
-                INNER JOIN books b ON oi.id_book = b.id_book
-                LEFT JOIN authors a ON b.id_author = a.id_author
-                WHERE oi.id_order = ?";
+        $sql = "SELECT oi.*, 
+                       oi.id_chitiet as id,
+                       oi.so_luong as quantity, 
+                       oi.gia as price,
+                       oi.gia as don_gia,
+                       b.ten_sach, 
+                       b.ten_sach as title,
+                       b.hinh_anh, 
+                       b.hinh_anh as cover_image, 
+                       a.ten_tacgia,
+                       a.ten_tacgia as author_name
+                FROM chitiet_hoadon oi
+                INNER JOIN sach b ON oi.id_sach = b.id_sach
+                LEFT JOIN tacgia a ON b.id_tacgia = a.id_tacgia
+                WHERE oi.id_hoadon = ?";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $orderId);
@@ -186,12 +242,19 @@ class Orders {
      * @param int $limit Items per page
      * @return array Orders
      */
-    public function getCustomerOrders($customerId, $page = 1, $limit = 10) {
+    public function getOrdersByCustomer($customerId, $page = 1, $limit = 10) {
         $offset = ($page - 1) * $limit;
         
-        $sql = "SELECT * FROM orders 
-                WHERE id_customer = ? 
-                ORDER BY order_date DESC
+        $sql = "SELECT id_hoadon as id_order, ma_hoadon as order_number, 
+                       ngay_dat_hang as order_date, tong_tien as total_amount,
+                       trang_thai as status, trang_thai_thanh_toan as payment_status,
+                       tong_tien, ngay_dat_hang, ma_hoadon, id_hoadon, trang_thai, trang_thai_thanh_toan,
+                       ngay_dat_hang as ngay_dat,
+                       tong_tien as tong_thanh_toan,
+                       trang_thai as trang_thai_don_hang
+                FROM hoadon 
+                WHERE id_khachhang = ? 
+                ORDER BY ngay_dat_hang DESC
                 LIMIT ? OFFSET ?";
         
         $stmt = $this->conn->prepare($sql);
@@ -219,20 +282,20 @@ class Orders {
         $offset = ($page - 1) * $limit;
         
         if ($status) {
-            $sql = "SELECT o.*, c.full_name, c.email
-                    FROM orders o
-                    INNER JOIN customers c ON o.id_customer = c.id_customer
-                    WHERE o.status = ?
-                    ORDER BY o.order_date DESC
+            $sql = "SELECT o.*, c.ten_khachhang as full_name, c.email
+                    FROM hoadon o
+                    INNER JOIN khachhang c ON o.id_khachhang = c.id_khachhang
+                    WHERE o.trang_thai = ?
+                    ORDER BY o.ngay_dat_hang DESC
                     LIMIT ? OFFSET ?";
             
             $stmt = $this->conn->prepare($sql);
             $stmt->bind_param("sii", $status, $limit, $offset);
         } else {
-            $sql = "SELECT o.*, c.full_name, c.email
-                    FROM orders o
-                    INNER JOIN customers c ON o.id_customer = c.id_customer
-                    ORDER BY o.order_date DESC
+            $sql = "SELECT o.*, c.ten_khachhang as full_name, c.email
+                    FROM hoadon o
+                    INNER JOIN khachhang c ON o.id_khachhang = c.id_khachhang
+                    ORDER BY o.ngay_dat_hang DESC
                     LIMIT ? OFFSET ?";
             
             $stmt = $this->conn->prepare($sql);
@@ -244,6 +307,14 @@ class Orders {
         
         $orders = [];
         while ($row = $result->fetch_assoc()) {
+             // Alias for controller compat
+             $row['id_order'] = $row['id_hoadon'];
+             $row['order_number'] = $row['ma_hoadon'];
+             $row['order_date'] = $row['ngay_dat_hang'];
+             $row['total_amount'] = $row['tong_tien'];
+             $row['status'] = $row['trang_thai'];
+             $row['payment_status'] = $row['trang_thai_thanh_toan'];
+             $row['recipient_name'] = $row['ten_nguoi_nhan'];
             $orders[] = $row;
         }
         
@@ -258,13 +329,13 @@ class Orders {
      */
     public function getTotalOrders($status = null) {
         if ($status) {
-            $sql = "SELECT COUNT(*) as total FROM orders WHERE status = ?";
+            $sql = "SELECT COUNT(*) as total FROM hoadon WHERE trang_thai = ?";
             $stmt = $this->conn->prepare($sql);
             $stmt->bind_param("s", $status);
             $stmt->execute();
             $result = $stmt->get_result();
         } else {
-            $sql = "SELECT COUNT(*) as total FROM orders";
+            $sql = "SELECT COUNT(*) as total FROM hoadon";
             $result = $this->conn->query($sql);
         }
         
@@ -276,13 +347,13 @@ class Orders {
      * Update order status (Admin function)
      * 
      * @param int $orderId Order ID
-     * @param string $status New status (pending/processing/completed/cancelled)
+     * @param string $status New status (pending/confirmed/shipping/completed/cancelled)
      * @return bool Success status
      */
     public function updateOrderStatus($orderId, $status) {
-        $sql = "UPDATE orders 
-                SET status = ?, updated_at = CURRENT_TIMESTAMP 
-                WHERE id_order = ?";
+        $sql = "UPDATE hoadon 
+                SET trang_thai = ?, ngay_cap_nhat = CURRENT_TIMESTAMP 
+                WHERE id_hoadon = ?";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("si", $status, $orderId);
@@ -293,13 +364,13 @@ class Orders {
      * Update payment status
      * 
      * @param int $orderId Order ID
-     * @param string $paymentStatus New payment status (pending/paid/failed)
+     * @param string $paymentStatus New payment status (unpaid/paid)
      * @return bool Success status
      */
     public function updatePaymentStatus($orderId, $paymentStatus) {
-        $sql = "UPDATE orders 
-                SET payment_status = ?, updated_at = CURRENT_TIMESTAMP 
-                WHERE id_order = ?";
+        $sql = "UPDATE hoadon 
+                SET trang_thai_thanh_toan = ?, ngay_cap_nhat = CURRENT_TIMESTAMP 
+                WHERE id_hoadon = ?";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("si", $paymentStatus, $orderId);
@@ -314,14 +385,14 @@ class Orders {
     public function getOrderStats() {
         $sql = "SELECT 
                     COUNT(*) as total_orders,
-                    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
-                    SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) as processing,
-                    SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
-                    SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancelled,
-                    SUM(CASE WHEN status = 'completed' THEN total_amount ELSE 0 END) as total_revenue,
-                    SUM(CASE WHEN DATE(order_date) = CURDATE() THEN 1 ELSE 0 END) as today_orders,
-                    SUM(CASE WHEN DATE(order_date) = CURDATE() AND status = 'completed' THEN total_amount ELSE 0 END) as today_revenue
-                FROM orders";
+                    SUM(CASE WHEN trang_thai = 'pending' THEN 1 ELSE 0 END) as pending,
+                    SUM(CASE WHEN trang_thai = 'confirmed' THEN 1 ELSE 0 END) as processing,
+                    SUM(CASE WHEN trang_thai = 'completed' THEN 1 ELSE 0 END) as completed,
+                    SUM(CASE WHEN trang_thai = 'cancelled' THEN 1 ELSE 0 END) as cancelled,
+                    SUM(CASE WHEN trang_thai = 'completed' THEN tong_tien ELSE 0 END) as total_revenue,
+                    SUM(CASE WHEN DATE(ngay_dat_hang) = CURDATE() THEN 1 ELSE 0 END) as today_orders,
+                    SUM(CASE WHEN DATE(ngay_dat_hang) = CURDATE() AND trang_thai = 'completed' THEN tong_tien ELSE 0 END) as today_revenue
+                FROM hoadon";
         
         $result = $this->conn->query($sql);
         return $result->fetch_assoc();
@@ -336,11 +407,11 @@ class Orders {
     public function searchOrders($keyword) {
         $searchTerm = "%{$keyword}%";
         
-        $sql = "SELECT o.*, c.full_name, c.email
-                FROM orders o
-                INNER JOIN customers c ON o.id_customer = c.id_customer
-                WHERE o.order_number LIKE ? OR c.full_name LIKE ?
-                ORDER BY o.order_date DESC";
+        $sql = "SELECT o.*, c.ten_khachhang as full_name, c.email
+                FROM hoadon o
+                INNER JOIN khachhang c ON o.id_khachhang = c.id_khachhang
+                WHERE o.ma_hoadon LIKE ? OR c.ten_khachhang LIKE ?
+                ORDER BY o.ngay_dat_hang DESC";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("ss", $searchTerm, $searchTerm);
@@ -349,7 +420,15 @@ class Orders {
         
         $orders = [];
         while ($row = $result->fetch_assoc()) {
-            $orders[] = $row;
+             // Alias for controller compat
+             $row['id_order'] = $row['id_hoadon'];
+             $row['order_number'] = $row['ma_hoadon'];
+             $row['order_date'] = $row['ngay_dat_hang'];
+             $row['total_amount'] = $row['tong_tien'];
+             $row['status'] = $row['trang_thai'];
+             $row['payment_status'] = $row['trang_thai_thanh_toan'];
+             $row['recipient_name'] = $row['ten_nguoi_nhan'];
+             $orders[] = $row;
         }
         
         return $orders;
@@ -371,13 +450,17 @@ class Orders {
             
             // Restore stock for each item
             foreach ($items as $item) {
-                $sqlStock = "UPDATE books 
-                             SET stock_quantity = stock_quantity + ?,
-                                 sale_count = sale_count - ?
-                             WHERE id_book = ?";
+                // Determine quantity column name from getOrderItems result
+                $qty = $item['quantity'] ?? $item['so_luong'];
+                $bookId = $item['id_sach'];
+                
+                $sqlStock = "UPDATE sach 
+                             SET so_luong_ton = so_luong_ton + ?,
+                                 luot_ban = luot_ban - ?
+                             WHERE id_sach = ?";
                 
                 $stmtStock = $this->conn->prepare($sqlStock);
-                $stmtStock->bind_param("iii", $item['quantity'], $item['quantity'], $item['id_book']);
+                $stmtStock->bind_param("iii", $qty, $qty, $bookId);
                 
                 if (!$stmtStock->execute()) {
                     throw new Exception("Failed to restore stock");
@@ -385,7 +468,7 @@ class Orders {
             }
             
             // Update order status
-            $sql = "UPDATE orders SET status = 'cancelled' WHERE id_order = ?";
+            $sql = "UPDATE hoadon SET trang_thai = 'cancelled' WHERE id_hoadon = ?";
             $stmt = $this->conn->prepare($sql);
             $stmt->bind_param("i", $orderId);
             

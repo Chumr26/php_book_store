@@ -71,7 +71,7 @@ class AdminCustomerController extends BaseController {
             $whereClause = !empty($conditions) ? 'WHERE ' . implode(' AND ', $conditions) : '';
             
             // Get total count
-            $countQuery = "SELECT COUNT(*) as total FROM khach_hang $whereClause";
+            $countQuery = "SELECT COUNT(*) as total FROM khachhang $whereClause";
             $stmt = $this->conn->prepare($countQuery);
             
             if (!empty($params)) {
@@ -86,17 +86,17 @@ class AdminCustomerController extends BaseController {
             $offset = ($page - 1) * $perPage;
             
             // Validate sort column
-            $allowedSortColumns = ['ho_ten', 'email', 'ngay_tao', 'ngay_cap_nhat'];
-            $sortBy = in_array($sortBy, $allowedSortColumns) ? $sortBy : 'ngay_tao';
+            $allowedSortColumns = ['ho_ten', 'email', 'ngay_dang_ky', 'ngay_cap_nhat'];
+            $sortBy = $_GET['sort_by'] ?? 'ngay_dang_ky';
+            $sortBy = in_array($sortBy, $allowedSortColumns) ? $sortBy : 'ngay_dang_ky';
             $order = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
             
-            $query = "SELECT k.*,
-                           COUNT(DISTINCT d.ma_don_hang) as order_count,
-                           COALESCE(SUM(d.tong_thanh_toan), 0) as total_spent
-                     FROM khach_hang k
-                     LEFT JOIN don_hang d ON k.ma_khach_hang = d.ma_khach_hang
+            $query = "SELECT k.id_khachhang AS ma_khach_hang, k.ten_khachhang AS ho_ten, k.email, k.dien_thoai AS so_dien_thoai, 
+                           k.trang_thai, k.ngay_dang_ky AS ngay_tao,
+                           (SELECT COUNT(*) FROM hoadon d WHERE d.id_khachhang = k.id_khachhang) as order_count,
+                           (SELECT COALESCE(SUM(d.tong_tien), 0) FROM hoadon d WHERE d.id_khachhang = k.id_khachhang AND d.trang_thai = 'completed') as total_spent
+                     FROM khachhang k
                      $whereClause
-                     GROUP BY k.ma_khach_hang
                      ORDER BY k.$sortBy $order
                      LIMIT ? OFFSET ?";
             
@@ -137,8 +137,24 @@ class AdminCustomerController extends BaseController {
             
         } catch (Exception $e) {
             error_log("Error in AdminCustomerController::index: " . $e->getMessage());
-            SessionHelper::setFlash('error', 'Không thể tải danh sách khách hàng');
-            return ['customers' => []];
+            SessionHelper::setFlash('error', 'Lỗi: ' . $e->getMessage());
+            return [
+                'customers' => [],
+                'statuses' => [],
+                'pagination' => [
+                    'current_page' => 1,
+                    'total_pages' => 0,
+                    'total_items' => 0,
+                    'per_page' => 20
+                ],
+                'filters' => [
+                    'search' => '',
+                    'status' => '',
+                    'sort_by' => 'ngay_tao',
+                    'order' => 'DESC'
+                ],
+                'csrf_token' => ''
+            ];
         }
     }
     

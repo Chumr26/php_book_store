@@ -53,8 +53,11 @@ class AdminCategoryController extends BaseController {
             
         } catch (Exception $e) {
             error_log("Error in AdminCategoryController::index: " . $e->getMessage());
-            SessionHelper::setFlash('error', 'Không thể tải danh sách danh mục');
-            return ['categories' => []];
+            SessionHelper::setFlash('error', 'Lỗi: ' . $e->getMessage());
+            return [
+                'categories' => [],
+                'csrf_token' => ''
+            ];
         }
     }
     
@@ -324,7 +327,7 @@ class AdminCategoryController extends BaseController {
      * @return int
      */
     private function getBookCountByCategory($categoryId) {
-        $query = "SELECT COUNT(*) as count FROM sach WHERE ma_danh_muc = ?";
+        $query = "SELECT COUNT(*) as count FROM sach WHERE id_theloai = ?";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param("i", $categoryId);
         $stmt->execute();

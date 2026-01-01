@@ -56,7 +56,7 @@ class AdminOrderController extends BaseController {
             $types = '';
             
             if (!empty($status)) {
-                $conditions[] = "d.trang_thai_don_hang = ?";
+                $conditions[] = "d.trang_thai = ?";
                 $params[] = $status;
                 $types .= 's';
             }
@@ -68,7 +68,7 @@ class AdminOrderController extends BaseController {
             }
             
             if (!empty($search)) {
-                $conditions[] = "(d.ma_don_hang LIKE ? OR k.ho_ten LIKE ? OR k.email LIKE ? OR d.ten_nguoi_nhan LIKE ?)";
+                $conditions[] = "(d.ma_hoadon LIKE ? OR k.ten_khachhang LIKE ? OR k.email LIKE ? OR d.ten_nguoi_nhan LIKE ?)";
                 $searchParam = "%$search%";
                 $params[] = $searchParam;
                 $params[] = $searchParam;
@@ -78,13 +78,13 @@ class AdminOrderController extends BaseController {
             }
             
             if (!empty($fromDate)) {
-                $conditions[] = "DATE(d.ngay_dat) >= ?";
+                $conditions[] = "DATE(d.ngay_dat_hang) >= ?";
                 $params[] = $fromDate;
                 $types .= 's';
             }
             
             if (!empty($toDate)) {
-                $conditions[] = "DATE(d.ngay_dat) <= ?";
+                $conditions[] = "DATE(d.ngay_dat_hang) <= ?";
                 $params[] = $toDate;
                 $types .= 's';
             }
@@ -93,8 +93,8 @@ class AdminOrderController extends BaseController {
             
             // Get total count
             $countQuery = "SELECT COUNT(*) as total 
-                          FROM don_hang d
-                          JOIN khach_hang k ON d.ma_khach_hang = k.ma_khach_hang
+                          FROM hoadon d
+                          JOIN khachhang k ON d.id_khachhang = k.id_khachhang
                           $whereClause";
             
             $stmt = $this->conn->prepare($countQuery);
@@ -108,11 +108,17 @@ class AdminOrderController extends BaseController {
             // Get orders with pagination
             $offset = ($page - 1) * $perPage;
             
-            $query = "SELECT d.*, k.ho_ten, k.email, k.so_dien_thoai
-                     FROM don_hang d
-                     JOIN khach_hang k ON d.ma_khach_hang = k.ma_khach_hang
+            // Get orders with pagination
+            $offset = ($page - 1) * $perPage;
+            
+            $query = "SELECT d.id_hoadon, d.ma_hoadon AS ma_don_hang, d.ngay_dat_hang AS ngay_dat, 
+                             d.tong_tien AS tong_thanh_toan, d.trang_thai AS trang_thai_don_hang, d.trang_thai_thanh_toan,
+                             k.ten_khachhang AS ho_ten, k.email, k.dien_thoai AS so_dien_thoai,
+                             d.phuong_thuc_thanh_toan, d.ten_nguoi_nhan
+                     FROM hoadon d
+                     JOIN khachhang k ON d.id_khachhang = k.id_khachhang
                      $whereClause
-                     ORDER BY d.ngay_dat DESC
+                     ORDER BY d.ngay_dat_hang DESC
                      LIMIT ? OFFSET ?";
             
             $stmt = $this->conn->prepare($query);
@@ -150,8 +156,26 @@ class AdminOrderController extends BaseController {
             
         } catch (Exception $e) {
             error_log("Error in AdminOrderController::index: " . $e->getMessage());
-            SessionHelper::setFlash('error', 'Không thể tải danh sách đơn hàng');
-            return ['orders' => []];
+            SessionHelper::setFlash('error', 'Lỗi: ' . $e->getMessage());
+            return [
+                'orders' => [],
+                'pagination' => [
+                    'current_page' => 1,
+                    'total_pages' => 0,
+                    'total_items' => 0,
+                    'per_page' => 20
+                ],
+                'filters' => [
+                    'status' => '',
+                    'payment_status' => '',
+                    'search' => '',
+                    'from_date' => '',
+                    'to_date' => ''
+                ],
+                'order_statuses' => [],
+                'payment_statuses' => [],
+                'csrf_token' => ''
+            ];
         }
     }
     

@@ -89,6 +89,7 @@ class Books {
                        tg.ten_tacgia as ten_tac_gia,
                        tg.but_danh,
                        nxb.ten_nxb,
+                       nxb.id_nxb as ma_nha_xuat_ban,
                        tl.ten_theloai as ten_danh_muc,
                        tl.id_theloai as ma_danh_muc,
                        COALESCE(AVG(CASE WHEN dg.trang_thai = 'approved' THEN dg.so_sao END), 0) as diem_trung_binh,
@@ -297,42 +298,60 @@ class Books {
     }
     
     /**
-     * Add new book (Admin function)
+     * Create new book (Admin function)
      * 
      * @param array $data Book data
      * @return int|false New book ID or false on failure
      */
-    public function addBook($data) {
-        $sql = "INSERT INTO books (
-                    title, id_author, id_publisher, id_category, isbn, 
-                    price, original_price, cover_image, description, pages, 
-                    publication_year, language, stock_quantity, is_featured, status
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    public function createBook($data) {
+        $sql = "INSERT INTO sach (
+                    ten_sach, id_tacgia, id_nxb, id_theloai, isbn, 
+                    gia, gia_goc, hinh_anh, mo_ta, so_trang, 
+                    nam_xuat_ban, ngon_ngu, so_luong_ton, noi_bat, trang_thai, tu_khoa
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         $stmt = $this->conn->prepare($sql);
+        
+        // Handle defaults
+        $gia_goc = !empty($data['gia_goc']) ? $data['gia_goc'] : NULL;
+        $tinh_trang = !empty($data['tinh_trang']) ? $data['tinh_trang'] : 'available'; 
+        // Map Controller 'Còn hàng' -> 'available' if schema uses 'available', check check_schema...
+        // The check_schema output showed enum('available','out_of_stock','discontinued')
+        // So I must map.
+        
+        $statusMap = [
+            'Còn hàng' => 'available',
+            'Hết hàng' => 'out_of_stock',
+            'Ngừng kinh doanh' => 'discontinued',
+            'available' => 'available'
+        ];
+        $dbStatus = $statusMap[$tinh_trang] ?? 'available';
+        
         $stmt->bind_param(
-            "siiisddsssissii",
-            $data['title'],
-            $data['id_author'],
-            $data['id_publisher'],
-            $data['id_category'],
+            "siiisddssissdiss",
+            $data['ten_sach'],
+            $data['ma_tac_gia'],
+            $data['ma_nha_xuat_ban'],
+            $data['ma_danh_muc'],
             $data['isbn'],
-            $data['price'],
-            $data['original_price'],
-            $data['cover_image'],
-            $data['description'],
-            $data['pages'],
-            $data['publication_year'],
-            $data['language'],
-            $data['stock_quantity'],
-            $data['is_featured'],
-            $data['status']
+            $data['gia'],
+            $gia_goc,
+            $data['anh_bia'],
+            $data['mo_ta'],
+            $data['so_trang'],
+            $data['nam_xuat_ban'],
+            $data['ngon_ngu'],
+            $data['so_luong_ton'],
+            $data['noi_bat'],
+            $dbStatus,
+            $data['tu_khoa']
         );
         
         if ($stmt->execute()) {
             return $this->conn->insert_id;
         }
         
+        error_log("Create Book Error: " . $stmt->error);
         return false;
     }
     
@@ -344,46 +363,82 @@ class Books {
      * @return bool Success status
      */
     public function updateBook($id, $data) {
-        $sql = "UPDATE books SET 
-                    title = ?, 
-                    id_author = ?, 
-                    id_publisher = ?, 
-                    id_category = ?, 
+        $sql = "UPDATE sach SET 
+                    ten_sach = ?, 
+                    id_tacgia = ?, 
+                    id_nxb = ?, 
+                    id_theloai = ?, 
                     isbn = ?, 
-                    price = ?, 
-                    original_price = ?, 
-                    cover_image = ?, 
-                    description = ?, 
-                    pages = ?, 
-                    publication_year = ?, 
-                    language = ?, 
-                    stock_quantity = ?, 
-                    is_featured = ?, 
-                    status = ?,
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE id_book = ?";
+                    gia = ?, 
+                    gia_goc = ?, 
+                    hinh_anh = ?, 
+                    mo_ta = ?, 
+                    so_trang = ?, 
+                    nam_xuat_ban = ?, 
+                    ngon_ngu = ?, 
+                    so_luong_ton = ?, 
+                    noi_bat = ?, 
+                    trang_thai = ?,
+                    tu_khoa = ?,
+                    ngay_cap_nhat = CURRENT_TIMESTAMP
+                WHERE id_sach = ?";
         
         $stmt = $this->conn->prepare($sql);
+        
+        // Handle defaults
+        $gia_goc = !empty($data['gia_goc']) ? $data['gia_goc'] : NULL;
+        $tinh_trang = !empty($data['tinh_trang']) ? $data['tinh_trang'] : 'available';
+        
+        $statusMap = [
+            'Còn hàng' => 'available',
+            'Hết hàng' => 'out_of_stock',
+            'Ngừng kinh doanh' => 'discontinued',
+             'available' => 'available'
+        ];
+        $dbStatus = $statusMap[$tinh_trang] ?? 'available';
+        
         $stmt->bind_param(
-            "siiisddsssissiii",
-            $data['title'],
-            $data['id_author'],
-            $data['id_publisher'],
-            $data['id_category'],
+            "siiisddssissdissi",
+            $data['ten_sach'],
+            $data['ma_tac_gia'],
+            $data['ma_nha_xuat_ban'],
+            $data['ma_danh_muc'],
             $data['isbn'],
-            $data['price'],
-            $data['original_price'],
-            $data['cover_image'],
-            $data['description'],
-            $data['pages'],
-            $data['publication_year'],
-            $data['language'],
-            $data['stock_quantity'],
-            $data['is_featured'],
-            $data['status'],
+            $data['gia'],
+            $gia_goc,
+            $data['anh_bia'],
+            $data['mo_ta'],
+            $data['so_trang'],
+            $data['nam_xuat_ban'],
+            $data['ngon_ngu'],
+            $data['so_luong_ton'],
+            $data['noi_bat'],
+            $dbStatus,
+            $data['tu_khoa'],
             $id
         );
         
+        if ($stmt->execute()) {
+             return true;
+        }
+        error_log("Update Book Error: " . $stmt->error);
+        return false;
+    }
+    
+    /**
+     * Update book status only
+     */
+    public function updateBookStatus($id, $status) {
+        $statusMap = [
+            'Còn hàng' => 'available',
+            'Hết hàng' => 'out_of_stock',
+            'Ngừng kinh doanh' => 'discontinued'
+        ];
+        $dbStatus = $statusMap[$status] ?? 'available';
+        
+        $sql = "UPDATE sach SET trang_thai = ? WHERE id_sach = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("si", $dbStatus, $id);
         return $stmt->execute();
     }
     
@@ -394,8 +449,10 @@ class Books {
      * @return bool Success status
      */
     public function deleteBook($id) {
-        // Soft delete - just set status to 0
-        $sql = "UPDATE books SET status = 0 WHERE id_book = ?";
+        // Soft delete - just set status to discontinued?
+        // Or delete row? Let's use delete row if clean, or soft delete.
+        // Schema says trang_thai ENUM.
+        $sql = "DELETE FROM sach WHERE id_sach = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $id);
         return $stmt->execute();

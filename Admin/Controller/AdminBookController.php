@@ -104,15 +104,23 @@ class AdminBookController extends BaseController {
             $offset = ($page - 1) * $perPage;
             
             // Validate sort column
-            $allowedSortColumns = ['ten_sach', 'gia', 'so_luong_ton', 'luot_ban', 'luot_xem', 'ngay_tao'];
-            $sortBy = in_array($sortBy, $allowedSortColumns) ? $sortBy : 'ngay_tao';
+            // Validate sort column
+            $allowedSortColumns = ['ten_sach', 'gia', 'so_luong_ton', 'luot_ban', 'luot_xem', 'ngay_tao', 'ngay_them'];
+            $sortBy = in_array($sortBy, $allowedSortColumns) ? $sortBy : 'ngay_them';
+            
+            // Map 'ngay_tao' to 'ngay_them' for DB compatibility
+            if ($sortBy === 'ngay_tao') {
+                $sortBy = 'ngay_them';
+            }
+            
             $order = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
             
-            $query = "SELECT s.*, d.ten_danh_muc, t.ten_tac_gia, n.ten_nha_xuat_ban
+            $query = "SELECT s.id_sach AS ma_sach, s.ten_sach, s.gia, s.gia_goc, s.so_luong_ton, s.trang_thai AS tinh_trang, s.noi_bat, s.hinh_anh AS anh_bia, s.isbn,
+                             d.ten_theloai AS ten_danh_muc, t.ten_tacgia AS ten_tac_gia, n.ten_nxb AS ten_nha_xuat_ban
                      FROM sach s
-                     LEFT JOIN danh_muc d ON s.ma_danh_muc = d.ma_danh_muc
-                     LEFT JOIN tac_gia t ON s.ma_tac_gia = t.ma_tac_gia
-                     LEFT JOIN nha_xuat_ban n ON s.ma_nha_xuat_ban = n.ma_nha_xuat_ban
+                     LEFT JOIN theloai d ON s.id_theloai = d.id_theloai
+                     LEFT JOIN tacgia t ON s.id_tacgia = t.id_tacgia
+                     LEFT JOIN nhaxuatban n ON s.id_nxb = n.id_nxb
                      $whereClause
                      ORDER BY s.$sortBy $order
                      LIMIT ? OFFSET ?";
@@ -157,8 +165,26 @@ class AdminBookController extends BaseController {
             
         } catch (Exception $e) {
             error_log("Error in AdminBookController::index: " . $e->getMessage());
-            SessionHelper::setFlash('error', 'Không thể tải danh sách sách');
-            return ['books' => []];
+            SessionHelper::setFlash('error', 'Lỗi: ' . $e->getMessage());
+            return [
+                'books' => [],
+                'categories' => [],
+                'statuses' => [],
+                'pagination' => [
+                    'current_page' => 1,
+                    'total_pages' => 0,
+                    'total_items' => 0,
+                    'per_page' => 20
+                ],
+                'filters' => [
+                    'search' => '',
+                    'category' => 0,
+                    'status' => '',
+                    'sort_by' => 'ngay_tao',
+                    'order' => 'DESC'
+                ],
+                'csrf_token' => ''
+            ];
         }
     }
     

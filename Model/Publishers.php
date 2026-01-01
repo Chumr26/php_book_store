@@ -22,7 +22,9 @@ class Publishers {
      */
     public function getAllPublishers() {
         $sql = "SELECT id_nxb as ma_nxb,
+                       id_nxb as ma_nha_xuat_ban,
                        ten_nxb,
+                       ten_nxb as ten_nha_xuat_ban,
                        dia_chi,
                        dien_thoai,
                        email,

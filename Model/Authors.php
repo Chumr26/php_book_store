@@ -2,7 +2,7 @@
 /**
  * Authors Model Class
  * 
- * Handles all author-related operations
+ * Handles all author-related operations using table 'tacgia'
  */
 
 class Authors {
@@ -21,7 +21,9 @@ class Authors {
      * @return array Authors
      */
     public function getAllAuthors() {
-        $sql = "SELECT * FROM authors ORDER BY author_name ASC";
+        $sql = "SELECT id_tacgia as ma_tac_gia, ten_tacgia as ten_tac_gia, but_danh, tieu_su, ngay_sinh, quoc_tich, hinh_anh 
+                FROM tacgia 
+                ORDER BY ten_tacgia ASC";
         $result = $this->conn->query($sql);
         
         $authors = [];
@@ -39,14 +41,24 @@ class Authors {
      * @return array|null Author data or null
      */
     public function getAuthorById($id) {
-        $sql = "SELECT * FROM authors WHERE id_author = ?";
+        $sql = "SELECT id_tacgia as ma_tac_gia, ten_tacgia as ten_tac_gia, but_danh, tieu_su, ngay_sinh, quoc_tich, hinh_anh 
+                FROM tacgia 
+                WHERE id_tacgia = ?";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $id);
         $stmt->execute();
         $result = $stmt->get_result();
         
-        return $result->fetch_assoc();
+        $row = $result->fetch_assoc();
+        
+        // Alias for compatibility
+        if ($row) {
+            $row['id_author'] = $row['ma_tac_gia'];
+            $row['author_name'] = $row['ten_tac_gia'];
+        }
+        
+        return $row;
     }
     
     /**
@@ -56,18 +68,19 @@ class Authors {
      * @return int|false New author ID or false
      */
     public function addAuthor($data) {
-        $sql = "INSERT INTO authors (author_name, pen_name, biography, date_of_birth, nationality) 
+        $sql = "INSERT INTO tacgia (ten_tacgia, but_danh, tieu_su, ngay_sinh, quoc_tich) 
                 VALUES (?, ?, ?, ?, ?)";
         
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param(
-            "sssss",
-            $data['author_name'],
-            $data['pen_name'],
-            $data['biography'],
-            $data['date_of_birth'],
-            $data['nationality']
-        );
+        
+        // Handle input keys flexible
+        $name = $data['ten_tacgia'] ?? $data['author_name'];
+        $pen = $data['but_danh'] ?? $data['pen_name'];
+        $bio = $data['tieu_su'] ?? $data['biography'];
+        $dob = $data['ngay_sinh'] ?? $data['date_of_birth'];
+        $nat = $data['quoc_tich'] ?? $data['nationality'];
+        
+        $stmt->bind_param("sssss", $name, $pen, $bio, $dob, $nat);
         
         if ($stmt->execute()) {
             return $this->conn->insert_id;
@@ -84,21 +97,20 @@ class Authors {
      * @return bool Success status
      */
     public function updateAuthor($id, $data) {
-        $sql = "UPDATE authors 
-                SET author_name = ?, pen_name = ?, biography = ?, 
-                    date_of_birth = ?, nationality = ? 
-                WHERE id_author = ?";
+        $sql = "UPDATE tacgia 
+                SET ten_tacgia = ?, but_danh = ?, tieu_su = ?, 
+                    ngay_sinh = ?, quoc_tich = ? 
+                WHERE id_tacgia = ?";
         
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param(
-            "sssssi",
-            $data['author_name'],
-            $data['pen_name'],
-            $data['biography'],
-            $data['date_of_birth'],
-            $data['nationality'],
-            $id
-        );
+        
+        $name = $data['ten_tacgia'] ?? $data['author_name'];
+        $pen = $data['but_danh'] ?? $data['pen_name'];
+        $bio = $data['tieu_su'] ?? $data['biography'];
+        $dob = $data['ngay_sinh'] ?? $data['date_of_birth'];
+        $nat = $data['quoc_tich'] ?? $data['nationality'];
+        
+        $stmt->bind_param("sssssi", $name, $pen, $bio, $dob, $nat, $id);
         
         return $stmt->execute();
     }
@@ -110,7 +122,7 @@ class Authors {
      * @return bool Success status
      */
     public function deleteAuthor($id) {
-        $sql = "DELETE FROM authors WHERE id_author = ?";
+        $sql = "DELETE FROM tacgia WHERE id_tacgia = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $id);
         return $stmt->execute();
@@ -125,9 +137,9 @@ class Authors {
     public function searchAuthors($keyword) {
         $searchTerm = "%{$keyword}%";
         
-        $sql = "SELECT * FROM authors 
-                WHERE author_name LIKE ? OR pen_name LIKE ?
-                ORDER BY author_name ASC";
+        $sql = "SELECT * FROM tacgia 
+                WHERE ten_tacgia LIKE ? OR but_danh LIKE ?
+                ORDER BY ten_tacgia ASC";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("ss", $searchTerm, $searchTerm);

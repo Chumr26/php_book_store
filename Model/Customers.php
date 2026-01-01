@@ -2,7 +2,7 @@
 /**
  * Customers Model Class
  * 
- * Handles all database operations related to customers/users
+ * Handles all database operations related to customers/users using 'khachhang' table
  */
 
 class Customers {
@@ -25,10 +25,10 @@ class Customers {
         // Hash password before storing
         $hashedPassword = password_hash($data['password'], PASSWORD_BCRYPT);
         
-        $sql = "INSERT INTO customers (
-                    full_name, email, password, phone, address, 
-                    date_of_birth, gender, status
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, 1)";
+        $sql = "INSERT INTO khachhang (
+                    ten_khachhang, email, password, dien_thoai, dia_chi, 
+                    ngay_sinh, gioi_tinh, trang_thai
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, 'active')";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param(
@@ -56,17 +56,36 @@ class Customers {
      * @return array|null Customer data or null if not found
      */
     public function getCustomerById($id) {
-        $sql = "SELECT id_customer, full_name, email, phone, address, 
-                       date_of_birth, gender, status, created_at 
-                FROM customers 
-                WHERE id_customer = ?";
+        $sql = "SELECT id_khachhang, ten_khachhang, email, dien_thoai, dia_chi, 
+                       ngay_sinh, gioi_tinh, trang_thai, ngay_dang_ky 
+                FROM khachhang 
+                WHERE id_khachhang = ?";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $id);
         $stmt->execute();
         $result = $stmt->get_result();
         
-        return $result->fetch_assoc();
+        $row = $result->fetch_assoc();
+        
+        // Map to English keys for compatibility with Controllers if needed
+        if ($row) {
+            $row['id_customer'] = $row['id_khachhang'];
+            $row['full_name'] = $row['ten_khachhang'];
+            $row['phone'] = $row['dien_thoai'];
+            $row['address'] = $row['dia_chi'];
+            $row['date_of_birth'] = $row['ngay_sinh'];
+            $row['gender'] = $row['gioi_tinh'];
+            $row['status'] = $row['trang_thai'];
+            $row['created_at'] = $row['ngay_dang_ky'];
+            
+            // Aliases expected by some views
+            $row['ho_ten'] = $row['ten_khachhang'];
+            $row['so_dien_thoai'] = $row['dien_thoai'];
+            $row['ngay_tao'] = $row['ngay_dang_ky'];
+        }
+        
+        return $row;
     }
     
     /**
@@ -83,7 +102,20 @@ class Customers {
         $stmt->execute();
         $result = $stmt->get_result();
         
-        return $result->fetch_assoc();
+        $row = $result->fetch_assoc();
+        
+        // Map to English keys
+        if ($row) {
+            $row['password'] = $row['password']; // Needed for verification
+            $row['status'] = ($row['trang_thai'] == 'active') ? 1 : 0; // rough mapping
+            $row['trang_thai_code'] = $row['trang_thai'];
+            
+            // Standard mapping
+            $row['id_customer'] = $row['id_khachhang'];
+            $row['full_name'] = $row['ten_khachhang'];
+        }
+        
+        return $row;
     }
     
     /**
@@ -93,7 +125,7 @@ class Customers {
      * @return bool True if email exists
      */
     public function emailExists($email) {
-        $sql = "SELECT COUNT(*) as count FROM customers WHERE email = ?";
+        $sql = "SELECT COUNT(*) as count FROM khachhang WHERE email = ?";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("s", $email);
@@ -112,14 +144,16 @@ class Customers {
      * @return bool Success status
      */
     public function updateCustomer($id, $data) {
-        $sql = "UPDATE customers SET 
-                    full_name = ?, 
-                    phone = ?, 
-                    address = ?, 
-                    date_of_birth = ?, 
-                    gender = ?,
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE id_customer = ?";
+        // Warning: schema has no 'updated_at' column in khachhang table based on sql file? 
+        // SQL file timestamp default current_timestamp on create, update not mentioned.
+        
+        $sql = "UPDATE khachhang SET 
+                    ten_khachhang = ?, 
+                    dien_thoai = ?, 
+                    dia_chi = ?, 
+                    ngay_sinh = ?, 
+                    gioi_tinh = ?
+                WHERE id_khachhang = ?";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param(
@@ -147,7 +181,7 @@ class Customers {
         
         if ($customer && password_verify($password, $customer['password'])) {
             // Check if account is active
-            if ($customer['status'] == 1) {
+            if ($customer['trang_thai_code'] == 'active') {
                 // Don't return password in the result
                 unset($customer['password']);
                 return $customer;
@@ -167,10 +201,9 @@ class Customers {
     public function updatePassword($id, $newPassword) {
         $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
         
-        $sql = "UPDATE customers SET 
-                    password = ?,
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE id_customer = ?";
+        $sql = "UPDATE khachhang SET 
+                    password = ?
+                WHERE id_khachhang = ?";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("si", $hashedPassword, $id);
@@ -188,8 +221,8 @@ class Customers {
     public function getAllCustomers($page = 1, $limit = 20) {
         $offset = ($page - 1) * $limit;
         
-        $sql = "SELECT id_khachhang as id, ten_khachhang as full_name, email, 
-                       trang_thai as status, ngay_dang_ky as created_at 
+        $sql = "SELECT id_khachhang, ten_khachhang, email, 
+                       trang_thai, ngay_dang_ky 
                 FROM khachhang 
                 ORDER BY ngay_dang_ky DESC
                 LIMIT ? OFFSET ?";
@@ -201,8 +234,12 @@ class Customers {
         
         $customers = [];
         while ($row = $result->fetch_assoc()) {
-            // Map back to expected keys for controller compatibility
-            $row['id_customer'] = $row['id'];
+            // Map keys
+            $row['id_customer'] = $row['id_khachhang'];
+            $row['full_name'] = $row['ten_khachhang'];
+            $row['status'] = $row['trang_thai'];
+            $row['created_at'] = $row['ngay_dang_ky'];
+            
             $customers[] = $row;
         }
         
@@ -215,7 +252,7 @@ class Customers {
      * @return int Total count
      */
     public function getTotalCustomers() {
-        $sql = "SELECT COUNT(*) as total FROM customers";
+        $sql = "SELECT COUNT(*) as total FROM khachhang";
         $result = $this->conn->query($sql);
         $row = $result->fetch_assoc();
         return $row['total'];
@@ -228,11 +265,21 @@ class Customers {
      * @return bool Success status
      */
     public function deleteCustomer($id) {
-        // Soft delete - set status to 0
-        $sql = "UPDATE customers SET status = 0 WHERE id_customer = ?";
+        // Soft delete - set status to inactive/blocked? Or 'inactive'
+        $sql = "UPDATE khachhang SET trang_thai = 'inactive' WHERE id_khachhang = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $id);
         return $stmt->execute();
+    }
+    
+    /**
+     * Update customer status (Admin function)
+     */
+    public function updateCustomerStatus($id, $status) {
+         $sql = "UPDATE khachhang SET trang_thai = ? WHERE id_khachhang = ?";
+         $stmt = $this->conn->prepare($sql);
+         $stmt->bind_param("si", $status, $id);
+         return $stmt->execute();
     }
     
     /**
@@ -242,7 +289,7 @@ class Customers {
      * @return bool Success status
      */
     public function activateCustomer($id) {
-        $sql = "UPDATE customers SET status = 1 WHERE id_customer = ?";
+        $sql = "UPDATE khachhang SET trang_thai = 'active' WHERE id_khachhang = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $id);
         return $stmt->execute();
@@ -257,11 +304,11 @@ class Customers {
     public function searchCustomers($keyword) {
         $searchTerm = "%{$keyword}%";
         
-        $sql = "SELECT id_customer, full_name, email, phone, 
-                       status, created_at 
-                FROM customers 
-                WHERE full_name LIKE ? OR email LIKE ?
-                ORDER BY full_name ASC";
+        $sql = "SELECT id_khachhang, ten_khachhang, email, dien_thoai, 
+                       trang_thai, ngay_dang_ky 
+                FROM khachhang 
+                WHERE ten_khachhang LIKE ? OR email LIKE ?
+                ORDER BY ten_khachhang ASC";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("ss", $searchTerm, $searchTerm);
@@ -270,6 +317,12 @@ class Customers {
         
         $customers = [];
         while ($row = $result->fetch_assoc()) {
+             // Map keys
+            $row['id_customer'] = $row['id_khachhang'];
+            $row['full_name'] = $row['ten_khachhang'];
+            $row['phone'] = $row['dien_thoai'];
+            $row['status'] = $row['trang_thai'];
+            $row['created_at'] = $row['ngay_dang_ky'];
             $customers[] = $row;
         }
         
@@ -284,10 +337,10 @@ class Customers {
     public function getCustomerStats() {
         $sql = "SELECT 
                     COUNT(*) as total,
-                    SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) as active,
-                    SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as today,
-                    SUM(CASE WHEN YEARWEEK(created_at) = YEARWEEK(NOW()) THEN 1 ELSE 0 END) as this_week
-                FROM customers";
+                    SUM(CASE WHEN trang_thai = 'active' THEN 1 ELSE 0 END) as active,
+                    SUM(CASE WHEN DATE(ngay_dang_ky) = CURDATE() THEN 1 ELSE 0 END) as today,
+                    SUM(CASE WHEN YEARWEEK(ngay_dang_ky) = YEARWEEK(NOW()) THEN 1 ELSE 0 END) as this_week
+                FROM khachhang";
         
         $result = $this->conn->query($sql);
         return $result->fetch_assoc();
