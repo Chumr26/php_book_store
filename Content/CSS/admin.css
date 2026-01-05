@@ -22,6 +22,14 @@
     transition: all 0.3s;
     background-image: linear-gradient(180deg, #4e73df 10%, #224abe 100%);
     background-size: cover;
+
+    /* Fixed Logic */
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    overflow-y: auto;
 }
 
 #sidebar.active {
@@ -75,9 +83,13 @@
 
 /* Content Wrapper */
 .admin-content-wrapper {
-    width: 100%;
     display: flex;
     flex-direction: column;
+
+    /* Layout fix for fixed sidebar */
+    margin-left: 250px;
+    width: calc(100% - 250px);
+    transition: all 0.3s;
 }
 
 .admin-content {
@@ -149,7 +161,78 @@
         margin-left: 0;
     }
 
+    .admin-content-wrapper {
+        width: 100%;
+        margin-left: 0;
+    }
+
     #sidebarCollapse span {
         display: none;
     }
+}
+
+/* Toggled Sidebar (Collapsed) */
+.sidebar-toggled #sidebar {
+    width: 4.5rem !important;
+    min-width: 4.5rem !important;
+    max-width: 4.5rem !important;
+    overflow: visible;
+}
+
+.sidebar-toggled .admin-content-wrapper {
+    margin-left: 4.5rem;
+    width: calc(100% - 4.5rem);
+}
+
+.sidebar-toggled #sidebar .sidebar-header h3 span {
+    display: none;
+}
+
+.sidebar-toggled #sidebar .sidebar-header {
+    padding: 1rem 0.5rem;
+}
+
+.sidebar-toggled #sidebar ul li a {
+    text-align: center;
+    padding: 1rem;
+    width: 4.5rem;
+}
+
+.sidebar-toggled #sidebar ul li a span {
+    display: none;
+}
+
+.sidebar-toggled #sidebar ul li a i {
+    margin-right: 0;
+    font-size: 1.2rem;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Hover effect for collapsed sidebar items - optional tooltip-like behavior could be added here */
+.sidebar-toggled #sidebar ul li a:hover {
+    width: 4.5rem;
+    /* Ensure it doesn't expand on hover unless we want it to */
+}
+
+/* Mobile Toggled State adjustments */
+@media (max-width: 768px) {
+    .sidebar-toggled #sidebar {
+        width: 100% !important;
+        /* On mobile, toggled usually means SHOWING the full sidebar */
+        min-width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0;
+    }
+
+    .sidebar-toggled .admin-content-wrapper {
+        margin-left: 0;
+    }
+
+    /* When NOT toggled on mobile (default), sidebar is hidden (-250px) */
+    /* Accessing .sidebar-toggled on mobile actually means "OPENED" in many admin templates. 
+       Let's stick to the current plan: 
+       Right now: #sidebar.active { margin-left: -250px } (desktop) / 0 (mobile) ??
+       Wait, let's re-read the existing CSS for mobile.
+    */
 }

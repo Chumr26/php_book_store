@@ -107,10 +107,29 @@
                                         <input type="checkbox" name="book_ids[]" value="<?php echo $book['ma_sach']; ?>" class="book-check">
                                     </td>
                                     <td class="text-center">
-                                        <?php if ($book['anh_bia']): ?>
-                                            <img src="<?php echo BASE_URL . $book['anh_bia']; ?>" alt="Cover" style="height: 50px; object-fit: cover;">
+                                        <?php 
+                                        $imagePath = $book['anh_bia'];
+                                        $displayImage = false;
+                                        $finalUrl = '';
+                                        
+                                        if ($imagePath) {
+                                            // Case 1: Full relative path exists
+                                            if (file_exists(BASE_PATH . $imagePath) && is_file(BASE_PATH . $imagePath)) {
+                                                $displayImage = true;
+                                                $finalUrl = BASE_URL . $imagePath;
+                                            } 
+                                            // Case 2: Legacy filename only (assume Content/images/books/)
+                                            elseif (file_exists(BASE_PATH . 'Content/images/books/' . $imagePath) && is_file(BASE_PATH . 'Content/images/books/' . $imagePath)) {
+                                                $displayImage = true;
+                                                $finalUrl = BASE_URL . 'Content/images/books/' . $imagePath;
+                                            }
+                                        }
+                                        ?>
+                                        
+                                        <?php if ($displayImage): ?>
+                                            <img src="<?php echo $finalUrl; ?>" alt="Cover" style="height: 50px; object-fit: cover;">
                                         <?php else: ?>
-                                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 50px; width: 35px; margin: 0 auto;">
+                                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 50px; width: 35px; margin: 0 auto; border: 1px solid #ddd;">
                                                 <i class="fas fa-book text-muted"></i>
                                             </div>
                                         <?php endif; ?>
