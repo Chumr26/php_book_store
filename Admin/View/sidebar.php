@@ -9,7 +9,7 @@
                 <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
             </a>
         </li>
-        
+
         <li class="<?php echo ($page === 'orders') ? 'active' : ''; ?>">
             <a href="<?php echo ADMIN_BASE_URL; ?>index.php?page=orders">
                 <i class="fas fa-shopping-cart"></i> <span>Đơn hàng</span>
@@ -27,17 +27,17 @@
                 <i class="fas fa-list"></i> <span>Thể loại</span>
             </a>
         </li>
-        
+
         <li class="<?php echo ($page === 'customers') ? 'active' : ''; ?>">
             <a href="<?php echo ADMIN_BASE_URL; ?>index.php?page=customers">
                 <i class="fas fa-users"></i> <span>Khách hàng</span>
             </a>
         </li>
 
-        <li class="<?php echo ($page === 'settings') ? 'active' : ''; ?>">
+        <!-- <li class="<?php echo ($page === 'settings') ? 'active' : ''; ?>">
             <a href="<?php echo ADMIN_BASE_URL; ?>index.php?page=settings">
                 <i class="fas fa-cog"></i> <span>Cài đặt</span>
             </a>
-        </li>
+        </li> -->
     </ul>
 </nav>

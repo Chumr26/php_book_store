@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Admin Panel - Main Entry Point
  * 
@@ -64,17 +65,17 @@ try {
             require_once ADMIN_BASE_PATH . 'Controller/AdminAuthController.php';
             $controller = new AdminAuthController($conn);
             $viewData = $controller->login();
-            
+
             $viewFile = 'View/login.php';
             $pageTitle = 'Admin Login - BookStore';
             break;
-        
+
         case 'logout':
             require_once ADMIN_BASE_PATH . 'Controller/AdminAuthController.php';
             $controller = new AdminAuthController($conn);
             $controller->logout();
             break;
-        
+
         // ========== DASHBOARD ==========
         case 'dashboard':
             require_once ADMIN_BASE_PATH . 'Controller/AdminDashboardController.php';
@@ -83,13 +84,13 @@ try {
             $viewFile = 'View/dashboard.php';
             $pageTitle = 'Dashboard - Admin BookStore';
             break;
-        
+
         case 'export_statistics':
             require_once ADMIN_BASE_PATH . 'Controller/AdminDashboardController.php';
             $controller = new AdminDashboardController($conn);
             $controller->exportStatistics();
             break;
-        
+
         // ========== BOOK MANAGEMENT ==========
         case 'books':
             require_once ADMIN_BASE_PATH . 'Controller/AdminBookController.php';
@@ -98,11 +99,11 @@ try {
             $viewFile = 'View/books/index.php';
             $pageTitle = 'Quản lý sách - Admin BookStore';
             break;
-        
+
         case 'book_create':
             require_once ADMIN_BASE_PATH . 'Controller/AdminBookController.php';
             $controller = new AdminBookController($conn);
-            
+
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $controller->store();
             } else {
@@ -111,11 +112,11 @@ try {
                 $pageTitle = 'Thêm sách mới - Admin BookStore';
             }
             break;
-        
+
         case 'book_edit':
             require_once ADMIN_BASE_PATH . 'Controller/AdminBookController.php';
             $controller = new AdminBookController($conn);
-            
+
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $controller->update();
             } else {
@@ -124,25 +125,25 @@ try {
                 $pageTitle = 'Sửa sách - Admin BookStore';
             }
             break;
-        
+
         case 'book_delete':
             require_once ADMIN_BASE_PATH . 'Controller/AdminBookController.php';
             $controller = new AdminBookController($conn);
             $controller->delete();
             break;
-        
+
         case 'book_bulk_delete':
             require_once ADMIN_BASE_PATH . 'Controller/AdminBookController.php';
             $controller = new AdminBookController($conn);
             $controller->bulkDelete();
             break;
-        
+
         case 'book_toggle_status':
             require_once ADMIN_BASE_PATH . 'Controller/AdminBookController.php';
             $controller = new AdminBookController($conn);
             $controller->toggleStatus();
             break;
-        
+
         // ========== ORDER MANAGEMENT ==========
         case 'orders':
             require_once ADMIN_BASE_PATH . 'Controller/AdminOrderController.php';
@@ -151,7 +152,7 @@ try {
             $viewFile = 'View/orders/index.php';
             $pageTitle = 'Quản lý đơn hàng - Admin BookStore';
             break;
-        
+
         case 'order_detail':
             require_once ADMIN_BASE_PATH . 'Controller/AdminOrderController.php';
             $controller = new AdminOrderController($conn);
@@ -159,25 +160,25 @@ try {
             $viewFile = 'View/orders/detail.php';
             $pageTitle = 'Chi tiết đơn hàng - Admin BookStore';
             break;
-        
+
         case 'order_update_status':
             require_once ADMIN_BASE_PATH . 'Controller/AdminOrderController.php';
             $controller = new AdminOrderController($conn);
             $controller->updateStatus();
             break;
-        
+
         case 'orders_export':
             require_once ADMIN_BASE_PATH . 'Controller/AdminOrderController.php';
             $controller = new AdminOrderController($conn);
             $controller->exportOrders();
             break;
-        
+
         case 'order_print_invoice':
             require_once ADMIN_BASE_PATH . 'Controller/AdminOrderController.php';
             $controller = new AdminOrderController($conn);
             $controller->printInvoice();
             break;
-        
+
         // ========== CATEGORY MANAGEMENT ==========
         case 'categories':
             require_once ADMIN_BASE_PATH . 'Controller/AdminCategoryController.php';
@@ -186,11 +187,11 @@ try {
             $viewFile = 'View/categories/index.php';
             $pageTitle = 'Quản lý danh mục - Admin BookStore';
             break;
-        
+
         case 'category_create':
             require_once ADMIN_BASE_PATH . 'Controller/AdminCategoryController.php';
             $controller = new AdminCategoryController($conn);
-            
+
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $controller->store();
             } else {
@@ -199,11 +200,11 @@ try {
                 $pageTitle = 'Thêm danh mục - Admin BookStore';
             }
             break;
-        
+
         case 'category_edit':
             require_once ADMIN_BASE_PATH . 'Controller/AdminCategoryController.php';
             $controller = new AdminCategoryController($conn);
-            
+
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $controller->update();
             } else {
@@ -212,13 +213,13 @@ try {
                 $pageTitle = 'Sửa danh mục - Admin BookStore';
             }
             break;
-        
+
         case 'category_delete':
             require_once ADMIN_BASE_PATH . 'Controller/AdminCategoryController.php';
             $controller = new AdminCategoryController($conn);
             $controller->delete();
             break;
-        
+
         case 'category_update_order':
             require_once ADMIN_BASE_PATH . 'Controller/AdminCategoryController.php';
             $controller = new AdminCategoryController($conn);
@@ -230,7 +231,7 @@ try {
             $controller = new AdminCategoryController($conn);
             $controller->bulkDelete();
             break;
-        
+
         // ========== CUSTOMER MANAGEMENT ==========
         case 'customers':
             require_once ADMIN_BASE_PATH . 'Controller/AdminCustomerController.php';
@@ -239,7 +240,7 @@ try {
             $viewFile = 'View/customers/index.php';
             $pageTitle = 'Quản lý khách hàng - Admin BookStore';
             break;
-        
+
         case 'customer_detail':
             require_once ADMIN_BASE_PATH . 'Controller/AdminCustomerController.php';
             $controller = new AdminCustomerController($conn);
@@ -247,7 +248,7 @@ try {
             $viewFile = 'View/customers/detail.php';
             $pageTitle = 'Chi tiết khách hàng - Admin BookStore';
             break;
-        
+
         case 'customer_update_status':
             require_once ADMIN_BASE_PATH . 'Controller/AdminCustomerController.php';
             $controller = new AdminCustomerController($conn);
@@ -259,13 +260,13 @@ try {
             $controller = new AdminCustomerController($conn);
             $controller->bulkDelete();
             break;
-        
+
         case 'customers_export':
             require_once ADMIN_BASE_PATH . 'Controller/AdminCustomerController.php';
             $controller = new AdminCustomerController($conn);
             $controller->exportCustomers();
             break;
-        
+
         // ========== 404 NOT FOUND ==========
         default:
             http_response_code(404);
@@ -273,11 +274,10 @@ try {
             $pageTitle = '404 - Không tìm thấy trang';
             break;
     }
-    
 } catch (Exception $e) {
     // Log error
     error_log("Error in admin routing: " . $e->getMessage());
-    
+
     // Show error page
     SessionHelper::setFlash('error', 'Đã xảy ra lỗi. Vui lòng thử lại.');
     $viewFile = 'View/error.php';
@@ -287,9 +287,10 @@ try {
 
 // Render view if not already handled by controller (redirect/JSON response)
 if ($viewFile && file_exists(ADMIN_BASE_PATH . $viewFile)) {
-    ?>
+?>
     <!DOCTYPE html>
     <html lang="vi">
+
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -300,6 +301,7 @@ if ($viewFile && file_exists(ADMIN_BASE_PATH . $viewFile)) {
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
     </head>
+
     <body class="admin-body">
         <script>
             // Check for saved sidebar state immediately to prevent FOUC
@@ -317,7 +319,7 @@ if ($viewFile && file_exists(ADMIN_BASE_PATH . $viewFile)) {
                 include_once ADMIN_BASE_PATH . 'View/sidebar.php';
             }
             ?>
-            
+
             <div class="admin-content-wrapper">
                 <?php
                 // Include admin header (if exists and user is logged in)
@@ -325,7 +327,7 @@ if ($viewFile && file_exists(ADMIN_BASE_PATH . $viewFile)) {
                     include_once ADMIN_BASE_PATH . 'View/header.php';
                 }
                 ?>
-                
+
                 <main class="admin-content">
                     <?php
                     // Display flash messages
@@ -339,17 +341,17 @@ if ($viewFile && file_exists(ADMIN_BASE_PATH . $viewFile)) {
                             echo "</div>";
                         }
                     }
-                    
+
                     // Extract view data to make variables available in view
                     if (isset($viewData) && is_array($viewData)) {
                         extract($viewData);
                     }
-                    
+
                     // Include the view file
                     include ADMIN_BASE_PATH . $viewFile;
                     ?>
                 </main>
-                
+
                 <?php
                 // Include admin footer (if exists)
                 if (file_exists(ADMIN_BASE_PATH . 'View/footer.php')) {
@@ -358,14 +360,14 @@ if ($viewFile && file_exists(ADMIN_BASE_PATH . $viewFile)) {
                 ?>
             </div>
         </div>
-        
+
         <!-- jQuery and Bootstrap JS -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
-        
+
         <!-- Custom Admin JavaScript -->
 
         <script src="<?php echo BASE_URL; ?>Content/JS/admin.js"></script>
@@ -376,7 +378,7 @@ if ($viewFile && file_exists(ADMIN_BASE_PATH . $viewFile)) {
                     'X-CSRF-Token': '<?php echo SessionHelper::get("csrf_token", ""); ?>'
                 }
             });
-            
+
             // Initialize DataTables
             $(document).ready(function() {
                 if ($.fn.DataTable) {
@@ -389,8 +391,9 @@ if ($viewFile && file_exists(ADMIN_BASE_PATH . $viewFile)) {
             });
         </script>
     </body>
+
     </html>
-    <?php
+<?php
 } elseif ($viewFile) {
     // View file doesn't exist
     http_response_code(404);
