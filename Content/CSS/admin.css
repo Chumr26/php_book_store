@@ -15,8 +15,8 @@
 
 /* Sidebar */
 #sidebar {
-    min-width: 250px;
-    max-width: 250px;
+    min-width: 165px;
+    max-width: 165px;
     background: #4e73df;
     color: #fff;
     transition: all 0.3s;
@@ -33,11 +33,11 @@
 }
 
 #sidebar.active {
-    margin-left: -250px;
+    margin-left: -165px;
 }
 
 #sidebar .sidebar-header {
-    padding: 1rem 0.5rem;
+    padding: 1.1rem 0.5rem;
     background: rgba(0, 0, 0, 0.1);
     text-align: center;
 }
@@ -87,8 +87,8 @@
     flex-direction: column;
 
     /* Layout fix for fixed sidebar */
-    margin-left: 250px;
-    width: calc(100% - 250px);
+    margin-left: 165px;
+    width: calc(100% - 165px);
     transition: all 0.3s;
 }
 
@@ -154,7 +154,7 @@
 /* Responsive */
 @media (max-width: 768px) {
     #sidebar {
-        margin-left: -250px;
+        margin-left: -165px;
     }
 
     #sidebar.active {
@@ -229,10 +229,10 @@
         margin-left: 0;
     }
 
-    /* When NOT toggled on mobile (default), sidebar is hidden (-250px) */
+    /* When NOT toggled on mobile (default), sidebar is hidden (-165px) */
     /* Accessing .sidebar-toggled on mobile actually means "OPENED" in many admin templates. 
        Let's stick to the current plan: 
-       Right now: #sidebar.active { margin-left: -250px } (desktop) / 0 (mobile) ??
+       Right now: #sidebar.active { margin-left: -165px } (desktop) / 0 (mobile) ??
        Wait, let's re-read the existing CSS for mobile.
 }
 
@@ -248,5 +248,134 @@
 
     tr.clickable-row input[type="checkbox"] {
         cursor: default;
+    }
+}
+
+/* Admin Profile Button Redesign */
+.navbar-nav .nav-item.dropdown .dropdown-toggle::after {
+    display: none !important;
+}
+
+.admin-profile-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+    border: 1px solid #e3e6f0;
+    border-radius: 50px;
+    padding: 0.25rem 1rem 0.25rem 0.25rem !important;
+    transition: all 0.2s ease;
+    color: #5a5c69 !important;
+    font-weight: 600;
+    box-shadow: 0 .15rem 1.75rem 0 rgba(58, 59, 69, .1);
+    width: auto;
+    min-width: 200px;
+}
+
+.admin-profile-btn:hover,
+.show>.admin-profile-btn {
+    background-color: #f8f9fc;
+    border-color: #d1d3e2;
+    color: #4e73df !important;
+    text-decoration: none;
+}
+
+.admin-profile-btn .profile-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background-color: #4e73df;
+    color: #fff;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.admin-profile-btn .profile-name {
+    font-size: 0.85rem;
+    margin-right: 0.5rem;
+}
+
+.admin-profile-btn .fa-chevron-down {
+    font-size: 0.75rem;
+    color: #b7b9cc;
+    transition: transform 0.2s;
+}
+
+.show>.admin-profile-btn .fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+/* Dropdown Menu Enhancements */
+.dropdown-menu {
+    border: 1px solid #e3e6f0;
+    /* Match button border */
+    box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.175) !important;
+    border-radius: 1rem !important;
+    /* Force rounded corners */
+    padding: 0.5rem !important;
+    /* Force space for floating items */
+    margin-top: 0.75rem;
+    width: 100%;
+    min-width: auto;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    overflow: hidden;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    color: #3a3b45;
+    transition: all 0.2s;
+    border-radius: 0.5rem;
+    /* Floating item look */
+    margin-bottom: 2px;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fc;
+    color: #4e73df;
+}
+
+.dropdown-item i {
+    margin-right: 0.75rem;
+    color: #b7b9cc;
+    width: 20px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.dropdown-item:hover i {
+    color: #4e73df;
+}
+
+.dropdown-item:active {
+    background-color: #eaecf4;
+    color: #2e59d9;
+}
+
+/* Animations using Bootstrap/custom classes if needed, 
+   but basic usage is usually covered by JS or transition.
+   Adding specific class for animation referenced in HTML */
+.animated--grow-in {
+    animation-name: growIn;
+    animation-duration: 200ms;
+    animation-timing-function: transform cubic-bezier(.18, 1.25, .4, 1), opacity cubic-bezier(0, 1, .4, 1);
+}
+
+@keyframes growIn {
+    0% {
+        transform: scale(.9);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
     }
 }
