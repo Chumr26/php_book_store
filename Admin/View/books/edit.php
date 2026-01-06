@@ -15,17 +15,17 @@
                     <form action="index.php?page=book_edit" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
                         <input type="hidden" name="ma_sach" value="<?php echo $book['ma_sach']; ?>">
-                        
+
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <label for="ten_sach">Tên sách <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="ten_sach" name="ten_sach" 
-                                       value="<?php echo htmlspecialchars($book['ten_sach']); ?>" required>
+                                <input type="text" class="form-control" id="ten_sach" name="ten_sach"
+                                    value="<?php echo htmlspecialchars($book['ten_sach']); ?>" required>
                             </div>
                             <div class="form-group col-md-6">
                                 <label for="isbn">ISBN <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="isbn" name="isbn" 
-                                       value="<?php echo htmlspecialchars($book['isbn']); ?>" required>
+                                <input type="text" class="form-control" id="isbn" name="isbn"
+                                    value="<?php echo htmlspecialchars($book['isbn']); ?>" required>
                             </div>
                         </div>
 
@@ -36,7 +36,7 @@
                                     <option value="">-- Chọn tác giả --</option>
                                     <?php foreach ($authors as $author): ?>
                                         <option value="<?php echo $author['ma_tac_gia']; ?>"
-                                            <?php echo $book['ma_tac_gia'] == $author['ma_tac_gia'] ? 'selected' : ''; ?>>
+                                            <?php echo ($book['ma_tac_gia'] ?? '') == $author['ma_tac_gia'] ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($author['ten_tac_gia']); ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -48,7 +48,7 @@
                                     <option value="">-- Chọn nhà xuất bản --</option>
                                     <?php foreach ($publishers as $pub): ?>
                                         <option value="<?php echo $pub['ma_nha_xuat_ban']; ?>"
-                                            <?php echo $book['ma_nha_xuat_ban'] == $pub['ma_nha_xuat_ban'] ? 'selected' : ''; ?>>
+                                            <?php echo ($book['ma_nha_xuat_ban'] ?? '') == $pub['ma_nha_xuat_ban'] ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($pub['ten_nha_xuat_ban']); ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -72,8 +72,8 @@
                             <div class="form-group col-md-4">
                                 <label for="gia">Giá bán <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" id="gia" name="gia" min="0" 
-                                           value="<?php echo $book['gia']; ?>" required>
+                                    <input type="number" class="form-control" id="gia" name="gia" min="0"
+                                        value="<?php echo $book['gia']; ?>" required>
                                     <div class="input-group-append">
                                         <span class="input-group-text">VNĐ</span>
                                     </div>
@@ -83,7 +83,7 @@
                                 <label for="gia_goc">Giá gốc (để hiển thị giảm giá)</label>
                                 <div class="input-group">
                                     <input type="number" class="form-control" id="gia_goc" name="gia_goc" min="0"
-                                           value="<?php echo $book['gia_goc']; ?>">
+                                        value="<?php echo $book['gia_goc']; ?>">
                                     <div class="input-group-append">
                                         <span class="input-group-text">VNĐ</span>
                                     </div>
@@ -91,8 +91,8 @@
                             </div>
                             <div class="form-group col-md-4">
                                 <label for="so_luong_ton">Số lượng tồn <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="so_luong_ton" name="so_luong_ton" min="0" 
-                                       value="<?php echo $book['so_luong_ton']; ?>" required>
+                                <input type="number" class="form-control" id="so_luong_ton" name="so_luong_ton" min="0"
+                                    value="<?php echo $book['so_luong_ton']; ?>" required>
                             </div>
                         </div>
 
@@ -100,19 +100,19 @@
                             <div class="form-group col-md-3">
                                 <label for="so_trang">Số trang</label>
                                 <input type="number" class="form-control" id="so_trang" name="so_trang" min="1"
-                                       value="<?php echo $book['so_trang']; ?>">
+                                    value="<?php echo $book['so_trang'] ?? ''; ?>">
                             </div>
                             <div class="form-group col-md-3">
                                 <label for="nam_xuat_ban">Năm xuất bản</label>
-                                <input type="number" class="form-control" id="nam_xuat_ban" name="nam_xuat_ban" 
-                                       min="1900" max="<?php echo date('Y'); ?>" value="<?php echo $book['nam_xuat_ban']; ?>">
+                                <input type="number" class="form-control" id="nam_xuat_ban" name="nam_xuat_ban"
+                                    min="1900" max="<?php echo date('Y'); ?>" value="<?php echo $book['nam_xuat_ban'] ?? ''; ?>">
                             </div>
                             <div class="form-group col-md-3">
                                 <label for="ngon_ngu">Ngôn ngữ</label>
-                                <input type="text" class="form-control" id="ngon_ngu" name="ngon_ngu" 
-                                       value="<?php echo htmlspecialchars($book['ngon_ngu']); ?>">
+                                <input type="text" class="form-control" id="ngon_ngu" name="ngon_ngu"
+                                    value="<?php echo htmlspecialchars($book['ngon_ngu'] ?? ''); ?>">
                             </div>
-                             <div class="form-group col-md-3">
+                            <div class="form-group col-md-3">
                                 <label for="tinh_trang">Trạng thái</label>
                                 <select class="form-control" id="tinh_trang" name="tinh_trang">
                                     <option value="Còn hàng" <?php echo $book['tinh_trang'] == 'Còn hàng' ? 'selected' : ''; ?>>Còn hàng</option>
@@ -124,14 +124,14 @@
 
                         <div class="form-group">
                             <label for="mo_ta">Mô tả sách</label>
-                            <textarea class="form-control" id="mo_ta" name="mo_ta" rows="5"><?php echo htmlspecialchars($book['mo_ta']); ?></textarea>
+                            <textarea class="form-control" id="mo_ta" name="mo_ta" rows="5"><?php echo htmlspecialchars($book['mo_ta'] ?? ''); ?></textarea>
                         </div>
 
                         <div class="form-group">
                             <label for="tu_khoa">Từ khóa (cách nhau bởi dấu phẩy)</label>
-                            <input type="text" class="form-control" id="tu_khoa" name="tu_khoa" 
-                                   value="<?php echo htmlspecialchars($book['tu_khoa']); ?>"
-                                   placeholder="VD: kinh tế, khởi nghiệp, marketing">
+                            <input type="text" class="form-control" id="tu_khoa" name="tu_khoa"
+                                value="<?php echo htmlspecialchars($book['tu_khoa'] ?? ''); ?>"
+                                placeholder="VD: kinh tế, khởi nghiệp, marketing">
                         </div>
 
                         <div class="form-row">
@@ -143,18 +143,44 @@
                                 </div>
                                 <small class="form-text text-muted">Định dạng: JPG, PNG, GIF. Kích thước tối đa: 5MB.</small>
                             </div>
-                            <div class="form-group col-md-6">
-                                <?php if ($book['anh_bia']): ?>
-                                    <p>Ảnh hiện tại:</p>
-                                    <img src="<?php echo BASE_URL . $book['anh_bia']; ?>" alt="Cover" style="height: 150px; border: 1px solid #ddd; padding: 5px;">
-                                <?php endif; ?>
-                                <img id="preview" src="#" alt="Preview" style="display: none; max-height: 200px; max-width: 100%; border: 1px solid #ddd; padding: 5px; margin-top: 10px;">
-                            </div>
+                            <?php
+                            // Include helper for API covers
+                            require_once BASE_PATH . 'View/helpers/cover.php';
+
+                            $imagePath = $book['anh_bia'] ?? '';
+                            $displayUrl = '';
+                            $isLocal = false;
+
+                            // 1. Check for valid local file
+                            if ($imagePath) {
+                                if (file_exists(BASE_PATH . $imagePath) && is_file(BASE_PATH . $imagePath)) {
+                                    $displayUrl = BASE_URL . $imagePath;
+                                    $isLocal = true;
+                                } elseif (file_exists(BASE_PATH . 'Content/images/books/' . $imagePath) && is_file(BASE_PATH . 'Content/images/books/' . $imagePath)) {
+                                    $displayUrl = BASE_URL . 'Content/images/books/' . $imagePath;
+                                    $isLocal = true;
+                                }
+                            }
+
+                            // 2. Fallback to API if no local file found
+                            if (!$isLocal) {
+                                $displayUrl = book_cover_url($book['isbn'] ?? '', 'medium');
+                            }
+                            ?>
+
+                            <p>Ảnh hiện tại:</p>
+                            <img src="<?php echo $displayUrl; ?>" alt="Cover" style="height: 150px; border: 1px solid #ddd; padding: 5px; object-fit: cover;">
+
+                            <?php if ($isLocal): ?>
+                                <div class="mt-2 text-success"><small><i class="fas fa-check-circle"></i> Ảnh đã upload</small></div>
+                            <?php endif; ?>
+
+                            <img id="preview" src="#" alt="Preview" style="display: none; max-height: 200px; max-width: 100%; border: 1px solid #ddd; padding: 5px; margin-top: 10px;">
                         </div>
 
                         <div class="form-group">
                             <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="noi_bat" name="noi_bat" value="1" 
+                                <input type="checkbox" class="custom-control-input" id="noi_bat" name="noi_bat" value="1"
                                     <?php echo $book['noi_bat'] ? 'checked' : ''; ?>>
                                 <label class="custom-control-label" for="noi_bat">Sách nổi bật (Hiển thị trên trang chủ)</label>
                             </div>
@@ -229,7 +255,7 @@
     function previewImage(input) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();
-            
+
             reader.onload = function(e) {
                 var preview = document.getElementById('preview');
                 if (preview) {
@@ -237,7 +263,7 @@
                     preview.style.display = 'block';
                 }
             }
-            
+
             reader.readAsDataURL(input.files[0]);
         }
     }

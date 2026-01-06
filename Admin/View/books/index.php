@@ -90,7 +90,7 @@
                                 <th style="width: 40px" class="text-center">
                                     <input type="checkbox" id="check-all">
                                 </th>
-                                <th style="width: 60px">Hình</th>
+
                                 <th>Tên sách</th>
                                 <th>Danh mục</th>
                                 <th>Giá bán</th>
@@ -105,34 +105,7 @@
                                     <td class="text-center align-middle no-click">
                                         <input type="checkbox" name="book_ids[]" value="<?php echo $book['ma_sach']; ?>" class="book-check">
                                     </td>
-                                    <td class="text-center">
-                                        <?php 
-                                        $imagePath = $book['anh_bia'];
-                                        $displayImage = false;
-                                        $finalUrl = '';
-                                        
-                                        if ($imagePath) {
-                                            // Case 1: Full relative path exists
-                                            if (file_exists(BASE_PATH . $imagePath) && is_file(BASE_PATH . $imagePath)) {
-                                                $displayImage = true;
-                                                $finalUrl = BASE_URL . $imagePath;
-                                            } 
-                                            // Case 2: Legacy filename only (assume Content/images/books/)
-                                            elseif (file_exists(BASE_PATH . 'Content/images/books/' . $imagePath) && is_file(BASE_PATH . 'Content/images/books/' . $imagePath)) {
-                                                $displayImage = true;
-                                                $finalUrl = BASE_URL . 'Content/images/books/' . $imagePath;
-                                            }
-                                        }
-                                        ?>
-                                        
-                                        <?php if ($displayImage): ?>
-                                            <img src="<?php echo $finalUrl; ?>" alt="Cover" style="height: 50px; object-fit: cover;">
-                                        <?php else: ?>
-                                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 50px; width: 35px; margin: 0 auto; border: 1px solid #ddd;">
-                                                <i class="fas fa-book text-muted"></i>
-                                            </div>
-                                        <?php endif; ?>
-                                    </td>
+
                                     <td>
                                         <div class="font-weight-bold text-primary mb-1"><?php echo htmlspecialchars($book['ten_sach']); ?></div>
                                         <small class="text-muted">ISBN: <?php echo htmlspecialchars($book['isbn']); ?></small>

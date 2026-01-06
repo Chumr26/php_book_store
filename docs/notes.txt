@@ -17,5 +17,5 @@ re design the ui of the dropdown selection box
 - remove the top bar ui, and update the layout of the header
 - redesing the account button in the header
 - the cover of some book is small, i know that the cover api sometime return small cover, that is ok, but if the iamge is small we can expand it to fill the container, i want to have a consistent size cover despire the resolution
-
 - don't display book cover collumn in the admin/book page, instead display it in the book edit page, also the book edit ui page display some errors check and fix it
+- implement the bulk deletion feture for category and customer pages
