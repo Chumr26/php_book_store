@@ -234,5 +234,18 @@
        Let's stick to the current plan: 
        Right now: #sidebar.active { margin-left: -250px } (desktop) / 0 (mobile) ??
        Wait, let's re-read the existing CSS for mobile.
-    */
 }
+
+/* Clickable Rows (Global) */
+    tr.clickable-row {
+        cursor: pointer;
+        transition: background-color 0.15s ease-in-out;
+    }
+
+    tr.clickable-row:hover {
+        background-color: #eaecf4;
+    }
+
+    tr.clickable-row input[type="checkbox"] {
+        cursor: default;
+    }

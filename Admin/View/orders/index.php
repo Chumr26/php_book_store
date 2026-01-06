@@ -67,17 +67,16 @@
                             <th>Tổng tiền</th>
                             <th>Trạng thái đơn hàng</th>
                             <th>Thanh toán</th>
-                            <th style="width: 100px">Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (!empty($orders)): ?>
                             <?php foreach ($orders as $order): ?>
-                            <tr>
+                            <tr class="clickable-row" data-href="index.php?page=order_detail&id=<?php echo $order['id_hoadon']; ?>">
                                 <td>
-                                    <a href="index.php?page=order_detail&id=<?php echo $order['id_hoadon']; ?>" class="font-weight-bold">
+                                    <span class="font-weight-bold">
                                         #<?php echo $order['id_hoadon']; ?>
-                                    </a>
+                                    </span>
                                 </td>
                                 <td><?php echo date('d/m/Y H:i', strtotime($order['ngay_dat'])); ?></td>
                                 <td>
@@ -111,11 +110,6 @@
                                     }
                                     ?>
                                     <span class="badge badge-<?php echo $paymentClass; ?>"><?php echo htmlspecialchars($order['trang_thai_thanh_toan']); ?></span>
-                                </td>
-                                <td>
-                                    <a href="index.php?page=order_detail&id=<?php echo $order['id_hoadon']; ?>" class="btn btn-info btn-sm" title="Xem chi tiết">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -176,3 +170,16 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var rows = document.querySelectorAll('.clickable-row');
+        rows.forEach(function(row) {
+            row.addEventListener('click', function(e) {
+                var href = this.getAttribute('data-href');
+                if (href) {
+                    window.location.href = href;
+                }
+            });
+        });
+    });
+</script>

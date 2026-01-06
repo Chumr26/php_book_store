@@ -289,6 +289,15 @@ if ($viewFile && file_exists(ADMIN_BASE_PATH . $viewFile)) {
         <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
     </head>
     <body class="admin-body">
+        <script>
+            // Check for saved sidebar state immediately to prevent FOUC
+            (function() {
+                var sidebar = localStorage.getItem('sb|sidebar-toggle');
+                if (sidebar === 'true') {
+                    document.body.classList.add('sidebar-toggled');
+                }
+            })();
+        </script>
         <div class="admin-wrapper">
             <?php
             // Include admin sidebar (if exists and user is logged in)
@@ -346,17 +355,7 @@ if ($viewFile && file_exists(ADMIN_BASE_PATH . $viewFile)) {
         <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
         
         <!-- Custom Admin JavaScript -->
-        <script>
-            // Check for saved sidebar state immediately to prevent FOUC
-            (function() {
-                var sidebar = localStorage.getItem('sb|sidebar-toggle');
-                if (sidebar === 'true') {
-                    document.body.classList.add('sidebar-toggled');
-                    var sidebarEl = document.getElementById('sidebar');
-                    if (sidebarEl) sidebarEl.classList.add('toggled');
-                }
-            })();
-        </script>
+
         <script src="<?php echo BASE_URL; ?>Content/JS/admin.js"></script>
         <script>
             // AJAX setup for CSRF tokens

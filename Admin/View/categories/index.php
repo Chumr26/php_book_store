@@ -21,35 +21,17 @@
                             <th>Tên danh mục</th>
                             <th>Mô tả</th>
                             <th>Số lượng sách</th>
-                            <th style="width: 150px">Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (!empty($categories)): ?>
                             <?php foreach ($categories as $cat): ?>
-                            <tr>
+                            <tr class="clickable-row" data-href="index.php?page=category_edit&id=<?php echo $cat['ma_danh_muc']; ?>">
                                 <td class="text-center"><?php echo $cat['thu_tu']; ?></td>
                                 <td class="font-weight-bold text-primary"><?php echo htmlspecialchars($cat['ten_danh_muc']); ?></td>
                                 <td><?php echo htmlspecialchars($cat['mo_ta']); ?></td>
                                 <td class="text-center">
                                     <span class="badge badge-secondary badge-pill"><?php echo $cat['book_count']; ?></span>
-                                </td>
-                                <td>
-                                    <a href="index.php?page=category_edit&id=<?php echo $cat['ma_danh_muc']; ?>" class="btn btn-info btn-sm" title="Sửa">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <?php if ($cat['book_count'] == 0): ?>
-                                    <button type="button" class="btn btn-danger btn-sm delete-btn" 
-                                            data-id="<?php echo $cat['ma_danh_muc']; ?>" 
-                                            data-name="<?php echo htmlspecialchars($cat['ten_danh_muc']); ?>"
-                                            title="Xóa">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                    <?php else: ?>
-                                    <button type="button" class="btn btn-secondary btn-sm" disabled title="Không thể xóa danh mục đang có sách">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                    <?php endif; ?>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -92,12 +74,15 @@
 </div>
 
 <script>
-    // Handle Delete Modal
-    $('.delete-btn').click(function() {
-        var id = $(this).data('id');
-        var name = $(this).data('name');
-        $('#delete-cat-id').val(id);
-        $('#delete-cat-name').text(name);
-        $('#deleteModal').modal('show');
+    document.addEventListener('DOMContentLoaded', function() {
+        var rows = document.querySelectorAll('.clickable-row');
+        rows.forEach(function(row) {
+            row.addEventListener('click', function(e) {
+                var href = this.getAttribute('data-href');
+                if (href) {
+                    window.location.href = href;
+                }
+            });
+        });
     });
 </script>

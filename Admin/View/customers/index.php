@@ -65,18 +65,15 @@
                             <th>Chi tiêu</th>
                             <th>Trạng thái</th>
                             <th>Ngày tham gia</th>
-                            <th style="width: 100px">Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (!empty($customers)): ?>
                             <?php foreach ($customers as $customer): ?>
-                            <tr>
+                            <tr class="clickable-row" data-href="index.php?page=customer_detail&id=<?php echo $customer['ma_khach_hang']; ?>">
                                 <td><?php echo $customer['ma_khach_hang']; ?></td>
                                 <td class="font-weight-bold text-primary">
-                                    <a href="index.php?page=customer_detail&id=<?php echo $customer['ma_khach_hang']; ?>">
-                                        <?php echo htmlspecialchars($customer['ho_ten']); ?>
-                                    </a>
+                                    <?php echo htmlspecialchars($customer['ho_ten']); ?>
                                 </td>
                                 <td><?php echo htmlspecialchars($customer['email']); ?></td>
                                 <td><?php echo htmlspecialchars($customer['so_dien_thoai']); ?></td>
@@ -96,11 +93,6 @@
                                     <span class="badge <?php echo $statusClass; ?>"><?php echo htmlspecialchars($statusLabel); ?></span>
                                 </td>
                                 <td><?php echo date('d/m/Y', strtotime($customer['ngay_tao'])); ?></td>
-                                <td>
-                                    <a href="index.php?page=customer_detail&id=<?php echo $customer['ma_khach_hang']; ?>" class="btn btn-info btn-sm" title="Xem chi tiết">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </td>
                             </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -160,3 +152,16 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var rows = document.querySelectorAll('.clickable-row');
+        rows.forEach(function(row) {
+            row.addEventListener('click', function(e) {
+                var href = this.getAttribute('data-href');
+                if (href) {
+                    window.location.href = href;
+                }
+            });
+        });
+    });
+</script>

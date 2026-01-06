@@ -96,14 +96,13 @@
                                 <th>Giá bán</th>
                                 <th>Tồn kho</th>
                                 <th>Trạng thái</th>
-                                <th style="width: 150px">Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (!empty($books)): ?>
                                 <?php foreach ($books as $book): ?>
-                                <tr>
-                                    <td class="text-center align-middle">
+                                <tr class="clickable-row" data-href="index.php?page=book_edit&id=<?php echo $book['ma_sach']; ?>">
+                                    <td class="text-center align-middle no-click">
                                         <input type="checkbox" name="book_ids[]" value="<?php echo $book['ma_sach']; ?>" class="book-check">
                                     </td>
                                     <td class="text-center">
@@ -161,17 +160,6 @@
                                         }
                                         ?>
                                         <span class="badge <?php echo $statusClass; ?>"><?php echo htmlspecialchars($book['tinh_trang']); ?></span>
-                                    </td>
-                                    <td>
-                                        <a href="index.php?page=book_edit&id=<?php echo $book['ma_sach']; ?>" class="btn btn-info btn-sm" title="Sửa">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-danger btn-sm delete-btn" 
-                                                data-id="<?php echo $book['ma_sach']; ?>" 
-                                                data-name="<?php echo htmlspecialchars($book['ten_sach']); ?>"
-                                                title="Xóa">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -255,29 +243,52 @@
 </div>
 
 <script>
-    // Handle Delete Modal
-    $('.delete-btn').click(function() {
-        var id = $(this).data('id');
-        var name = $(this).data('name');
-        $('#delete-book-id').val(id);
-        $('#delete-book-name').text(name);
-        $('#deleteModal').modal('show');
-    });
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle Row Click
+        var rows = document.querySelectorAll('.clickable-row');
+        rows.forEach(function(row) {
+            row.addEventListener('click', function(e) {
+                // Do not trigger if clicked on checkbox or its container
+                if (e.target.closest('.no-click')) {
+                    return;
+                }
+                var href = this.getAttribute('data-href');
+                if (href) {
+                    window.location.href = href;
+                }
+            });
+        });
 
-    // Handle Check All
-    $('#check-all').click(function() {
-        $('.book-check').prop('checked', this.checked);
-        toggleBulkBtn();
-    });
+        // Handle Check All
+        var checkAll = document.getElementById('check-all');
+        var checkboxes = document.querySelectorAll('.book-check');
+        var bulkBtn = document.getElementById('bulk-delete-btn');
 
-    $('.book-check').change(function() {
-        var allChecked = $('.book-check:checked').length == $('.book-check').length;
-        $('#check-all').prop('checked', allChecked);
-        toggleBulkBtn();
-    });
+        if (checkAll) {
+            checkAll.addEventListener('change', function() {
+                var isChecked = this.checked;
+                checkboxes.forEach(function(cb) {
+                    cb.checked = isChecked;
+                });
+                toggleBulkBtn();
+            });
+        }
 
-    function toggleBulkBtn() {
-        var count = $('.book-check:checked').length;
-        $('#bulk-delete-btn').prop('disabled', count === 0);
-    }
+        checkboxes.forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                var allChecked = document.querySelectorAll('.book-check:checked').length === checkboxes.length;
+                if (checkAll) checkAll.checked = allChecked;
+                toggleBulkBtn();
+            });
+        });
+
+        function toggleBulkBtn() {
+            var count = document.querySelectorAll('.book-check:checked').length;
+            if (bulkBtn) bulkBtn.disabled = count === 0;
+        }
+
+        // Handle Delete Modal for bulk delete (if any manual trigger needed, but form handles it mostly)
+        // Original code had .delete-btn for single delete, which is gone from this view. 
+        // We only have the bulk delete form button now which submits directly.
+    });
 </script>

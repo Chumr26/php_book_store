@@ -161,13 +161,47 @@
                         </div>
 
                         <hr>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Cập nhật
-                        </button>
-                        <a href="index.php?page=books" class="btn btn-secondary">
-                            <i class="fas fa-times"></i> Hủy bỏ
-                        </a>
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Cập nhật
+                                </button>
+                                <a href="index.php?page=books" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Hủy bỏ
+                                </a>
+                            </div>
+                            <!-- Delete Button -->
+                            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModalInEdit">
+                                <i class="fas fa-trash"></i> Xóa sách này
+                            </button>
+                        </div>
                     </form>
+
+                    <!-- Delete Confirmation Modal (Self-contained in Edit Page) -->
+                    <div class="modal fade" id="deleteModalInEdit" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteModalLabel">Xác nhận xóa sách</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Bạn có chắc chắn muốn xóa sách <strong><?php echo htmlspecialchars($book['ten_sach']); ?></strong>?<br>
+                                    Hành động này không thể hoàn tác.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                                    <form action="index.php?page=book_delete" method="POST" style="margin:0;">
+                                        <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+                                        <input type="hidden" name="book_id" value="<?php echo $book['ma_sach']; ?>">
+                                        <button type="submit" class="btn btn-danger">Xóa ngay</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -175,10 +209,20 @@
 </div>
 
 <script>
-    // Update file input label with selected filename
-    $(".custom-file-input").on("change", function() {
-        var fileName = $(this).val().split("\\").pop();
-        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+    document.addEventListener('DOMContentLoaded', function() {
+        // Update file input label with selected filename
+        var fileInput = document.getElementById('anh_bia');
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                var fileName = e.target.value.split("\\").pop();
+                var label = e.target.nextElementSibling;
+                if (label && label.classList.contains('custom-file-label')) {
+                    label.classList.add("selected");
+                    label.innerHTML = fileName;
+                }
+                previewImage(this);
+            });
+        }
     });
 
     // Image preview
@@ -187,8 +231,11 @@
             var reader = new FileReader();
             
             reader.onload = function(e) {
-                $('#preview').attr('src', e.target.result);
-                $('#preview').show();
+                var preview = document.getElementById('preview');
+                if (preview) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
             }
             
             reader.readAsDataURL(input.files[0]);
