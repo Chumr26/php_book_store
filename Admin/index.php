@@ -224,6 +224,12 @@ try {
             $controller = new AdminCategoryController($conn);
             $controller->updateOrder();
             break;
+
+        case 'category_bulk_delete':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminCategoryController.php';
+            $controller = new AdminCategoryController($conn);
+            $controller->bulkDelete();
+            break;
         
         // ========== CUSTOMER MANAGEMENT ==========
         case 'customers':
@@ -246,6 +252,12 @@ try {
             require_once ADMIN_BASE_PATH . 'Controller/AdminCustomerController.php';
             $controller = new AdminCustomerController($conn);
             $controller->updateStatus();
+            break;
+
+        case 'customer_bulk_delete':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminCustomerController.php';
+            $controller = new AdminCustomerController($conn);
+            $controller->bulkDelete();
             break;
         
         case 'customers_export':

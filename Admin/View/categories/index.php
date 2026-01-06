@@ -2,9 +2,14 @@
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Quản lý danh mục</h1>
-        <a href="index.php?page=category_create" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-            <i class="fas fa-plus fa-sm text-white-50"></i> Thêm danh mục
-        </a>
+        <div>
+            <button id="btn-delete-selected" class="btn btn-sm btn-danger shadow-sm mr-2" disabled>
+                <i class="fas fa-trash fa-sm text-white-50"></i> Xóa đã chọn
+            </button>
+            <a href="index.php?page=category_create" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                <i class="fas fa-plus fa-sm text-white-50"></i> Thêm danh mục
+            </a>
+        </div>
     </div>
 
     <!-- Data Table -->
@@ -13,36 +18,49 @@
             <h6 class="m-0 font-weight-bold text-primary">Danh sách danh mục</h6>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th style="width: 80px">Thứ tự</th>
-                            <th>Tên danh mục</th>
-                            <th>Mô tả</th>
-                            <th>Số lượng sách</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (!empty($categories)): ?>
-                            <?php foreach ($categories as $cat): ?>
-                            <tr class="clickable-row" data-href="index.php?page=category_edit&id=<?php echo $cat['ma_danh_muc']; ?>">
-                                <td class="text-center"><?php echo $cat['thu_tu']; ?></td>
-                                <td class="font-weight-bold text-primary"><?php echo htmlspecialchars($cat['ten_danh_muc']); ?></td>
-                                <td><?php echo htmlspecialchars($cat['mo_ta']); ?></td>
-                                <td class="text-center">
-                                    <span class="badge badge-secondary badge-pill"><?php echo $cat['book_count']; ?></span>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
+            <form id="bulk-delete-form" action="index.php?page=category_bulk_delete" method="POST">
+                <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
                             <tr>
-                                <td colspan="5" class="text-center py-4">Chưa có danh mục nào</td>
+                                <th style="width: 40px" class="text-center">
+                                    <input type="checkbox" id="select-all">
+                                </th>
+                                <th style="width: 80px">Thứ tự</th>
+                                <th>Tên danh mục</th>
+                                <th>Mô tả</th>
+                                <th>Số lượng sách</th>
                             </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            <?php if (!empty($categories)): ?>
+                                <?php foreach ($categories as $cat): ?>
+                                    <tr class="clickable-row">
+                                        <td class="text-center">
+                                            <input type="checkbox" name="ids[]" value="<?php echo $cat['ma_danh_muc']; ?>" class="item-checkbox">
+                                        </td>
+                                        <td class="text-center"><?php echo $cat['thu_tu']; ?></td>
+                                        <td class="font-weight-bold text-primary">
+                                            <a href="index.php?page=category_edit&id=<?php echo $cat['ma_danh_muc']; ?>">
+                                                <?php echo htmlspecialchars($cat['ten_danh_muc']); ?>
+                                            </a>
+                                        </td>
+                                        <td><?php echo htmlspecialchars($cat['mo_ta']); ?></td>
+                                        <td class="text-center">
+                                            <span class="badge badge-secondary badge-pill"><?php echo $cat['book_count']; ?></span>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="6" class="text-center py-4">Chưa có danh mục nào</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -75,14 +93,49 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var rows = document.querySelectorAll('.clickable-row');
-        rows.forEach(function(row) {
-            row.addEventListener('click', function(e) {
-                var href = this.getAttribute('data-href');
-                if (href) {
-                    window.location.href = href;
+        const selectAll = document.getElementById('select-all');
+        const checkboxes = document.querySelectorAll('.item-checkbox');
+        const btnDelete = document.getElementById('btn-delete-selected');
+        const form = document.getElementById('bulk-delete-form');
+
+        // Select All handler
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                checkboxes.forEach(cb => cb.checked = this.checked);
+                updateDeleteButton();
+            });
+        }
+
+        // Individual checkbox handler
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                updateDeleteButton();
+                if (!this.checked) {
+                    if (selectAll) selectAll.checked = false;
                 }
             });
         });
+
+        // Update delete button state
+        function updateDeleteButton() {
+            const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
+            if (btnDelete) {
+                btnDelete.disabled = checkedCount === 0;
+                btnDelete.innerHTML = `<i class="fas fa-trash fa-sm text-white-50"></i> Xóa đã chọn (${checkedCount})`;
+            }
+        }
+
+        // Delete button click handler
+        if (btnDelete) {
+            btnDelete.addEventListener('click', function(e) {
+                e.preventDefault();
+                const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
+                if (checkedCount > 0) {
+                    if (confirm(`Bạn có chắc chắn muốn xóa ${checkedCount} danh mục đã chọn?`)) {
+                        form.submit();
+                    }
+                }
+            });
+        }
     });
 </script>

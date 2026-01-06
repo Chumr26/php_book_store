@@ -37,7 +37,7 @@
 }
 
 #sidebar .sidebar-header {
-    padding: 20px;
+    padding: 1rem 0.5rem;
     background: rgba(0, 0, 0, 0.1);
     text-align: center;
 }
@@ -188,9 +188,9 @@
     display: none;
 }
 
-.sidebar-toggled #sidebar .sidebar-header {
+/* .sidebar-toggled #sidebar .sidebar-header {
     padding: 1rem 0.5rem;
-}
+} */
 
 .sidebar-toggled #sidebar ul li a {
     text-align: center;
@@ -249,3 +249,4 @@
     tr.clickable-row input[type="checkbox"] {
         cursor: default;
     }
+}
