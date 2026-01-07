@@ -1,100 +1,140 @@
 <div class="container-fluid">
-    <!-- Page Heading -->
+    <!-- Page Header -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Quản lý khách hàng</h1>
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-users"></i> Quản lý khách hàng
+        </h1>
         <div>
-            <button id="btn-delete-selected" class="btn btn-sm btn-danger shadow-sm mr-2" disabled>
-                <i class="fas fa-trash fa-sm text-white-50"></i> Xóa đã chọn
+            <button id="bulk-delete-btn" class="btn btn-danger btn-icon-split shadow-sm mr-2 d-none">
+                <span class="icon text-white-50">
+                    <i class="fas fa-trash"></i>
+                </span>
+                <span class="text">Xóa (<span id="selected-count">0</span>)</span>
             </button>
-            <a href="index.php?page=customers_export&<?php echo http_build_query($filters); ?>" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm">
-                <i class="fas fa-file-export fa-sm text-white-50"></i> Xuất CSV
+            <a href="index.php?page=customers_export&<?php echo http_build_query($filters); ?>" class="btn btn-success btn-icon-split shadow-sm">
+                <span class="icon text-white-50">
+                    <i class="fas fa-file-export"></i>
+                </span>
+                <span class="text">Xuất CSV</span>
             </a>
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Bộ lọc tìm kiếm</h6>
-        </div>
-        <div class="card-body">
-            <form method="GET" action="index.php" class="form-inline">
-                <input type="hidden" name="page" value="customers">
+    <!-- Modern Filters Bar -->
+    <div class="filter-bar mb-4">
+        <form method="GET" action="index.php" class="row align-items-end">
+            <input type="hidden" name="page" value="customers">
 
-                <div class="form-group mb-2 mr-3">
-                    <label for="search" class="sr-only">Tìm kiếm</label>
-                    <input type="text" class="form-control" id="search" name="search"
-                        placeholder="Tên, Email, SĐT..." value="<?php echo htmlspecialchars($filters['search']); ?>">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <label for="search" class="small font-weight-bold text-gray-700 mb-2">Tìm kiếm</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-white border-right-0 rounded-left">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </span>
+                    </div>
+                    <input type="text" class="form-control form-control-custom border-left-0"
+                        id="search" name="search"
+                        placeholder="Tên, Email, SĐT..."
+                        value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
                 </div>
+            </div>
 
-                <div class="form-group mb-2 mr-3">
-                    <select class="form-control" name="status">
-                        <option value="">-- Tất cả trạng thái --</option>
-                        <?php foreach ($statuses as $key => $label): ?>
-                            <option value="<?php echo $key; ?>"
-                                <?php echo $filters['status'] == $key ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($label); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+            <div class="col-md-2 mb-3 mb-md-0">
+                <label for="status" class="small font-weight-bold text-gray-700 mb-2">Trạng thái</label>
+                <select class="form-control" name="status" id="status">
+                    <option value="">Tất cả</option>
+                    <?php foreach ($statuses as $key => $label): ?>
+                        <option value="<?php echo $key; ?>"
+                            <?php echo $filters['status'] == $key ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($label); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-                <div class="form-group mb-2 mr-3">
-                    <select class="form-control" name="sort_by">
-                        <option value="ngay_tao" <?php echo $filters['sort_by'] == 'ngay_tao' ? 'selected' : ''; ?>>Ngày tham gia</option>
-                        <option value="ho_ten" <?php echo $filters['sort_by'] == 'ho_ten' ? 'selected' : ''; ?>>Tên</option>
-                        <option value="email" <?php echo $filters['sort_by'] == 'email' ? 'selected' : ''; ?>>Email</option>
-                    </select>
-                </div>
+            <div class="col-md-2 mb-3 mb-md-0">
+                <label for="sort_by" class="small font-weight-bold text-gray-700 mb-2">Sắp xếp theo</label>
+                <select class="form-control" name="sort_by" id="sort_by">
+                    <option value="ngay_tao" <?php echo $filters['sort_by'] == 'ngay_tao' ? 'selected' : ''; ?>>Ngày tham gia</option>
+                    <option value="ho_ten" <?php echo $filters['sort_by'] == 'ho_ten' ? 'selected' : ''; ?>>Tên</option>
+                    <option value="email" <?php echo $filters['sort_by'] == 'email' ? 'selected' : ''; ?>>Email</option>
+                </select>
+            </div>
 
-                <button type="submit" class="btn btn-primary mb-2">
-                    <i class="fas fa-search"></i> Tìm kiếm
+            <div class="col-md-4 d-flex mb-3 mb-md-0">
+                <button type="submit" class="btn btn-primary mr-2 flex-grow-1">
+                    Tìm kiếm
                 </button>
-                <a href="index.php?page=customers" class="btn btn-secondary mb-2 ml-2">Đặt lại</a>
-            </form>
-        </div>
+                <a href="index.php?page=customers" class="btn btn-light border">
+                    <i class="fas fa-redo-alt"></i>
+                </a>
+            </div>
+        </form>
     </div>
 
-    <!-- Data Table -->
+    <!-- Data Table Card -->
     <div class="card shadow mb-4">
-        <div class="card-body">
-            <form id="bulk-delete-form" action="index.php?page=customer_bulk_delete" method="POST">
-                <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <form id="bulk-action-form" action="index.php?page=customer_bulk_delete" method="POST">
+                    <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+
+                    <table class="table table-custom table-hover mb-0" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th style="width: 40px" class="text-center">
-                                    <input type="checkbox" id="select-all">
+                                <th style="width: 40px" class="text-center pl-4">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" id="check-all">
+                                        <label class="custom-control-label" for="check-all"></label>
+                                    </div>
                                 </th>
-                                <th>ID</th>
-                                <th>Họ tên</th>
+                                <th style="width: 80px">ID</th>
+                                <th style="width: 20%">Họ tên</th>
                                 <th>Email</th>
-                                <th>Số điện thoại</th>
-                                <th>Đơn hàng</th>
-                                <th>Chi tiêu</th>
-                                <th>Trạng thái</th>
-                                <th>Ngày tham gia</th>
+                                <th style="width: 130px">Số điện thoại</th>
+                                <th style="width: 100px">Đơn hàng</th>
+                                <th style="width: 130px">Chi tiêu</th>
+                                <th style="width: 120px">Trạng thái</th>
+                                <th style="width: 120px">Ngày tham gia</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (!empty($customers)): ?>
                                 <?php foreach ($customers as $customer): ?>
-                                    <tr class="clickable-row">
-                                        <td class="text-center">
-                                            <input type="checkbox" name="ids[]" value="<?php echo $customer['ma_khach_hang']; ?>" class="item-checkbox">
+                                    <tr class="clickable-row" data-href="index.php?page=customer_detail&id=<?php echo $customer['ma_khach_hang']; ?>">
+                                        <td class="text-center align-middle pl-4 no-click">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" name="ids[]" value="<?php echo $customer['ma_khach_hang']; ?>"
+                                                    class="custom-control-input customer-check" id="check-<?php echo $customer['ma_khach_hang']; ?>">
+                                                <label class="custom-control-label" for="check-<?php echo $customer['ma_khach_hang']; ?>"></label>
+                                            </div>
                                         </td>
-                                        <td><?php echo $customer['ma_khach_hang']; ?></td>
-                                        <td class="font-weight-bold text-primary">
-                                            <a href="index.php?page=customer_detail&id=<?php echo $customer['ma_khach_hang']; ?>">
+                                        <td class="align-middle text-center">
+                                            <span class="badge badge-light border"><?php echo $customer['ma_khach_hang']; ?></span>
+                                        </td>
+                                        <td class="align-middle">
+                                            <div class="book-title">
+                                                <i class="fas fa-user text-primary mr-2"></i>
                                                 <?php echo htmlspecialchars($customer['ho_ten']); ?>
-                                            </a>
+                                            </div>
                                         </td>
-                                        <td><?php echo htmlspecialchars($customer['email']); ?></td>
-                                        <td><?php echo htmlspecialchars($customer['so_dien_thoai']); ?></td>
-                                        <td class="text-center"><?php echo number_format($customer['order_count']); ?></td>
-                                        <td><?php echo number_format($customer['total_spent']); ?>đ</td>
-                                        <td>
+                                        <td class="align-middle">
+                                            <span class="text-muted"><i class="fas fa-envelope mr-1 text-gray-400"></i><?php echo htmlspecialchars($customer['email']); ?></span>
+                                        </td>
+                                        <td class="align-middle">
+                                            <span class="text-muted"><i class="fas fa-phone mr-1 text-gray-400"></i><?php echo htmlspecialchars($customer['so_dien_thoai']); ?></span>
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            <span class="badge badge-pill-custom badge-info">
+                                                <i class="fas fa-shopping-bag mr-1"></i>
+                                                <?php echo $customer['order_count']; ?>
+                                            </span>
+                                        </td>
+                                        <td class="align-middle">
+                                            <span class="price-tag"><?php echo number_format($customer['total_spent']); ?>đ</span>
+                                        </td>
+                                        <td class="align-middle text-center">
                                             <?php
                                             $statusClass = '';
                                             switch ($customer['trang_thai']) {
@@ -112,111 +152,136 @@
                                             }
                                             $statusLabel = $statuses[$customer['trang_thai']] ?? $customer['trang_thai'];
                                             ?>
-                                            <span class="badge <?php echo $statusClass; ?>"><?php echo htmlspecialchars($statusLabel); ?></span>
+                                            <span class="badge badge-pill-custom <?php echo $statusClass; ?>"><?php echo htmlspecialchars($statusLabel); ?></span>
                                         </td>
-                                        <td><?php echo date('d/m/Y', strtotime($customer['ngay_tao'])); ?></td>
+                                        <td class="align-middle"><?php echo date('d/m/Y', strtotime($customer['ngay_tao'])); ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="10" class="text-center py-4">Không tìm thấy khách hàng nào</td>
+                                    <td colspan="9" class="text-center py-5">
+                                        <div class="text-gray-500 mb-2"><i class="fas fa-users fa-3x"></i></div>
+                                        <p>Không tìm thấy khách hàng nào</p>
+                                    </td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
-                </div>
-            </form>
+                </form>
+            </div>
 
             <!-- Pagination -->
             <?php if ($pagination['total_pages'] > 1): ?>
-                <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-center">
-                        <?php
-                        $queryParams = $filters;
-                        unset($queryParams['page']); // Handled in href
-                        $queryString = http_build_query($queryParams);
-                        ?>
+                <div class="px-4 py-3">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center mb-0">
+                            <?php
+                            $queryParams = $filters;
+                            unset($queryParams['page']);
+                            $queryString = http_build_query($queryParams);
+                            ?>
 
-                        <li class="page-item <?php echo $pagination['current_page'] <= 1 ? 'disabled' : ''; ?>">
-                            <a class="page-link" href="index.php?page=customers&p=<?php echo $pagination['current_page'] - 1; ?>&<?php echo $queryString; ?>">Trước</a>
-                        </li>
-
-                        <?php
-                        $start = max(1, $pagination['current_page'] - 2);
-                        $end = min($pagination['total_pages'], $pagination['current_page'] + 2);
-
-                        if ($start > 1) {
-                            echo '<li class="page-item"><a class="page-link" href="index.php?page=customers&p=1&' . $queryString . '">1</a></li>';
-                            if ($start > 2) echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
-                        }
-
-                        for ($i = $start; $i <= $end; $i++):
-                        ?>
-                            <li class="page-item <?php echo $pagination['current_page'] == $i ? 'active' : ''; ?>">
-                                <a class="page-link" href="index.php?page=customers&p=<?php echo $i; ?>&<?php echo $queryString; ?>">
-                                    <?php echo $i; ?>
-                                </a>
+                            <li class="page-item <?php echo $pagination['current_page'] <= 1 ? 'disabled' : ''; ?>">
+                                <a class="page-link" href="index.php?page=customers&p=<?php echo $pagination['current_page'] - 1; ?>&<?php echo $queryString; ?>">Trước</a>
                             </li>
-                        <?php endfor; ?>
 
-                        <?php
-                        if ($end < $pagination['total_pages']) {
-                            if ($end < $pagination['total_pages'] - 1) echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
-                            echo '<li class="page-item"><a class="page-link" href="index.php?page=customers&p=' . $pagination['total_pages'] . '&' . $queryString . '">' . $pagination['total_pages'] . '</a></li>';
-                        }
-                        ?>
+                            <?php
+                            $start = max(1, $pagination['current_page'] - 2);
+                            $end = min($pagination['total_pages'], $pagination['current_page'] + 2);
 
-                        <li class="page-item <?php echo $pagination['current_page'] >= $pagination['total_pages'] ? 'disabled' : ''; ?>">
-                            <a class="page-link" href="index.php?page=customers&p=<?php echo $pagination['current_page'] + 1; ?>&<?php echo $queryString; ?>">Sau</a>
-                        </li>
-                    </ul>
-                </nav>
+                            if ($start > 1) {
+                                echo '<li class="page-item"><a class="page-link" href="index.php?page=customers&p=1&' . $queryString . '">1</a></li>';
+                                if ($start > 2) echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                            }
+
+                            for ($i = $start; $i <= $end; $i++):
+                            ?>
+                                <li class="page-item <?php echo $pagination['current_page'] == $i ? 'active' : ''; ?>">
+                                    <a class="page-link" href="index.php?page=customers&p=<?php echo $i; ?>&<?php echo $queryString; ?>">
+                                        <?php echo $i; ?>
+                                    </a>
+                                </li>
+                            <?php endfor; ?>
+
+                            <?php
+                            if ($end < $pagination['total_pages']) {
+                                if ($end < $pagination['total_pages'] - 1) echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                                echo '<li class="page-item"><a class="page-link" href="index.php?page=customers&p=' . $pagination['total_pages'] . '&' . $queryString . '">' . $pagination['total_pages'] . '</a></li>';
+                            }
+                            ?>
+
+                            <li class="page-item <?php echo $pagination['current_page'] >= $pagination['total_pages'] ? 'disabled' : ''; ?>">
+                                <a class="page-link" href="index.php?page=customers&p=<?php echo $pagination['current_page'] + 1; ?>&<?php echo $queryString; ?>">Sau</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
             <?php endif; ?>
         </div>
     </div>
 </div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const selectAll = document.getElementById('select-all');
-        const checkboxes = document.querySelectorAll('.item-checkbox');
-        const btnDelete = document.getElementById('btn-delete-selected');
-        const form = document.getElementById('bulk-delete-form');
-
-        // Select All handler
-        if (selectAll) {
-            selectAll.addEventListener('change', function() {
-                checkboxes.forEach(cb => cb.checked = this.checked);
-                updateDeleteButton();
-            });
-        }
-
-        // Individual checkbox handler
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', function() {
-                updateDeleteButton();
-                if (!this.checked) {
-                    if (selectAll) selectAll.checked = false;
+        // Handle Row Click
+        var rows = document.querySelectorAll('.clickable-row');
+        rows.forEach(function(row) {
+            row.addEventListener('click', function(e) {
+                // Do not trigger if clicked on checkbox, its container, or label
+                if (e.target.closest('.no-click') || e.target.closest('.custom-control')) {
+                    return;
+                }
+                var href = this.getAttribute('data-href');
+                if (href) {
+                    window.location.href = href;
                 }
             });
         });
 
-        // Update delete button state
-        function updateDeleteButton() {
-            const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
-            if (btnDelete) {
-                btnDelete.disabled = checkedCount === 0;
-                btnDelete.innerHTML = `<i class="fas fa-trash fa-sm text-white-50"></i> Xóa đã chọn (${checkedCount})`;
+        // Handle Check All
+        var checkAll = document.getElementById('check-all');
+        var checkboxes = document.querySelectorAll('.customer-check');
+        var bulkBtn = document.getElementById('bulk-delete-btn');
+        var selectedCountSpan = document.getElementById('selected-count');
+
+        if (checkAll) {
+            checkAll.addEventListener('change', function() {
+                var isChecked = this.checked;
+                checkboxes.forEach(function(cb) {
+                    cb.checked = isChecked;
+                });
+                toggleBulkBtn();
+            });
+        }
+
+        checkboxes.forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                var allChecked = document.querySelectorAll('.customer-check:checked').length === checkboxes.length;
+                if (checkAll) checkAll.checked = allChecked;
+                toggleBulkBtn();
+            });
+        });
+
+        function toggleBulkBtn() {
+            var count = document.querySelectorAll('.customer-check:checked').length;
+            if (bulkBtn) {
+                if (count > 0) {
+                    bulkBtn.classList.remove('d-none');
+                    if (selectedCountSpan) selectedCountSpan.textContent = count;
+                } else {
+                    bulkBtn.classList.add('d-none');
+                }
             }
         }
 
-        // Delete button click handler
-        if (btnDelete) {
-            btnDelete.addEventListener('click', function(e) {
+        // Bulk delete button handler
+        if (bulkBtn) {
+            bulkBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
-                if (checkedCount > 0) {
-                    if (confirm(`Bạn có chắc chắn muốn xóa ${checkedCount} khách hàng đã chọn?`)) {
-                        form.submit();
+                var count = document.querySelectorAll('.customer-check:checked').length;
+                if (count > 0) {
+                    if (confirm(`Bạn có chắc chắn muốn xóa ${count} khách hàng đã chọn?`)) {
+                        document.getElementById('bulk-action-form').submit();
                     }
                 }
             });

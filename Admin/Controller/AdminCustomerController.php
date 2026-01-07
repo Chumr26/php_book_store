@@ -250,7 +250,7 @@ class AdminCustomerController extends BaseController
         }
 
         $customerId = $_POST['customer_id'] ?? 0;
-        header('Location: index.php?page=admin_customer_detail&id=' . $customerId);
+        header('Location: index.php?page=customer_detail&id=' . $customerId);
         exit;
     }
 
@@ -414,21 +414,41 @@ class AdminCustomerController extends BaseController
     {
         try {
             $query = "SELECT 
-                        COUNT(DISTINCT ma_don_hang) as total_orders,
-                        COALESCE(SUM(CASE WHEN trang_thai_don_hang = 'Đã giao' THEN 1 ELSE 0 END), 0) as completed_orders,
-                        COALESCE(SUM(CASE WHEN trang_thai_don_hang = 'Đã hủy' THEN 1 ELSE 0 END), 0) as cancelled_orders,
-                        COALESCE(SUM(tong_thanh_toan), 0) as total_spent,
-                        COALESCE(AVG(tong_thanh_toan), 0) as avg_order_value,
-                        MAX(ngay_dat) as last_order_date
-                     FROM don_hang
-                     WHERE ma_khach_hang = ?";
+                        COUNT(DISTINCT id_hoadon) as total_orders,
+                        COALESCE(SUM(CASE WHEN trang_thai = 'completed' THEN 1 ELSE 0 END), 0) as completed_orders,
+                        COALESCE(SUM(CASE WHEN trang_thai = 'cancelled' THEN 1 ELSE 0 END), 0) as cancelled_orders,
+                        COALESCE(SUM(tong_tien), 0) as total_spent,
+                        COALESCE(AVG(tong_tien), 0) as avg_order_value,
+                        MAX(ngay_dat_hang) as last_order_date
+                     FROM hoadon
+                     WHERE id_khachhang = ?";
 
             $stmt = $this->conn->prepare($query);
             $stmt->bind_param("i", $customerId);
             $stmt->execute();
             $result = $stmt->get_result()->fetch_assoc();
 
-            return $result;
+            // Ensure all keys exist with defaults, handling null result
+            if (!$result || !is_array($result)) {
+                return [
+                    'total_orders' => 0,
+                    'completed_orders' => 0,
+                    'cancelled_orders' => 0,
+                    'total_spent' => 0,
+                    'avg_order_value' => 0,
+                    'last_order_date' => null
+                ];
+            }
+
+            // Return with proper defaults for any null values
+            return [
+                'total_orders' => (int)($result['total_orders'] ?? 0),
+                'completed_orders' => (int)($result['completed_orders'] ?? 0),
+                'cancelled_orders' => (int)($result['cancelled_orders'] ?? 0),
+                'total_spent' => (float)($result['total_spent'] ?? 0),
+                'avg_order_value' => (float)($result['avg_order_value'] ?? 0),
+                'last_order_date' => $result['last_order_date'] ?? null
+            ];
         } catch (Exception $e) {
             error_log("Error in getCustomerStatistics: " . $e->getMessage());
             return [];

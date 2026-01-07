@@ -69,7 +69,7 @@
                                 <th style="width: 100px">Thứ tự</th>
                                 <th style="width: 30%">Tên danh mục</th>
                                 <th>Mô tả</th>
-                                <th style="width: 120px">Số lượng sách</th>
+                                <th style="width: 120px">SL sách</th>
                             </tr>
                         </thead>
                         <tbody>
