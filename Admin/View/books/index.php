@@ -100,7 +100,7 @@
 
             <div class="col-md-2 mb-3 mb-md-0">
                 <div class="dropdown">
-                    <input type="hidden" name="sort_by" id="sort_by_input" value="<?php echo htmlspecialchars($filters['sort_by']); ?>">
+                    <input type="hidden" name="sort_by" id="sort_input" value="<?php echo htmlspecialchars($filters['sort_by']); ?>">
                     <button class="btn admin-dropdown-toggle" type="button" id="sortDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <span class="text-value">
                             <?php
@@ -121,11 +121,11 @@
                         <i class="fas fa-chevron-down"></i>
                     </button>
                     <div class="dropdown-menu" aria-labelledby="sortDropdown">
-                        <a class="dropdown-item" href="javascript:void(0)" onclick="selectOption('sort_by', 'ngay_tao', 'Mới nhất')">Mới nhất</a>
-                        <a class="dropdown-item" href="javascript:void(0)" onclick="selectOption('sort_by', 'ten_sach', 'Tên A-Z')">Tên A-Z</a>
-                        <a class="dropdown-item" href="javascript:void(0)" onclick="selectOption('sort_by', 'gia', 'Giá bán')">Giá bán</a>
-                        <a class="dropdown-item" href="javascript:void(0)" onclick="selectOption('sort_by', 'so_luong_ton', 'Tồn kho')">Tồn kho</a>
-                        <a class="dropdown-item" href="javascript:void(0)" onclick="selectOption('sort_by', 'luot_ban', 'Bán chạy')">Bán chạy</a>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="selectOption('sort', 'ngay_tao', 'Mới nhất')">Mới nhất</a>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="selectOption('sort', 'ten_sach', 'Tên A-Z')">Tên A-Z</a>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="selectOption('sort', 'gia', 'Giá bán')">Giá bán</a>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="selectOption('sort', 'so_luong_ton', 'Tồn kho')">Tồn kho</a>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="selectOption('sort', 'luot_ban', 'Bán chạy')">Bán chạy</a>
                     </div>
                 </div>
             </div>
@@ -177,16 +177,16 @@
                                                 <label class="custom-control-label" for="check-<?php echo $book['ma_sach']; ?>"></label>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td class="align-middle">
                                             <div class="book-title"><?php echo htmlspecialchars($book['ten_sach']); ?></div>
                                             <div class="book-isbn"><i class="fas fa-barcode mr-1"></i><?php echo htmlspecialchars($book['isbn']); ?></div>
                                         </td>
-                                        <td>
+                                        <td class="align-middle">
                                             <span class="badge badge-light border">
                                                 <?php echo htmlspecialchars($book['ten_danh_muc'] ?? 'Chưa phân loại'); ?>
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="align-middle">
                                             <?php if ($book['gia_goc'] > $book['gia']): ?>
                                                 <div class="price-tag discount"><?php echo number_format($book['gia']); ?>đ</div>
                                                 <div class="original-price"><?php echo number_format($book['gia_goc']); ?>đ</div>
@@ -194,7 +194,7 @@
                                                 <div class="price-tag text-dark"><?php echo number_format($book['gia']); ?>đ</div>
                                             <?php endif; ?>
                                         </td>
-                                        <td>
+                                        <td class="align-middle">
                                             <?php
                                             $stockClass = $book['so_luong_ton'] < 10 ? 'stock-low' : 'stock-good';
                                             $stockIcon = $book['so_luong_ton'] < 10 ? 'fa-exclamation-circle' : 'fa-check-circle';
@@ -204,7 +204,7 @@
                                                 <?php echo number_format($book['so_luong_ton']); ?>
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="align-middle">
                                             <?php
                                             $statusClass = '';
                                             switch ($book['tinh_trang']) {
@@ -377,6 +377,8 @@
         var btn = document.getElementById(name + 'Dropdown');
         if (btn) {
             btn.querySelector('.text-value').textContent = label;
+            // Close the dropdown using Bootstrap's dropdown method
+            $(btn).dropdown('toggle');
         }
     }
 </script>
