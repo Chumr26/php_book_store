@@ -57,15 +57,33 @@
                     </div>
                     <div class="mb-0">
                         <label class="small font-weight-bold text-gray-500 mb-2"><i class="fas fa-toggle-on mr-2 text-gray-400"></i>Trạng thái:</label>
-                        <form action="index.php?page=customer_update_status" method="POST">
+                        <form action="index.php?page=customer_update_status" method="POST" id="statusForm">
                             <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
                             <input type="hidden" name="customer_id" value="<?php echo $customer['id_khachhang']; ?>">
                             <div class="input-group">
-                                <select class="form-control" name="status">
-                                    <option value="active" <?php echo $customer['trang_thai'] == 'active' ? 'selected' : ''; ?>>Hoạt động</option>
-                                    <option value="inactive" <?php echo $customer['trang_thai'] == 'inactive' ? 'selected' : ''; ?>>Không hoạt động</option>
-                                    <option value="banned" <?php echo $customer['trang_thai'] == 'banned' ? 'selected' : ''; ?>>Bị khóa</option>
-                                </select>
+                                <div class="dropdown" style="flex: 1;">
+                                    <input type="hidden" name="status" id="customer_status_input" value="<?php echo htmlspecialchars($customer['trang_thai']); ?>">
+                                    <button class="btn admin-dropdown-toggle" type="button" id="customerStatusDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span class="text-value">
+                                            <?php
+                                            $statusLabels = [
+                                                'active' => 'Hoạt động',
+                                                'inactive' => 'Không hoạt động',
+                                                'banned' => 'Bị khóa'
+                                            ];
+                                            echo htmlspecialchars($statusLabels[$customer['trang_thai']] ?? 'Hoạt động');
+                                            ?>
+                                        </span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="customerStatusDropdown">
+                                        <div class="admin-dropdown-menu-scrollable">
+                                            <a class="dropdown-item" href="javascript:void(0)" onclick="selectOption('customer_status', 'active', 'Hoạt động')">Hoạt động</a>
+                                            <a class="dropdown-item" href="javascript:void(0)" onclick="selectOption('customer_status', 'inactive', 'Không hoạt động')">Không hoạt động</a>
+                                            <a class="dropdown-item" href="javascript:void(0)" onclick="selectOption('customer_status', 'banned', 'Bị khóa')">Bị khóa</a>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="input-group-append">
                                     <button class="btn btn-primary btn-icon-split" type="submit">
                                         <span class="icon text-white-50"><i class="fas fa-save"></i></span>
@@ -193,3 +211,28 @@
         </div>
     </div>
 </div>
+<script>
+    // Standardized Admin Dropdown Handler
+    function selectOption(name, value, label) {
+        // Update hidden input
+        document.getElementById(name + '_input').value = value;
+        // Update button text
+        var btn = document.getElementById(name + 'Dropdown') || document.getElementById(name.replace('_', '') + 'Dropdown');
+        if (!btn) {
+            // Try alternative naming conventions
+            var possibleIds = [name + 'Dropdown', name.replace('_', '') + 'Dropdown', name.charAt(0).toUpperCase() + name.slice(1) + 'Dropdown'];
+            for (var i = 0; i < possibleIds.length; i++) {
+                btn = document.getElementById(possibleIds[i]);
+                if (btn) break;
+            }
+        }
+        if (btn) {
+            var textElement = btn.querySelector('.text-value');
+            if (textElement) {
+                textElement.textContent = label;
+            }
+            // Close the dropdown using Bootstrap's dropdown method
+            $(btn).dropdown('toggle');
+        }
+    }
+</script>

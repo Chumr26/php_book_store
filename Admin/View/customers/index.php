@@ -42,24 +42,62 @@
 
             <div class="col-md-2 mb-3 mb-md-0">
                 <label for="status" class="small font-weight-bold text-gray-700 mb-2">Trạng thái</label>
-                <select class="form-control" name="status" id="status">
-                    <option value="">Tất cả</option>
-                    <?php foreach ($statuses as $key => $label): ?>
-                        <option value="<?php echo $key; ?>"
-                            <?php echo $filters['status'] == $key ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($label); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                <div class="dropdown">
+                    <input type="hidden" name="status" id="status_input" value="<?php echo htmlspecialchars($filters['status']); ?>">
+                    <button class="btn admin-dropdown-toggle" type="button" id="statusDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="text-value">
+                            <?php
+                            $statusLabel = 'Tất cả';
+                            if ($filters['status'] && isset($statuses[$filters['status']])) {
+                                $statusLabel = $statuses[$filters['status']];
+                            }
+                            echo htmlspecialchars($statusLabel);
+                            ?>
+                        </span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="statusDropdown">
+                        <div class="admin-dropdown-menu-scrollable">
+                            <a class="dropdown-item" href="javascript:void(0)" data-value="" onclick="selectOption('status', '', 'Tất cả')">
+                                Tất cả
+                            </a>
+                            <?php foreach ($statuses as $key => $label): ?>
+                                <a class="dropdown-item" href="javascript:void(0)"
+                                    data-value="<?php echo $key; ?>"
+                                    onclick="selectOption('status', '<?php echo $key; ?>', '<?php echo htmlspecialchars($label); ?>')">
+                                    <?php echo htmlspecialchars($label); ?>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="col-md-2 mb-3 mb-md-0">
                 <label for="sort_by" class="small font-weight-bold text-gray-700 mb-2">Sắp xếp theo</label>
-                <select class="form-control" name="sort_by" id="sort_by">
-                    <option value="ngay_tao" <?php echo $filters['sort_by'] == 'ngay_tao' ? 'selected' : ''; ?>>Ngày tham gia</option>
-                    <option value="ho_ten" <?php echo $filters['sort_by'] == 'ho_ten' ? 'selected' : ''; ?>>Tên</option>
-                    <option value="email" <?php echo $filters['sort_by'] == 'email' ? 'selected' : ''; ?>>Email</option>
-                </select>
+                <div class="dropdown">
+                    <input type="hidden" name="sort_by" id="sort_by_input" value="<?php echo htmlspecialchars($filters['sort_by']); ?>">
+                    <button class="btn admin-dropdown-toggle" type="button" id="sortByDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="text-value">
+                            <?php
+                            $sortLabels = [
+                                'ngay_tao' => 'Ngày tham gia',
+                                'ho_ten' => 'Tên',
+                                'email' => 'Email'
+                            ];
+                            echo htmlspecialchars($sortLabels[$filters['sort_by']] ?? 'Ngày tham gia');
+                            ?>
+                        </span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="sortByDropdown">
+                        <div class="admin-dropdown-menu-scrollable">
+                            <a class="dropdown-item" href="javascript:void(0)" onclick="selectOption('sort_by', 'ngay_tao', 'Ngày tham gia')">Ngày tham gia</a>
+                            <a class="dropdown-item" href="javascript:void(0)" onclick="selectOption('sort_by', 'ho_ten', 'Tên')">Tên</a>
+                            <a class="dropdown-item" href="javascript:void(0)" onclick="selectOption('sort_by', 'email', 'Email')">Email</a>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="col-md-4 d-flex mb-3 mb-md-0">
@@ -220,7 +258,31 @@
         </div>
     </div>
 </div>
-
+<script>
+    // Standardized Admin Dropdown Handler
+    function selectOption(name, value, label) {
+        // Update hidden input
+        document.getElementById(name + '_input').value = value;
+        // Update button text
+        var btn = document.getElementById(name + 'Dropdown') || document.getElementById(name.replace('_', '') + 'Dropdown');
+        if (!btn) {
+            // Try alternative naming conventions
+            var possibleIds = [name + 'Dropdown', name.replace('_', '') + 'Dropdown', name.charAt(0).toUpperCase() + name.slice(1) + 'Dropdown'];
+            for (var i = 0; i < possibleIds.length; i++) {
+                btn = document.getElementById(possibleIds[i]);
+                if (btn) break;
+            }
+        }
+        if (btn) {
+            var textElement = btn.querySelector('.text-value');
+            if (textElement) {
+                textElement.textContent = label;
+            }
+            // Close the dropdown using Bootstrap's dropdown method
+            $(btn).dropdown('toggle');
+        }
+    }
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Handle Row Click

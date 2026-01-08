@@ -405,7 +405,35 @@ a.dropdown-item,
     visibility: hidden !important;
 }
 
-/* Generic Admin Dropdown (Pill Style) */
+/* ============================================
+   STANDARDIZED ADMIN DROPDOWN SYSTEM
+   ============================================
+   
+   This is the primary dropdown style for all admin pages.
+   Use this for consistent dropdown UI across the entire admin panel.
+   
+   Structure:
+   <div class="dropdown">
+       <input type="hidden" name="field_name" id="field_name_input" value="">
+       <button class="btn admin-dropdown-toggle" type="button" 
+               id="fieldDropdown" data-toggle="dropdown">
+           <span class="text-value">Label Text</span>
+           <i class="fas fa-chevron-down"></i>
+       </button>
+       <div class="dropdown-menu" aria-labelledby="fieldDropdown">
+           <div class="admin-dropdown-menu-scrollable">
+               <a class="dropdown-item" href="javascript:void(0)" 
+                  onclick="selectOption('field_name', 'value', 'Label')">
+                   Label
+               </a>
+           </div>
+       </div>
+   </div>
+   
+   Note: Requires selectOption() JavaScript function (see admin.js)
+   ============================================ */
+
+/* Generic Admin Dropdown Toggle Button (Pill Style) */
 .admin-dropdown-toggle {
     display: flex !important;
     align-items: center;
@@ -436,12 +464,14 @@ a.dropdown-item,
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    flex: 1;
 }
 
 .admin-dropdown-toggle .fa-chevron-down {
     font-size: 0.75rem;
     color: #b7b9cc;
     transition: transform 0.2s;
+    flex-shrink: 0;
 }
 
 .show>.admin-dropdown-toggle .fa-chevron-down {
