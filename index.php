@@ -147,6 +147,20 @@ try {
                 $pageTitle = 'Đặt lại mật khẩu - BookStore';
             }
             break;
+
+        // ========== PROFILE ==========
+        case 'profile':
+            require_once BASE_PATH . 'Controller/ProfileController.php';
+            $controller = new ProfileController($conn);
+
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $controller->handlePost();
+            } else {
+                $viewData = $controller->show();
+                $viewFile = 'View/profile.php';
+                $pageTitle = 'Thông tin cá nhân - BookStore';
+            }
+            break;
         
         // ========== SHOPPING CART ==========
         case 'cart':

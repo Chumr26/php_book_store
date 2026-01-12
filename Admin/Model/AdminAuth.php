@@ -28,21 +28,44 @@ class AdminAuth {
      * @return array|false Admin data or false
      */
     public function verifyAdmin($username, $password) {
-        // TODO: Replace with database check in future phases
-        // For now, using hardcoded admin credentials
-        
+        // Preferred: verify against database (table: admin)
+        try {
+            $sql = "SELECT id_admin, ten_admin, username, password, email, quyen FROM admin WHERE username = ? OR email = ? LIMIT 1";
+            $stmt = $this->conn->prepare($sql);
+            if ($stmt) {
+                $stmt->bind_param('ss', $username, $username);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $row = $result ? $result->fetch_assoc() : null;
+
+                if ($row && isset($row['password']) && password_verify($password, $row['password'])) {
+                    return [
+                        'id_admin' => (int)$row['id_admin'],
+                        'username' => $row['username'],
+                        'full_name' => $row['ten_admin'],
+                        'email' => $row['email'],
+                        'role' => $row['quyen'] ?? 'admin'
+                    ];
+                }
+            }
+        } catch (Exception $e) {
+            // Fall through to legacy fallback
+        }
+
+        // Legacy fallback: hardcoded (keeps admin login working if DB not imported)
         $adminUsername = 'admin';
-        $adminPassword = 'admin123'; // In production, this should be hashed
-        
+        $adminPassword = 'admin123';
+
         if ($username === $adminUsername && $password === $adminPassword) {
             return [
                 'id_admin' => 1,
                 'username' => $username,
                 'full_name' => 'Administrator',
+                'email' => 'admin@bookstore.com',
                 'role' => 'admin'
             ];
         }
-        
+
         return false;
     }
     
@@ -57,6 +80,9 @@ class AdminAuth {
         $_SESSION['admin_username'] = $adminData['username'];
         $_SESSION['admin_name'] = $adminData['full_name'];
         $_SESSION['admin_role'] = $adminData['role'];
+        if (isset($adminData['email'])) {
+            $_SESSION['admin_email'] = $adminData['email'];
+        }
         $_SESSION['is_admin'] = true;
         $_SESSION['admin_login_time'] = time();
         
@@ -99,6 +125,7 @@ class AdminAuth {
                 'id_admin' => $_SESSION['admin_id'],
                 'username' => $_SESSION['admin_username'],
                 'full_name' => $_SESSION['admin_name'],
+                'email' => $_SESSION['admin_email'] ?? null,
                 'role' => $_SESSION['admin_role']
             ];
         }
@@ -141,6 +168,79 @@ class AdminAuth {
         // $sql = "SELECT * FROM admin_users WHERE username = ? AND status = 1";
         // ...
         return null;
+    }
+
+    /**
+     * Get admin by ID from database
+     * @param int $id
+     * @return array|null
+     */
+    public function getAdminById($id) {
+        $sql = "SELECT id_admin, ten_admin, username, email, quyen, ngay_tao FROM admin WHERE id_admin = ? LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return null;
+        }
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result ? $result->fetch_assoc() : null;
+        return $row ?: null;
+    }
+
+    /**
+     * Update admin profile (name + email)
+     * @param int $id
+     * @param array $data
+     * @return bool
+     */
+    public function updateAdminProfile($id, $data) {
+        $sql = "UPDATE admin SET ten_admin = ?, email = ? WHERE id_admin = ?";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return false;
+        }
+        $stmt->bind_param('ssi', $data['full_name'], $data['email'], $id);
+        return $stmt->execute();
+    }
+
+    /**
+     * Verify current admin password
+     * @param int $id
+     * @param string $currentPassword
+     * @return bool
+     */
+    public function verifyAdminPassword($id, $currentPassword) {
+        $sql = "SELECT password FROM admin WHERE id_admin = ? LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return false;
+        }
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result ? $result->fetch_assoc() : null;
+        if (!$row || !isset($row['password'])) {
+            return false;
+        }
+        return password_verify($currentPassword, $row['password']);
+    }
+
+    /**
+     * Update admin password
+     * @param int $id
+     * @param string $newPassword
+     * @return bool
+     */
+    public function updateAdminPassword($id, $newPassword) {
+        $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+        $sql = "UPDATE admin SET password = ? WHERE id_admin = ?";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return false;
+        }
+        $stmt->bind_param('si', $hashedPassword, $id);
+        return $stmt->execute();
     }
 }
 ?>

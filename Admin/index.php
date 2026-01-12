@@ -76,6 +76,20 @@ try {
             $controller->logout();
             break;
 
+        // ========== PROFILE ==========
+        case 'profile':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminProfileController.php';
+            $controller = new AdminProfileController($conn);
+
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $controller->handlePost();
+            } else {
+                $viewData = $controller->show();
+                $viewFile = 'View/profile.php';
+                $pageTitle = 'Hồ sơ - Admin BookStore';
+            }
+            break;
+
         // ========== DASHBOARD ==========
         case 'dashboard':
             require_once ADMIN_BASE_PATH . 'Controller/AdminDashboardController.php';
