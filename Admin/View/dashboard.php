@@ -25,6 +25,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Doanh thu</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo number_format($statistics['total_revenue'] ?? 0); ?>đ</div>
+                            <div class="text-xs text-gray-800 mt-1">Giá trị đơn TB: <?php echo number_format($statistics['avg_order_value'] ?? 0); ?>đ</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -42,6 +43,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Đơn hàng</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo number_format($statistics['total_orders'] ?? 0); ?></div>
+                            <div class="text-xs text-gray-800 mt-1">Tỷ lệ chuyển đổi: <?php echo number_format($statistics['conversion_rate'] ?? 0, 2); ?>%</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
@@ -93,7 +95,7 @@
             <div class="card shadow mb-4">
                 <!-- Card Header - Dropdown -->
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Biểu đồ doanh thu</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Doanh thu & đơn hàng</h6>
                 </div>
                 <!-- Card Body -->
                 <div class="card-body">
@@ -134,6 +136,34 @@
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Khách hàng mới</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-line-sm">
+                        <canvas id="newCustomersChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Top sách bán chạy (SL)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-bar">
+                        <canvas id="topSellingBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Content Row -->
     <div class="row">
 
@@ -146,7 +176,7 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered" width="100%" cellspacing="0">
+                        <table class="table table-bordered table-hover" width="100%" cellspacing="0">
                             <thead>
                                 <tr>
                                     <th>Tên sách</th>
@@ -179,7 +209,7 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered" width="100%" cellspacing="0">
+                        <table class="table table-bordered table-hover" width="100%" cellspacing="0">
                             <thead>
                                 <tr>
                                     <th>Mã ĐH</th>
@@ -217,6 +247,22 @@
 Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
 Chart.defaults.global.defaultFontColor = '#858796';
 
+function formatCurrencyVND(value) {
+    try {
+        return Number(value || 0).toLocaleString('vi-VN') + 'đ';
+    } catch (e) {
+        return value + 'đ';
+    }
+}
+
+function formatNumberVI(value) {
+    try {
+        return Number(value || 0).toLocaleString('vi-VN');
+    } catch (e) {
+        return value;
+    }
+}
+
 // Area Chart Example
 var ctx = document.getElementById("myAreaChart");
 var myLineChart = new Chart(ctx, {
@@ -227,7 +273,7 @@ var myLineChart = new Chart(ctx, {
         echo json_encode($labels); 
     ?>,
     datasets: [{
-      label: "Earnings",
+            label: "Doanh thu",
       lineTension: 0.3,
       backgroundColor: "rgba(78, 115, 223, 0.05)",
       borderColor: "rgba(78, 115, 223, 1)",
@@ -239,11 +285,30 @@ var myLineChart = new Chart(ctx, {
       pointHoverBorderColor: "rgba(78, 115, 223, 1)",
       pointHitRadius: 10,
       pointBorderWidth: 2,
+            yAxisID: 'yRevenue',
       data: <?php 
         $values = array_map(function($item) { return $item['revenue']; }, $revenue_chart);
         echo json_encode($values); 
       ?>,
-    }],
+        },{
+            label: "Đơn hàng",
+            lineTension: 0.3,
+            backgroundColor: "rgba(28, 200, 138, 0.05)",
+            borderColor: "rgba(28, 200, 138, 1)",
+            pointRadius: 3,
+            pointBackgroundColor: "rgba(28, 200, 138, 1)",
+            pointBorderColor: "rgba(28, 200, 138, 1)",
+            pointHoverRadius: 3,
+            pointHoverBackgroundColor: "rgba(28, 200, 138, 1)",
+            pointHoverBorderColor: "rgba(28, 200, 138, 1)",
+            pointHitRadius: 10,
+            pointBorderWidth: 2,
+            yAxisID: 'yOrders',
+            data: <?php 
+                $orderCounts = array_map(function($item) { return $item['order_count'] ?? 0; }, $revenue_chart);
+                echo json_encode($orderCounts);
+            ?>
+        }],
   },
   options: {
     maintainAspectRatio: false,
@@ -269,12 +334,13 @@ var myLineChart = new Chart(ctx, {
         }
       }],
       yAxes: [{
+                id: 'yRevenue',
+                position: 'left',
         ticks: {
           maxTicksLimit: 5,
           padding: 10,
-          // Include a dollar sign in the ticks
           callback: function(value, index, values) {
-            return value.toLocaleString('vi-VN') + 'đ';
+                        return formatCurrencyVND(value);
           }
         },
         gridLines: {
@@ -284,10 +350,24 @@ var myLineChart = new Chart(ctx, {
           borderDash: [2],
           zeroLineBorderDash: [2]
         }
+            },{
+                id: 'yOrders',
+                position: 'right',
+                ticks: {
+                    maxTicksLimit: 5,
+                    padding: 10,
+                    callback: function(value) {
+                        return formatNumberVI(value);
+                    }
+                },
+                gridLines: {
+                    drawOnChartArea: false,
+                    drawBorder: false
+                }
       }],
     },
     legend: {
-      display: false
+            display: true
     },
     tooltips: {
       backgroundColor: "rgb(255,255,255)",
@@ -306,12 +386,168 @@ var myLineChart = new Chart(ctx, {
       callbacks: {
         label: function(tooltipItem, chart) {
           var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
-          return datasetLabel + ': ' + tooltipItem.yLabel.toLocaleString('vi-VN') + 'đ';
+                    if (datasetLabel === 'Doanh thu') {
+                        return datasetLabel + ': ' + formatCurrencyVND(tooltipItem.yLabel);
+                    }
+                    return datasetLabel + ': ' + formatNumberVI(tooltipItem.yLabel);
         }
       }
     }
   }
 });
+
+// New Customers Chart
+var newCustomersCanvas = document.getElementById("newCustomersChart");
+if (newCustomersCanvas) {
+    var newCustomersLabels = <?php 
+            $customerLabels = array_map(function($item) { return $item['date'] ?? $item['hour'] ?? $item['month']; }, $new_customers_chart ?? []);
+            echo json_encode($customerLabels);
+    ?>;
+    var newCustomersValues = <?php 
+            $customerValues = array_map(function($item) { return $item['customer_count'] ?? 0; }, $new_customers_chart ?? []);
+            echo json_encode($customerValues);
+    ?>;
+
+    new Chart(newCustomersCanvas, {
+        type: 'line',
+        data: {
+            labels: newCustomersLabels,
+            datasets: [{
+                label: 'Khách hàng mới',
+                lineTension: 0.3,
+                backgroundColor: "rgba(54, 185, 204, 0.05)",
+                borderColor: "rgba(54, 185, 204, 1)",
+                pointRadius: 3,
+                pointBackgroundColor: "rgba(54, 185, 204, 1)",
+                pointBorderColor: "rgba(54, 185, 204, 1)",
+                pointHoverRadius: 3,
+                pointHoverBackgroundColor: "rgba(54, 185, 204, 1)",
+                pointHoverBorderColor: "rgba(54, 185, 204, 1)",
+                pointHitRadius: 10,
+                pointBorderWidth: 2,
+                data: newCustomersValues
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            legend: { display: false },
+            scales: {
+                xAxes: [{
+                    gridLines: { display: false, drawBorder: false },
+                    ticks: { maxTicksLimit: 7 }
+                }],
+                yAxes: [{
+                    ticks: {
+                        maxTicksLimit: 5,
+                        padding: 10,
+                        callback: function(value) { return formatNumberVI(value); }
+                    },
+                    gridLines: {
+                        color: "rgb(234, 236, 244)",
+                        zeroLineColor: "rgb(234, 236, 244)",
+                        drawBorder: false,
+                        borderDash: [2],
+                        zeroLineBorderDash: [2]
+                    }
+                }]
+            },
+            tooltips: {
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                intersect: false,
+                mode: 'index',
+                caretPadding: 10,
+                callbacks: {
+                    label: function(tooltipItem) {
+                        return 'Khách hàng mới: ' + formatNumberVI(tooltipItem.yLabel);
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Top selling books (bar)
+var topSellingCanvas = document.getElementById("topSellingBarChart");
+if (topSellingCanvas) {
+    var topSellingLabels = <?php 
+            $topBooks = $top_selling_books ?? [];
+            $topBooks = array_slice($topBooks, 0, 8);
+            $topLabels = array_map(function($book) { return $book['ten_sach'] ?? ''; }, $topBooks);
+            echo json_encode($topLabels);
+    ?>;
+    var topSellingValues = <?php 
+            $topValues = array_map(function($book) { return $book['total_sold'] ?? 0; }, $topBooks);
+            echo json_encode($topValues);
+    ?>;
+
+    new Chart(topSellingCanvas, {
+        type: 'bar',
+        data: {
+            labels: topSellingLabels,
+            datasets: [{
+                label: 'Số lượng bán',
+                backgroundColor: "rgba(78, 115, 223, 0.7)",
+                hoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                borderColor: "rgba(78, 115, 223, 1)",
+                data: topSellingValues
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            legend: { display: false },
+            scales: {
+                xAxes: [{
+                    gridLines: { display: false, drawBorder: false },
+                    ticks: {
+                        maxTicksLimit: 8,
+                        callback: function(value) {
+                            if (typeof value === 'string' && value.length > 18) return value.substring(0, 18) + '…';
+                            return value;
+                        }
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        maxTicksLimit: 5,
+                        padding: 10,
+                        callback: function(value) { return formatNumberVI(value); }
+                    },
+                    gridLines: {
+                        color: "rgb(234, 236, 244)",
+                        zeroLineColor: "rgb(234, 236, 244)",
+                        drawBorder: false,
+                        borderDash: [2],
+                        zeroLineBorderDash: [2]
+                    }
+                }]
+            },
+            tooltips: {
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10,
+                callbacks: {
+                    label: function(tooltipItem) {
+                        return 'Đã bán: ' + formatNumberVI(tooltipItem.yLabel);
+                    }
+                }
+            }
+        }
+    });
+}
 
 // Pie Chart Example
 var ctx = document.getElementById("myPieChart");

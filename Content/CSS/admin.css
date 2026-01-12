@@ -151,6 +151,18 @@
     width: 100%;
 }
 
+.chart-bar {
+    position: relative;
+    height: 18rem;
+    width: 100%;
+}
+
+.chart-line-sm {
+    position: relative;
+    height: 16rem;
+    width: 100%;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     #sidebar {

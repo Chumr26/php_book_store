@@ -52,6 +52,7 @@ class AdminDashboardController extends BaseController {
             $data = [
                 'statistics' => $this->getStatistics($period),
                 'revenue_chart' => $this->getRevenueChart($period),
+                'new_customers_chart' => $this->getNewCustomersChart($period),
                 'top_selling_books' => $this->getTopSellingBooks(10),
                 'recent_orders' => $this->getRecentOrders(10),
                 'new_customers' => $this->getNewCustomers(10),
@@ -231,6 +232,77 @@ class AdminDashboardController extends BaseController {
             
         } catch (Exception $e) {
             error_log("Error in getRevenueChart: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Lấy dữ liệu biểu đồ khách hàng mới
+     *
+     * @param string $period
+     * @return array
+     */
+    public function getNewCustomersChart($period = 'month') {
+        try {
+            $data = [];
+
+            switch ($period) {
+                case 'day':
+                    // Hôm nay theo giờ
+                    $query = "SELECT 
+                                HOUR(ngay_dang_ky) as hour,
+                                COUNT(*) as customer_count
+                              FROM khachhang
+                              WHERE DATE(ngay_dang_ky) = CURDATE()
+                              GROUP BY hour
+                              ORDER BY hour";
+                    break;
+
+                case 'week':
+                    // 7 ngày qua
+                    $query = "SELECT 
+                                DATE(ngay_dang_ky) as date,
+                                DAYNAME(ngay_dang_ky) as day_name,
+                                COUNT(*) as customer_count
+                              FROM khachhang
+                              WHERE ngay_dang_ky >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+                              GROUP BY date, day_name
+                              ORDER BY date";
+                    break;
+
+                case 'year':
+                    // 12 tháng qua
+                    $query = "SELECT 
+                                MONTH(ngay_dang_ky) as month,
+                                YEAR(ngay_dang_ky) as year,
+                                COUNT(*) as customer_count
+                              FROM khachhang
+                              WHERE ngay_dang_ky >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+                              GROUP BY year, month
+                              ORDER BY year, month";
+                    break;
+
+                case 'month':
+                default:
+                    // 30 ngày qua
+                    $query = "SELECT 
+                                DATE(ngay_dang_ky) as date,
+                                COUNT(*) as customer_count
+                              FROM khachhang
+                              WHERE ngay_dang_ky >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+                              GROUP BY date
+                              ORDER BY date";
+                    break;
+            }
+
+            $result = $this->conn->query($query);
+            while ($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
+
+            return $data;
+        } catch (Exception $e) {
+            error_log("Error in getNewCustomersChart: " . $e->getMessage());
             return [];
         }
     }
@@ -416,6 +488,7 @@ class AdminDashboardController extends BaseController {
             $data = [
                 'statistics' => $this->getStatistics($period),
                 'revenue_chart' => $this->getRevenueChart($period),
+                'new_customers_chart' => $this->getNewCustomersChart($period),
                 'order_status_summary' => $this->getOrderStatusSummary()
             ];
             
