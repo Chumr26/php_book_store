@@ -9,6 +9,9 @@ DROP DATABASE IF EXISTS bookstore;
 CREATE DATABASE bookstore CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE bookstore;
 
+-- Ensure the import session interprets this script as UTF-8
+SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- =============================================
 -- TABLE STRUCTURE
 -- =============================================
@@ -365,12 +368,12 @@ INSERT INTO khachhang (ten_khachhang, email, password, dien_thoai, dia_chi, ngay
 -- =============================================
 -- SEED DATA - HÓA ĐƠN
 -- =============================================
-INSERT INTO hoadon (id_khachhang, ma_hoadon, tong_tien, trang_thai, phuong_thuc_thanh_toan, trang_thai_thanh_toan, ten_nguoi_nhan, dia_chi_giao, sdt_giao, email_giao) VALUES
-(1, 'HD001', 580000, 'completed', 'COD', 'paid', 'Nguyễn Văn A', '123 Nguyễn Huệ, Q1, TP.HCM', '0901234567', 'nguyenvana@gmail.com'),
-(2, 'HD002', 1375000, 'shipping', 'transfer', 'paid', 'Trần Thị B', '456 Lê Lợi, Q3, TP.HCM', '0912345678', 'tranthib@gmail.com'),
-(3, 'HD003', 635000, 'pending', 'COD', 'unpaid', 'Lê Văn C', '789 Trần Hưng Đạo, Q5, TP.HCM', '0923456789', 'levanc@gmail.com'),
-(4, 'HD004', 1785000, 'confirmed', 'momo', 'paid', 'Phạm Thị D', '321 Võ Văn Tần, Q3, TP.HCM', '0934567890', 'phamthid@gmail.com'),
-(5, 'HD005', 1165000, 'completed', 'vnpay', 'paid', 'Hoàng Văn E', '654 Pasteur, Q1, TP.HCM', '0945678901', 'hoangvane@gmail.com');
+INSERT INTO hoadon (id_khachhang, ma_hoadon, ngay_dat_hang, tong_tien, trang_thai, phuong_thuc_thanh_toan, trang_thai_thanh_toan, ten_nguoi_nhan, dia_chi_giao, sdt_giao, email_giao) VALUES
+(1, 'HD001', '2025-01-08 10:20:00', 580000, 'completed', 'COD', 'paid', 'Nguyễn Văn A', '123 Nguyễn Huệ, Q1, TP.HCM', '0901234567', 'nguyenvana@gmail.com'),
+(2, 'HD002', '2025-02-14 15:45:00', 1375000, 'shipping', 'transfer', 'paid', 'Trần Thị B', '456 Lê Lợi, Q3, TP.HCM', '0912345678', 'tranthib@gmail.com'),
+(3, 'HD003', '2025-03-02 09:05:00', 635000, 'pending', 'COD', 'unpaid', 'Lê Văn C', '789 Trần Hưng Đạo, Q5, TP.HCM', '0923456789', 'levanc@gmail.com'),
+(4, 'HD004', '2025-04-21 11:30:00', 1785000, 'confirmed', 'momo', 'paid', 'Phạm Thị D', '321 Võ Văn Tần, Q3, TP.HCM', '0934567890', 'phamthid@gmail.com'),
+(5, 'HD005', '2025-05-10 18:10:00', 1165000, 'completed', 'vnpay', 'paid', 'Hoàng Văn E', '654 Pasteur, Q1, TP.HCM', '0945678901', 'hoangvane@gmail.com');
 
 -- =============================================
 -- SEED DATA - CHI TIẾT HÓA ĐƠN
@@ -460,6 +463,173 @@ INSERT INTO banner (tieu_de, hinh_anh, link_url, thu_tu, trang_thai) VALUES
 ('Sách best seller', 'banner_bestseller.jpg', '/books/bestseller', 2, 'active'),
 ('Giảm giá sách thiếu nhi', 'banner_thieunhi.jpg', '/category/thieunhi', 3, 'active'),
 ('Mua 2 tặng 1', 'banner_mua2tang1.jpg', '/promotion/buy2get1', 4, 'active');
+
+-- =============================================
+-- EXTRA SEED DATA - MORE CUSTOMERS + MANY ORDERS (FOR DASHBOARD ANALYTICS)
+-- Note: This section generates many orders across months when you re-import.
+-- =============================================
+
+-- Add more customers (Password: 123456, same hash as existing seeds)
+INSERT INTO khachhang (ten_khachhang, email, password, dien_thoai, dia_chi, ngay_sinh, gioi_tinh) VALUES
+('Đặng Minh Anh', 'minhanh@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0902223344', '12 CMT8, Q10, TP.HCM', '1998-11-02', 'Nữ'),
+('Võ Quốc Huy', 'quochuy@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0903334455', '88 Lý Tự Trọng, Q1, TP.HCM', '1993-04-19', 'Nam'),
+('Ngô Thảo Vy', 'thaovy@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0904445566', '25 Nguyễn Trãi, Q5, TP.HCM', '1996-09-12', 'Nữ'),
+('Bùi Gia Bảo', 'giabao@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0905556677', '102 Hai Bà Trưng, Q1, TP.HCM', '1991-01-30', 'Nam'),
+('Phan Hoài Nam', 'hoainam@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0906667788', '15 Điện Biên Phủ, Bình Thạnh, TP.HCM', '1989-06-08', 'Nam'),
+('Lý Ngọc Trâm', 'ngoctram@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0907778899', '9 Pasteur, Q3, TP.HCM', '1997-02-22', 'Nữ'),
+('Trịnh Khánh Linh', 'khanhlinh@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0908889900', '70 Võ Thị Sáu, Q3, TP.HCM', '1999-07-05', 'Nữ'),
+('Nguyễn Đức Long', 'duclong@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0911112233', '5 Nguyễn Văn Cừ, Q5, TP.HCM', '1994-12-14', 'Nam'),
+('Hà Thu Hà', 'thuha@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0912223344', '120 Phan Xích Long, Phú Nhuận, TP.HCM', '1992-10-01', 'Nữ'),
+('Lâm Tuấn Kiệt', 'tuankiet@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0913334455', '33 Nguyễn Oanh, Gò Vấp, TP.HCM', '1990-03-03', 'Nam'),
+('Đỗ Thanh Tùng', 'thanhtung@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0914445566', '77 Tôn Đức Thắng, Q1, TP.HCM', '1987-08-09', 'Nam'),
+('Mai Phương Thảo', 'phuongthao@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0915556677', '18 Nguyễn Hữu Cảnh, Bình Thạnh, TP.HCM', '1995-05-27', 'Nữ'),
+('Phạm Quốc Tuấn', 'quoctuan@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0916667788', '9 Lê Văn Sỹ, Q3, TP.HCM', '1988-02-17', 'Nam'),
+('Trần Bảo Ngọc', 'baongoc@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0917778899', '66 Nguyễn Đình Chiểu, Q3, TP.HCM', '2000-12-31', 'Nữ'),
+('Vũ Hoàng Phúc', 'hoangphuc@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0918889900', '140 Lê Lai, Q1, TP.HCM', '1993-09-09', 'Nam');
+
+-- Bulk generate orders + order details for analytics
+DELIMITER $$
+CREATE PROCEDURE sp_seed_bulk_orders(
+    IN p_start_date DATE,
+    IN p_months INT,
+    IN p_orders_per_month INT
+)
+BEGIN
+    DECLARE m INT DEFAULT 0;
+    DECLARE o INT;
+    DECLARE v_order_id INT;
+    DECLARE v_customer_id INT;
+    DECLARE v_book_id INT;
+    DECLARE v_items INT;
+    DECLARE v_qty INT;
+    DECLARE v_total DECIMAL(10,2);
+    DECLARE v_ma VARCHAR(20);
+    DECLARE v_date DATETIME;
+    DECLARE v_status VARCHAR(20);
+    DECLARE v_paid VARCHAR(10);
+    DECLARE v_pay_method VARCHAR(10);
+
+    WHILE m < p_months DO
+        SET o = 0;
+        WHILE o < p_orders_per_month DO
+            -- Pick a random existing customer
+            SELECT id_khachhang INTO v_customer_id
+            FROM khachhang
+            ORDER BY RAND()
+            LIMIT 1;
+
+            -- Random date within the month (avoid month-length edge cases)
+            SET v_date = DATE_ADD(DATE_ADD(p_start_date, INTERVAL m MONTH), INTERVAL FLOOR(RAND() * 28) DAY);
+            SET v_date = DATE_ADD(v_date, INTERVAL FLOOR(RAND() * 24) HOUR);
+            SET v_date = DATE_ADD(v_date, INTERVAL FLOOR(RAND() * 60) MINUTE);
+
+            -- Status distribution (most are completed/shipping to feed analytics)
+            IF RAND() < 0.60 THEN
+                SET v_status = 'completed';
+            ELSEIF RAND() < 0.85 THEN
+                SET v_status = 'shipping';
+            ELSEIF RAND() < 0.93 THEN
+                SET v_status = 'confirmed';
+            ELSEIF RAND() < 0.97 THEN
+                SET v_status = 'pending';
+            ELSE
+                SET v_status = 'cancelled';
+            END IF;
+
+            -- Payment method
+            SET v_pay_method = ELT(1 + FLOOR(RAND() * 5), 'COD', 'transfer', 'card', 'momo', 'vnpay');
+
+            -- Payment status: cancelled always unpaid; completed/shipping usually paid
+            IF v_status = 'cancelled' THEN
+                SET v_paid = 'unpaid';
+            ELSEIF v_status IN ('completed', 'shipping') AND RAND() < 0.85 THEN
+                SET v_paid = 'paid';
+            ELSEIF v_pay_method = 'COD' AND RAND() < 0.40 THEN
+                SET v_paid = 'unpaid';
+            ELSE
+                SET v_paid = 'paid';
+            END IF;
+
+            -- Unique-ish order code
+            SET v_ma = CONCAT('HD', UPPER(SUBSTRING(REPLACE(UUID(), '-', ''), 1, 10)));
+
+            -- Insert order with tong_tien=0 then fill from details
+            INSERT INTO hoadon (
+                id_khachhang, ma_hoadon, ngay_dat_hang, tong_tien,
+                trang_thai, phuong_thuc_thanh_toan, trang_thai_thanh_toan,
+                ten_nguoi_nhan, dia_chi_giao, sdt_giao, email_giao, ghi_chu
+            )
+            SELECT
+                k.id_khachhang,
+                v_ma,
+                v_date,
+                0,
+                v_status,
+                v_pay_method,
+                v_paid,
+                k.ten_khachhang,
+                COALESCE(k.dia_chi, 'N/A'),
+                COALESCE(k.dien_thoai, '0000000000'),
+                k.email,
+                NULL
+            FROM khachhang k
+            WHERE k.id_khachhang = v_customer_id;
+
+            SET v_order_id = LAST_INSERT_ID();
+            SET v_items = 1 + FLOOR(RAND() * 4); -- 1..4 line items
+            SET v_total = 0;
+
+            WHILE v_items > 0 DO
+                -- Pick a random book
+                SELECT id_sach INTO v_book_id
+                FROM sach
+                ORDER BY RAND()
+                LIMIT 1;
+
+                SET v_qty = 1 + FLOOR(RAND() * 3); -- 1..3 qty
+
+                INSERT INTO chitiet_hoadon (id_hoadon, id_sach, so_luong, gia, thanh_tien)
+                SELECT v_order_id, s.id_sach, v_qty, s.gia, (s.gia * v_qty)
+                FROM sach s
+                WHERE s.id_sach = v_book_id;
+
+                SET v_total = v_total + (
+                    SELECT s.gia * v_qty FROM sach s WHERE s.id_sach = v_book_id
+                );
+
+                SET v_items = v_items - 1;
+            END WHILE;
+
+            UPDATE hoadon
+            SET tong_tien = v_total
+            WHERE id_hoadon = v_order_id;
+
+            -- Update inventory/sales only for shipped/completed orders
+            IF v_status IN ('completed', 'shipping') THEN
+                UPDATE sach s
+                JOIN (
+                    SELECT id_sach, SUM(so_luong) AS qty
+                    FROM chitiet_hoadon
+                    WHERE id_hoadon = v_order_id
+                    GROUP BY id_sach
+                ) x ON x.id_sach = s.id_sach
+                SET
+                    s.luot_ban = s.luot_ban + x.qty,
+                    s.so_luong_ton = GREATEST(s.so_luong_ton - x.qty, 0);
+            END IF;
+
+            SET o = o + 1;
+        END WHILE;
+
+        SET m = m + 1;
+    END WHILE;
+END$$
+DELIMITER ;
+
+-- Generate 18 months of data x 20 orders/month = 360 extra orders
+CALL sp_seed_bulk_orders('2024-01-01', 18, 20);
+
+DROP PROCEDURE sp_seed_bulk_orders;
 
 -- =============================================
 -- CREATE VIEWS FOR REPORTING
