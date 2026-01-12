@@ -75,7 +75,6 @@ class RegistrationController extends BaseController {
             $validator = new Validator();
             
             $validator->required('full_name', $fullName, 'Họ tên là bắt buộc.');
-            $validator->minLength('full_name', $fullName, 3, 'Họ tên phải có ít nhất 3 ký tự.');
             
             $validator->required('email', $email, 'Email là bắt buộc.');
             $validator->email('email', $email, 'Email không hợp lệ.');

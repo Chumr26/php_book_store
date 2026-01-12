@@ -18,7 +18,7 @@ $pageTitle = "Đăng ký";
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Họ và tên <span class="text-danger">*</span></label>
-                                    <input type="text" name="name" class="form-control" required>
+                                    <input type="text" name="full_name" class="form-control" required>
                                 </div>
                             </div>
                             
