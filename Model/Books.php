@@ -124,18 +124,47 @@ class Books {
     }
     
     /**
-     * Search books by keyword (title, author, ISBN)
-     * 
+     * Search books by keyword (title, author, publisher, ISBN) with pagination
+     *
+     * Controllers expect an array with keys: data, total, total_pages, current_page.
+     *
      * @param string $keyword Search keyword
      * @param int $page Current page
      * @param int $limit Items per page
-     * @return array Books matching search
+     * @param string $sortBy Allowed: ten_sach, gia, ngay_them, luot_ban, luot_xem
+     * @param string $order ASC|DESC
+     * @return array
      */
-    public function searchBooks($keyword, $page = 1, $limit = 12) {
+    public function searchBooks($keyword, $page = 1, $limit = 12, $sortBy = 'ten_sach', $order = 'ASC') {
+        $page = max(1, (int)$page);
+        $limit = max(1, (int)$limit);
         $offset = ($page - 1) * $limit;
+
+        $allowedSort = [
+            'ten_sach' => 's.ten_sach',
+            'gia' => 's.gia',
+            'ngay_them' => 's.ngay_them',
+            'luot_ban' => 's.luot_ban',
+            'luot_xem' => 's.luot_xem'
+        ];
+        $sortColumn = $allowedSort[$sortBy] ?? 's.ten_sach';
+        $order = strtoupper($order) === 'DESC' ? 'DESC' : 'ASC';
+
         $searchTerm = "%{$keyword}%";
-        
-        $sql = "SELECT s.*, 
+
+        $countSql = "SELECT COUNT(DISTINCT s.id_sach) as total
+                     FROM sach s
+                     LEFT JOIN tacgia tg ON s.id_tacgia = tg.id_tacgia
+                     LEFT JOIN nhaxuatban nxb ON s.id_nxb = nxb.id_nxb
+                     WHERE s.trang_thai = 'available'
+                     AND (s.ten_sach LIKE ? OR tg.ten_tacgia LIKE ? OR nxb.ten_nxb LIKE ? OR s.isbn LIKE ?)";
+        $countStmt = $this->conn->prepare($countSql);
+        $countStmt->bind_param("ssss", $searchTerm, $searchTerm, $searchTerm, $searchTerm);
+        $countStmt->execute();
+        $total = (int)($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
+        $totalPages = (int)ceil($total / $limit);
+
+        $sql = "SELECT s.*,
                        s.id_sach as ma_sach,
                        tg.ten_tacgia as author_name,
                        nxb.ten_nxb as publisher_name,
@@ -144,58 +173,93 @@ class Books {
                 LEFT JOIN tacgia tg ON s.id_tacgia = tg.id_tacgia
                 LEFT JOIN nhaxuatban nxb ON s.id_nxb = nxb.id_nxb
                 LEFT JOIN theloai tl ON s.id_theloai = tl.id_theloai
-                WHERE s.trang_thai = 'available' 
-                AND (s.ten_sach LIKE ? OR tg.ten_tacgia LIKE ? OR s.isbn LIKE ?)
-                ORDER BY s.ten_sach ASC
+                WHERE s.trang_thai = 'available'
+                AND (s.ten_sach LIKE ? OR tg.ten_tacgia LIKE ? OR nxb.ten_nxb LIKE ? OR s.isbn LIKE ?)
+                ORDER BY {$sortColumn} {$order}
                 LIMIT ? OFFSET ?";
-        
+
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("sssii", $searchTerm, $searchTerm, $searchTerm, $limit, $offset);
+        $stmt->bind_param("ssssii", $searchTerm, $searchTerm, $searchTerm, $searchTerm, $limit, $offset);
         $stmt->execute();
         $result = $stmt->get_result();
-        
+
         $books = [];
         while ($row = $result->fetch_assoc()) {
             $books[] = $row;
         }
-        
-        return $books;
+
+        return [
+            'data' => $books,
+            'total' => $total,
+            'total_pages' => $totalPages,
+            'current_page' => $page,
+            'limit' => $limit
+        ];
     }
     
     /**
-     * Get books by category
-     * 
+     * Get books by category with pagination
+     *
      * @param int $categoryId Category ID
      * @param int $page Current page
      * @param int $limit Items per page
-     * @return array Books in category
+     * @param string $sortBy Allowed: ngay_them, ten_sach, gia, luot_ban, luot_xem
+     * @param string $order ASC|DESC
+     * @return array
      */
-    public function getBooksByCategory($categoryId, $page = 1, $limit = 12) {
+    public function getBooksByCategory($categoryId, $page = 1, $limit = 12, $sortBy = 'ngay_them', $order = 'DESC') {
+        $page = max(1, (int)$page);
+        $limit = max(1, (int)$limit);
         $offset = ($page - 1) * $limit;
-        
-        $sql = "SELECT b.*, 
-                       a.author_name, 
-                       p.publisher_name, 
-                       c.category_name
-                FROM books b
-                LEFT JOIN authors a ON b.id_author = a.id_author
-                LEFT JOIN publishers p ON b.id_publisher = p.id_publisher
-                LEFT JOIN categories c ON b.id_category = c.id_category
-                WHERE b.id_category = ? AND b.status = 1
-                ORDER BY b.created_at DESC
+
+        $allowedSort = [
+            'ngay_them' => 's.ngay_them',
+            'ten_sach' => 's.ten_sach',
+            'gia' => 's.gia',
+            'luot_ban' => 's.luot_ban',
+            'luot_xem' => 's.luot_xem'
+        ];
+        $sortColumn = $allowedSort[$sortBy] ?? 's.ngay_them';
+        $order = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
+
+        $countSql = "SELECT COUNT(*) as total
+                     FROM sach s
+                     WHERE s.trang_thai = 'available' AND s.id_theloai = ?";
+        $countStmt = $this->conn->prepare($countSql);
+        $countStmt->bind_param("i", $categoryId);
+        $countStmt->execute();
+        $total = (int)($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
+        $totalPages = (int)ceil($total / $limit);
+
+        $sql = "SELECT s.*,
+                       s.id_sach as ma_sach,
+                       tg.ten_tacgia as author_name,
+                       nxb.ten_nxb as publisher_name,
+                       tl.ten_theloai as category_name
+                FROM sach s
+                LEFT JOIN tacgia tg ON s.id_tacgia = tg.id_tacgia
+                LEFT JOIN nhaxuatban nxb ON s.id_nxb = nxb.id_nxb
+                LEFT JOIN theloai tl ON s.id_theloai = tl.id_theloai
+                WHERE s.trang_thai = 'available' AND s.id_theloai = ?
+                ORDER BY {$sortColumn} {$order}
                 LIMIT ? OFFSET ?";
-        
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("iii", $categoryId, $limit, $offset);
         $stmt->execute();
         $result = $stmt->get_result();
-        
+
         $books = [];
         while ($row = $result->fetch_assoc()) {
             $books[] = $row;
         }
-        
-        return $books;
+
+        return [
+            'data' => $books,
+            'total' => $total,
+            'total_pages' => $totalPages,
+            'current_page' => $page,
+            'limit' => $limit
+        ];
     }
     
     /**

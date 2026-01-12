@@ -86,36 +86,9 @@ require_once __DIR__ . '/helpers/cover.php';
                         <h5 class="mb-0"><i class="fas fa-money-check-alt"></i> Phương thức thanh toán</h5>
                     </div>
                     <div class="card-body">
-                        <div class="custom-control custom-radio mb-3">
-                            <input type="radio" id="vnpay" name="payment_method" value="vnpay" 
-                                   class="custom-control-input" checked>
-                            <label class="custom-control-label" for="vnpay">
-                                <img src="/book_store/Content/images/icons/vnpay.png" style="height: 25px;" class="mr-2">
-                                <strong>VNPay</strong>
-                            </label>
-                        </div>
-                        
-                        <div class="custom-control custom-radio mb-3">
-                            <input type="radio" id="momo" name="payment_method" value="momo" 
-                                   class="custom-control-input">
-                            <label class="custom-control-label" for="momo">
-                                <img src="/book_store/Content/images/icons/momo.png" style="height: 25px;" class="mr-2">
-                                <strong>MoMo</strong>
-                            </label>
-                        </div>
-                        
-                        <div class="custom-control custom-radio mb-3">
-                            <input type="radio" id="zalopay" name="payment_method" value="zalopay" 
-                                   class="custom-control-input">
-                            <label class="custom-control-label" for="zalopay">
-                                <img src="/book_store/Content/images/icons/zalopay.png" style="height: 25px;" class="mr-2">
-                                <strong>ZaloPay</strong>
-                            </label>
-                        </div>
-                        
                         <div class="custom-control custom-radio">
                             <input type="radio" id="cod" name="payment_method" value="cod" 
-                                   class="custom-control-input">
+                                   class="custom-control-input" checked>
                             <label class="custom-control-label" for="cod">
                                 <i class="fas fa-money-bill-wave mr-2"></i>
                                 <strong>Thanh toán khi nhận hàng (COD)</strong>

@@ -104,8 +104,9 @@ class OrderController extends BaseController {
             $customerInfo = $this->getCustomerInfo($customerId);
             
             return [
-                'cart_items' => $cartItems,
-                'summary' => $summary,
+                // View/checkout.php expects these names
+                'cartItems' => $cartItems,
+                'cartSummary' => $summary,
                 'customer_info' => $customerInfo,
                 'csrf_token' => SessionHelper::generateCSRFToken(),
                 'payment_methods' => $this->getPaymentMethods()
@@ -196,85 +197,53 @@ class OrderController extends BaseController {
                 }
             }
             
-            // Bắt đầu transaction
-            $this->conn->begin_transaction();
-            
-            try {
-                // Tính toán tổng tiền
-                $summary = $this->calculateOrderSummary($cartItems);
-                
-                // Tạo mã đơn hàng unique
-                $orderCode = $this->generateOrderCode();
-                
-                // Chuẩn bị dữ liệu đơn hàng
-                $orderData = [
-                    'ma_khach_hang' => $customerId,
-                    'ma_don_hang' => $orderCode,
-                    'ten_nguoi_nhan' => Validator::sanitizeString($_POST['recipient_name']),
-                    'sdt_nguoi_nhan' => Validator::sanitizeString($_POST['phone']),
-                    'dia_chi_giao_hang' => Validator::sanitizeString($_POST['address']),
-                    'thanh_pho' => Validator::sanitizeString($_POST['city']),
-                    'quan_huyen' => Validator::sanitizeString($_POST['district']),
-                    'phuong_xa' => Validator::sanitizeString($_POST['ward'] ?? ''),
-                    'ghi_chu' => Validator::sanitizeString($_POST['note'] ?? ''),
-                    'tong_tien' => $summary['subtotal'],
-                    'phi_van_chuyen' => $summary['shipping'],
-                    'thue' => $summary['tax'],
-                    'tong_thanh_toan' => $summary['total'],
-                    'phuong_thuc_thanh_toan' => $_POST['payment_method'],
-                    'trang_thai_thanh_toan' => 'Đã thanh toán', // Sau khi payment gateway confirm
-                    'trang_thai_don_hang' => 'Chờ xác nhận'
-                ];
-                
-                // Tạo đơn hàng
-                $orderId = $this->orderModel->createOrder($orderData);
-                
-                if (!$orderId) {
-                    throw new Exception('Không thể tạo đơn hàng');
-                }
-                
-                // Thêm chi tiết đơn hàng và giảm tồn kho
-                foreach ($cartItems as $item) {
-                    // Thêm chi tiết đơn hàng
-                    $orderItemData = [
-                        'ma_don_hang' => $orderId,
-                        'ma_sach' => $item['ma_sach'],
-                        'so_luong' => $item['so_luong'],
-                        'gia' => $item['gia'],
-                        'thanh_tien' => $item['gia'] * $item['so_luong']
-                    ];
-                    
-                    $this->orderModel->addOrderItem($orderItemData);
-                    
-                    // Giảm tồn kho
-                    $this->bookModel->decreaseStock($item['ma_sach'], $item['so_luong']);
-                    
-                    // Tăng lượt bán
-                    $this->bookModel->increaseSales($item['ma_sach'], $item['so_luong']);
-                }
-                
-                // Xóa giỏ hàng
-                $this->cartModel->clearCart($customerId);
-                
-                // Commit transaction
-                $this->conn->commit();
-                
-                // Gửi email xác nhận (bất đồng bộ, không throw exception nếu fail)
-                $this->sendOrderConfirmation($orderId);
-                
-                // Lưu order ID vào session để hiển thị trang xác nhận
-                SessionHelper::set('last_order_id', $orderId);
-                SessionHelper::set('last_order_code', $orderCode);
-                
-                SessionHelper::setFlash('success', 'Đặt hàng thành công!');
-                header('Location: index.php?page=order_confirmation&order=' . $orderCode);
-                exit;
-                
-            } catch (Exception $e) {
-                // Rollback nếu có lỗi
-                $this->conn->rollback();
-                throw $e;
+            // COD only for now (future PayOS/online can hook into processPayment + callback)
+            $selectedMethod = strtolower((string)($_POST['payment_method'] ?? 'cod'));
+            if ($selectedMethod !== 'cod') {
+                throw new Exception('Phương thức thanh toán này chưa được hỗ trợ. Vui lòng chọn COD.');
             }
+
+            // Tính toán tổng tiền
+            $summary = $this->calculateOrderSummary($cartItems);
+
+            // Generate order number using Orders model format
+            $orderNumber = $this->orderModel->generateOrderNumber();
+
+            $deliveryAddress = Validator::sanitizeString($_POST['address']);
+            $district = Validator::sanitizeString($_POST['district']);
+            $city = Validator::sanitizeString($_POST['city']);
+            $fullDeliveryAddress = trim($deliveryAddress . ', ' . $district . ', ' . $city, " ,");
+
+            // Create order via model (handles items + stock + transaction)
+            $orderData = [
+                'order_number' => $orderNumber,
+                'payment_method' => 'COD',
+                'payment_status' => 'unpaid',
+                'recipient_name' => Validator::sanitizeString($_POST['recipient_name']),
+                'phone' => Validator::sanitizeString($_POST['phone']),
+                'email' => Validator::sanitizeEmail($_POST['email'] ?? ''),
+                'delivery_address' => $fullDeliveryAddress,
+                'note' => Validator::sanitizeString($_POST['note'] ?? ''),
+                'total_amount' => $summary['total']
+            ];
+
+            $orderId = $this->orderModel->createOrder($customerId, $orderData, $cartItems);
+            if (!$orderId) {
+                throw new Exception('Không thể tạo đơn hàng');
+            }
+
+            // Clear cart
+            $this->cartModel->clearCart($customerId);
+
+            // Best-effort email (do not block order success)
+            $this->sendOrderConfirmation($orderId);
+
+            SessionHelper::set('last_order_id', $orderId);
+            SessionHelper::set('last_order_code', $orderNumber);
+
+            SessionHelper::setFlash('success', 'Đặt hàng thành công!');
+            header('Location: index.php?page=order_confirmation&order=' . urlencode($orderNumber));
+            exit;
             
         } catch (Exception $e) {
             error_log("Error in createOrder: " . $e->getMessage());
@@ -309,39 +278,15 @@ class OrderController extends BaseController {
                 throw new Exception($validator->getFirstError());
             }
             
-            $customerId = SessionHelper::get('customer_id');
-            $cartItems = $this->cartModel->getCartItems($customerId);
-            $summary = $this->calculateOrderSummary($cartItems);
-            
-            // Lưu thông tin checkout vào session để dùng sau khi callback
-            SessionHelper::set('checkout_data', [
-                'recipient_name' => $_POST['recipient_name'],
-                'phone' => $_POST['phone'],
-                'address' => $_POST['address'],
-                'city' => $_POST['city'],
-                'district' => $_POST['district'],
-                'ward' => $_POST['ward'] ?? '',
-                'note' => $_POST['note'] ?? '',
-                'payment_method' => $_POST['payment_method']
-            ]);
-            
-            // Tạo mã đơn hàng tạm
-            $tempOrderCode = $this->generateOrderCode();
-            SessionHelper::set('temp_order_code', $tempOrderCode);
-            
-            // Redirect đến payment gateway
-            // TODO: Implement payment gateway integration (VNPay, MoMo, ZaloPay, etc.)
-            // Đây là ví dụ với VNPay
-            
-            $paymentUrl = $this->createVNPayPaymentUrl([
-                'order_code' => $tempOrderCode,
-                'amount' => $summary['total'],
-                'order_desc' => "Thanh toán đơn hàng $tempOrderCode",
-                'return_url' => $this->getBaseUrl() . '/index.php?page=payment_callback'
-            ]);
-            
-            header('Location: ' . $paymentUrl);
-            exit;
+            // COD only: create the order immediately
+            $selectedMethod = strtolower((string)($_POST['payment_method'] ?? 'cod'));
+            if ($selectedMethod !== 'cod') {
+                SessionHelper::setFlash('error', 'Hiện chỉ hỗ trợ COD. Cổng thanh toán online sẽ được bổ sung sau (PayOS).');
+                header('Location: index.php?page=checkout');
+                exit;
+            }
+
+            $this->createOrder();
             
         } catch (Exception $e) {
             error_log("Error in processPayment: " . $e->getMessage());
@@ -409,29 +354,33 @@ class OrderController extends BaseController {
      */
     public function confirmOrder() {
         try {
+            if (!SessionHelper::isLoggedIn()) {
+                SessionHelper::setFlash('warning', 'Vui lòng đăng nhập để xem đơn hàng');
+                header('Location: index.php?page=login&redirect=orders');
+                exit;
+            }
+
             $orderCode = $_GET['order'] ?? '';
             
             if (empty($orderCode)) {
                 throw new Exception('Mã đơn hàng không hợp lệ');
             }
             
-            // Lấy thông tin đơn hàng
-            $order = $this->orderModel->getOrderByCode($orderCode);
+            // Lấy thông tin đơn hàng (ma_hoadon)
+            $order = $this->orderModel->getOrderByNumber($orderCode);
             
             if (!$order) {
                 throw new Exception('Không tìm thấy đơn hàng');
             }
             
             // Kiểm tra quyền xem đơn hàng
-            if (SessionHelper::isLoggedIn()) {
-                $customerId = SessionHelper::get('customer_id');
-                if ($order['ma_khach_hang'] != $customerId) {
-                    throw new Exception('Bạn không có quyền xem đơn hàng này');
-                }
+            $customerId = SessionHelper::get('customer_id');
+            if ((int)($order['id_khachhang'] ?? 0) !== (int)$customerId) {
+                throw new Exception('Bạn không có quyền xem đơn hàng này');
             }
             
             // Lấy chi tiết đơn hàng
-            $orderItems = $this->orderModel->getOrderItems($order['ma_don_hang']);
+            $orderItems = $this->orderModel->getOrderItems($order['id_hoadon']);
             
             return [
                 'order' => $order,
@@ -492,9 +441,9 @@ class OrderController extends BaseController {
                 exit;
             }
             
-            $orderId = $_GET['id'] ?? '';
+            $orderId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             
-            if (empty($orderId)) {
+            if ($orderId <= 0) {
                 throw new Exception('Mã đơn hàng không hợp lệ');
             }
             
@@ -508,7 +457,7 @@ class OrderController extends BaseController {
             }
             
             // Kiểm tra quyền xem
-            if ($order['ma_khach_hang'] != $customerId) {
+            if ((int)($order['ma_khach_hang'] ?? 0) !== (int)$customerId) {
                 throw new Exception('Bạn không có quyền xem đơn hàng này');
             }
             
@@ -553,10 +502,10 @@ class OrderController extends BaseController {
                 throw new Exception('Invalid CSRF token');
             }
             
-            $orderId = $_POST['order_id'] ?? '';
+            $orderId = isset($_POST['order_id']) ? (int)$_POST['order_id'] : 0;
             $customerId = SessionHelper::get('customer_id');
             
-            if (empty($orderId)) {
+            if ($orderId <= 0) {
                 throw new Exception('Mã đơn hàng không hợp lệ');
             }
             
@@ -568,42 +517,22 @@ class OrderController extends BaseController {
             }
             
             // Kiểm tra quyền hủy
-            if ($order['ma_khach_hang'] != $customerId) {
+            if ((int)($order['ma_khach_hang'] ?? 0) !== (int)$customerId) {
                 throw new Exception('Bạn không có quyền hủy đơn hàng này');
             }
             
-            // Chỉ cho phép hủy đơn "Chờ xác nhận"
-            if ($order['trang_thai_don_hang'] !== 'Chờ xác nhận') {
+            // Chỉ cho phép hủy đơn ở trạng thái pending
+            if (($order['status'] ?? $order['trang_thai_don_hang'] ?? '') !== 'pending') {
                 throw new Exception('Không thể hủy đơn hàng ở trạng thái hiện tại');
             }
-            
-            // Bắt đầu transaction
-            $this->conn->begin_transaction();
-            
-            try {
-                // Cập nhật trạng thái đơn hàng
-                $this->orderModel->updateOrderStatus($orderId, 'Đã hủy');
-                
-                // Hoàn lại tồn kho
-                $orderItems = $this->orderModel->getOrderItems($orderId);
-                
-                foreach ($orderItems as $item) {
-                    $this->bookModel->increaseStock($item['ma_sach'], $item['so_luong']);
-                    $this->bookModel->decreaseSales($item['ma_sach'], $item['so_luong']);
-                }
-                
-                // Commit transaction
-                $this->conn->commit();
-                
-                SessionHelper::setFlash('success', 'Đã hủy đơn hàng thành công');
-                header('Location: index.php?page=order_detail&id=' . $orderId);
-                exit;
-                
-            } catch (Exception $e) {
-                // Rollback nếu có lỗi
-                $this->conn->rollback();
-                throw $e;
+
+            if (!$this->orderModel->cancelOrder($orderId)) {
+                throw new Exception('Không thể hủy đơn hàng. Vui lòng thử lại.');
             }
+
+            SessionHelper::setFlash('success', 'Đã hủy đơn hàng thành công');
+            header('Location: index.php?page=order_detail&id=' . $orderId);
+            exit;
             
         } catch (Exception $e) {
             error_log("Error in cancelOrder: " . $e->getMessage());
@@ -706,7 +635,7 @@ class OrderController extends BaseController {
      * @return array|null
      */
     private function getCustomerInfo($customerId) {
-        $query = "SELECT * FROM khach_hang WHERE ma_khach_hang = ? LIMIT 1";
+        $query = "SELECT * FROM khachhang WHERE id_khachhang = ? LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param("i", $customerId);
         $stmt->execute();
@@ -721,10 +650,8 @@ class OrderController extends BaseController {
      */
     private function getPaymentMethods() {
         return [
-            'vnpay' => 'VNPay',
-            'momo' => 'MoMo',
-            'zalopay' => 'ZaloPay',
-            'bank_transfer' => 'Chuyển khoản ngân hàng'
+            // COD only for now; keep method key stable for future providers like PayOS
+            'cod' => 'Thanh toán khi nhận hàng (COD)'
         ];
     }
     

@@ -108,9 +108,8 @@ class HomeController extends BaseController {
      */
     public function getNewArrivals($limit = 8) {
         try {
-            // Get books ordered by creation date (newest first)
-            $books = $this->booksModel->getAllBooks(1, $limit, 'ngay_tao', 'DESC');
-            return $books['data'] ?? [];
+            // Get books ordered by newest first
+            return $this->booksModel->getBooks(0, '', 0, '', 'newest', $limit, 0);
         } catch (Exception $e) {
             error_log("Error getting new arrivals: " . $e->getMessage());
             return [];

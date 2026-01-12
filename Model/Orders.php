@@ -38,11 +38,25 @@ class Orders {
         $this->conn->begin_transaction();
         
         try {
-            // Generate order number
-            $orderNumber = $this->generateOrderNumber();
+            // Generate / accept order number
+            $orderNumber = $orderData['order_number'] ?? $orderData['ma_hoadon'] ?? null;
+            if (empty($orderNumber)) {
+                $orderNumber = $this->generateOrderNumber();
+            }
             
-            // Calculate total
-            $totalAmount = $this->calculateTotal($items);
+            // Calculate total (allow controller to include shipping/tax)
+            $totalAmount = isset($orderData['total_amount']) ? (float)$orderData['total_amount'] : $this->calculateTotal($items);
+
+            // Normalize payment method to DB enum
+            $paymentMethod = $orderData['payment_method'] ?? 'COD';
+            $paymentMethodLower = strtolower((string)$paymentMethod);
+            if ($paymentMethodLower === 'cod') {
+                $paymentMethod = 'COD';
+            }
+
+            // Payment status enum: unpaid|paid
+            $paymentStatus = $orderData['payment_status'] ?? 'unpaid';
+            $paymentStatus = ($paymentStatus === 'paid') ? 'paid' : 'unpaid';
             
             // Insert order
             // Note: Schema has id_khachhang, ma_hoadon, tong_tien, trang_thai, phuong_thuc_thanh_toan, ...
@@ -50,7 +64,7 @@ class Orders {
                         id_khachhang, ma_hoadon, tong_tien, trang_thai, 
                         phuong_thuc_thanh_toan, trang_thai_thanh_toan, ten_nguoi_nhan, 
                         dia_chi_giao, sdt_giao, email_giao, ghi_chu
-                    ) VALUES (?, ?, ?, 'pending', ?, 'pending', ?, ?, ?, ?, ?)";
+                    ) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?)";
             
             $stmt = $this->conn->prepare($sql);
             
@@ -63,7 +77,8 @@ class Orders {
                 $customerId,
                 $orderNumber,
                 $totalAmount,
-                $orderData['payment_method'],
+                $paymentMethod,
+                $paymentStatus,
                 $orderData['recipient_name'],
                 $orderData['delivery_address'],
                 $orderData['phone'],
@@ -81,9 +96,13 @@ class Orders {
             foreach ($items as $item) {
                 // item keys from frontend/cart might differ. Assume standard keys.
                 // Cart usually has 'id_sach', 'gia', 'so_luong'.
-                $bookId = $item['id_book'] ?? $item['id_sach'];
+                $bookId = $item['id_book'] ?? $item['id_sach'] ?? $item['ma_sach'] ?? null;
                 $quantity = $item['quantity'] ?? $item['so_luong'];
                 $price = $item['price'] ?? $item['gia'];
+
+                if (empty($bookId)) {
+                    throw new Exception("Missing book id in cart item");
+                }
                 
                 $itemTotal = $quantity * $price;
                 

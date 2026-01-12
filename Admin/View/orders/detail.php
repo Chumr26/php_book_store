@@ -71,33 +71,35 @@
                             <div>
                                 <?php
                                 $statusClass = 'secondary';
-                                $orderStatus = isset($order['trang_thai_don_hang']) ? $order['trang_thai_don_hang'] : '';
-                                switch ($orderStatus) {
-                                    case 'Chờ xác nhận':
+                                $orderStatusCode = isset($order['trang_thai_don_hang']) ? $order['trang_thai_don_hang'] : '';
+                                $orderStatusLabelMap = [
+                                    'pending' => 'Chờ xác nhận',
+                                    'confirmed' => 'Đã xác nhận',
+                                    'shipping' => 'Đang giao hàng',
+                                    'completed' => 'Đã giao',
+                                    'cancelled' => 'Đã hủy',
+                                ];
+                                $orderStatusLabel = $orderStatusLabelMap[$orderStatusCode] ?? $orderStatusCode;
+                                switch ($orderStatusCode) {
+                                    case 'pending':
                                         $statusClass = 'badge-warning';
                                         break;
-                                    case 'Đã xác nhận':
+                                    case 'confirmed':
                                         $statusClass = 'badge-info';
                                         break;
-                                    case 'Đang xử lý':
+                                    case 'shipping':
                                         $statusClass = 'badge-primary';
                                         break;
-                                    case 'Đang giao hàng':
-                                        $statusClass = 'badge-info';
-                                        break;
-                                    case 'Đã giao':
+                                    case 'completed':
                                         $statusClass = 'badge-success';
                                         break;
-                                    case 'Đã hủy':
+                                    case 'cancelled':
                                         $statusClass = 'badge-danger';
-                                        break;
-                                    case 'Hoàn trả':
-                                        $statusClass = 'badge-dark';
                                         break;
                                 }
                                 ?>
                                 <span class="badge badge-pill-custom <?php echo $statusClass; ?>">
-                                    <?php echo htmlspecialchars($orderStatus); ?>
+                                    <?php echo htmlspecialchars($orderStatusLabel); ?>
                                 </span>
                             </div>
                         </div>
@@ -115,24 +117,23 @@
                             <div>
                                 <?php
                                 $paymentClass = 'secondary';
-                                $paymentStatus = isset($order['trang_thai_thanh_toan']) ? $order['trang_thai_thanh_toan'] : '';
-                                switch ($paymentStatus) {
-                                    case 'Chờ thanh toán':
+                                $paymentStatusCode = isset($order['trang_thai_thanh_toan']) ? $order['trang_thai_thanh_toan'] : '';
+                                $paymentStatusLabelMap = [
+                                    'unpaid' => 'Chờ thanh toán',
+                                    'paid' => 'Đã thanh toán',
+                                ];
+                                $paymentStatusLabel = $paymentStatusLabelMap[$paymentStatusCode] ?? $paymentStatusCode;
+                                switch ($paymentStatusCode) {
+                                    case 'unpaid':
                                         $paymentClass = 'badge-warning';
                                         break;
-                                    case 'Đã thanh toán':
+                                    case 'paid':
                                         $paymentClass = 'badge-success';
-                                        break;
-                                    case 'Thanh toán thất bại':
-                                        $paymentClass = 'badge-danger';
-                                        break;
-                                    case 'Hoàn tiền':
-                                        $paymentClass = 'badge-dark';
                                         break;
                                 }
                                 ?>
                                 <span class="badge badge-pill-custom <?php echo $paymentClass; ?>">
-                                    <?php echo htmlspecialchars($paymentStatus); ?>
+                                    <?php echo htmlspecialchars($paymentStatusLabel); ?>
                                 </span>
                             </div>
                         </div>
@@ -212,9 +213,13 @@
                         <div class="col-md-8 mb-3">
                             <label for="status" class="font-weight-600">Trạng thái đơn hàng</label>
                             <div class="dropdown">
-                                <input type="hidden" name="status" id="status_input" value="<?php echo htmlspecialchars($order['trang_thai_don_hang']); ?>">
+                                <?php
+                                $currentStatusCode = $order['trang_thai_don_hang'] ?? '';
+                                $currentStatusLabel = $order_statuses[$currentStatusCode] ?? $currentStatusCode;
+                                ?>
+                                <input type="hidden" name="status" id="status_input" value="<?php echo htmlspecialchars($currentStatusCode); ?>">
                                 <button class="btn admin-dropdown-toggle" type="button" id="statusDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <span class="text-value"><?php echo htmlspecialchars($order['trang_thai_don_hang']); ?></span>
+                                    <span class="text-value"><?php echo htmlspecialchars($currentStatusLabel); ?></span>
                                     <i class="fas fa-chevron-down"></i>
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="statusDropdown">
@@ -322,23 +327,23 @@
                         <div class="info-value">
                             <?php
                             $paymentClass = 'secondary';
-                            switch ($order['trang_thai_thanh_toan']) {
-                                case 'Chờ thanh toán':
+                            $paymentStatusCode = $order['trang_thai_thanh_toan'] ?? '';
+                            $paymentStatusLabelMap = [
+                                'unpaid' => 'Chờ thanh toán',
+                                'paid' => 'Đã thanh toán',
+                            ];
+                            $paymentStatusLabel = $paymentStatusLabelMap[$paymentStatusCode] ?? $paymentStatusCode;
+                            switch ($paymentStatusCode) {
+                                case 'unpaid':
                                     $paymentClass = 'badge-warning';
                                     break;
-                                case 'Đã thanh toán':
+                                case 'paid':
                                     $paymentClass = 'badge-success';
-                                    break;
-                                case 'Thanh toán thất bại':
-                                    $paymentClass = 'badge-danger';
-                                    break;
-                                case 'Hoàn tiền':
-                                    $paymentClass = 'badge-dark';
                                     break;
                             }
                             ?>
                             <span class="badge badge-pill-custom <?php echo $paymentClass; ?>">
-                                <?php echo htmlspecialchars($order['trang_thai_thanh_toan']); ?>
+                                <?php echo htmlspecialchars($paymentStatusLabel); ?>
                             </span>
                         </div>
                     </div>

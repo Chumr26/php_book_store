@@ -180,15 +180,33 @@
                                 <td class="align-middle">
                                     <?php
                                     $statusClass = 'secondary';
-                                    switch($order['trang_thai_don_hang']) {
-                                        case 'Đã giao': $statusClass = 'success'; break;
-                                        case 'Đã hủy': $statusClass = 'danger'; break;
-                                        case 'Đang xử lý': $statusClass = 'primary'; break;
-                                        case 'Đang giao hàng': $statusClass = 'info'; break;
-                                        default: $statusClass = 'warning';
+                                    $statusCode = $order['trang_thai_don_hang'] ?? '';
+                                    $statusLabelMap = [
+                                        'pending' => 'Chờ xác nhận',
+                                        'confirmed' => 'Đã xác nhận',
+                                        'shipping' => 'Đang giao hàng',
+                                        'completed' => 'Đã giao',
+                                        'cancelled' => 'Đã hủy',
+                                    ];
+                                    $statusLabel = $statusLabelMap[$statusCode] ?? $statusCode;
+                                    switch ($statusCode) {
+                                        case 'completed':
+                                            $statusClass = 'success';
+                                            break;
+                                        case 'cancelled':
+                                            $statusClass = 'danger';
+                                            break;
+                                        case 'shipping':
+                                            $statusClass = 'info';
+                                            break;
+                                        case 'confirmed':
+                                            $statusClass = 'primary';
+                                            break;
+                                        default:
+                                            $statusClass = 'warning';
                                     }
                                     ?>
-                                    <span class="badge badge-pill-custom badge-<?php echo $statusClass; ?>"><?php echo htmlspecialchars($order['trang_thai_don_hang']); ?></span>
+                                    <span class="badge badge-pill-custom badge-<?php echo $statusClass; ?>"><?php echo htmlspecialchars($statusLabel); ?></span>
                                 </td>
                                 <td class="align-middle text-center">
                                     <a href="index.php?page=order_detail&id=<?php echo $order['id_hoadon']; ?>" class="btn btn-sm btn-info">

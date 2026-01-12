@@ -46,7 +46,7 @@ class ForgetController extends BaseController {
             SessionHelper::start();
             
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                header('Location: index.php?page=forget_password');
+                header('Location: index.php?page=forgot_password');
                 exit;
             }
             
@@ -54,7 +54,7 @@ class ForgetController extends BaseController {
             $token = isset($_POST['csrf_token']) ? $_POST['csrf_token'] : '';
             if (!SessionHelper::verifyCSRFToken($token)) {
                 SessionHelper::setFlash('error', 'Token không hợp lệ. Vui lòng thử lại.');
-                header('Location: index.php?page=forget_password');
+                header('Location: index.php?page=forgot_password');
                 exit;
             }
             
@@ -68,7 +68,7 @@ class ForgetController extends BaseController {
             
             if ($validator->hasErrors()) {
                 SessionHelper::setFlash('error', $validator->getFirstError());
-                header('Location: index.php?page=forget_password');
+                header('Location: index.php?page=forgot_password');
                 exit;
             }
             
@@ -104,7 +104,7 @@ class ForgetController extends BaseController {
         } catch (Exception $e) {
             error_log("ForgetController::requestPasswordReset Error: " . $e->getMessage());
             SessionHelper::setFlash('error', 'Có lỗi xảy ra. Vui lòng thử lại sau.');
-            header('Location: index.php?page=forget_password');
+            header('Location: index.php?page=forgot_password');
             exit;
         }
     }
@@ -201,13 +201,13 @@ class ForgetController extends BaseController {
             if (strtotime($resetData['expiry']) < time()) {
                 SessionHelper::setFlash('error', 'Link đã hết hạn. Vui lòng yêu cầu link mới.');
                 SessionHelper::remove('password_reset_' . $customer['id_khachhang']);
-                header('Location: index.php?page=forget_password');
+                header('Location: index.php?page=forgot_password');
                 exit;
             }
             
             // Update password
-            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-            $result = $this->customersModel->updatePassword($customer['id_khachhang'], $hashedPassword);
+            // Customers model hashes the password
+            $result = $this->customersModel->updatePassword($customer['id_khachhang'], $newPassword);
             
             if ($result) {
                 // Clear reset token

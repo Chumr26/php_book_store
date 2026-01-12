@@ -49,7 +49,7 @@ class RegistrationController extends BaseController {
             }
             
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                header('Location: index.php?page=registration');
+                header('Location: index.php?page=register');
                 exit;
             }
             
@@ -57,7 +57,7 @@ class RegistrationController extends BaseController {
             $token = isset($_POST['csrf_token']) ? $_POST['csrf_token'] : '';
             if (!SessionHelper::verifyCSRFToken($token)) {
                 SessionHelper::setFlash('error', 'Token không hợp lệ. Vui lòng thử lại.');
-                header('Location: index.php?page=registration');
+                header('Location: index.php?page=register');
                 exit;
             }
             
@@ -102,8 +102,8 @@ class RegistrationController extends BaseController {
                 
                 // Store form data to repopulate
                 SessionHelper::set('registration_data', $_POST);
-                
-                header('Location: index.php?page=registration');
+
+                header('Location: index.php?page=register');
                 exit;
             }
             
@@ -111,19 +111,19 @@ class RegistrationController extends BaseController {
             if ($this->checkEmailExists($email)) {
                 SessionHelper::setFlash('error', 'Email đã được sử dụng. Vui lòng sử dụng email khác.');
                 SessionHelper::set('registration_data', $_POST);
-                header('Location: index.php?page=registration');
+                header('Location: index.php?page=register');
                 exit;
             }
             
-            // Prepare data for registration
+            // Prepare data for registration (Customers model hashes password)
             $customerData = [
-                'ten_khachhang' => Validator::sanitizeString($fullName),
+                'full_name' => Validator::sanitizeString($fullName),
                 'email' => Validator::sanitizeEmail($email),
-                'password' => password_hash($password, PASSWORD_DEFAULT),
-                'dien_thoai' => Validator::sanitizeString($phone),
-                'dia_chi' => Validator::sanitizeString($address),
-                'gioi_tinh' => !empty($gender) ? $gender : null,
-                'ngay_sinh' => !empty($dateOfBirth) ? $dateOfBirth : null
+                'password' => $password,
+                'phone' => Validator::sanitizeString($phone),
+                'address' => Validator::sanitizeString($address),
+                'gender' => !empty($gender) ? $gender : null,
+                'date_of_birth' => !empty($dateOfBirth) ? $dateOfBirth : null
             ];
             
             // Register customer
@@ -142,14 +142,14 @@ class RegistrationController extends BaseController {
             } else {
                 SessionHelper::setFlash('error', 'Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.');
                 SessionHelper::set('registration_data', $_POST);
-                header('Location: index.php?page=registration');
+                header('Location: index.php?page=register');
                 exit;
             }
             
         } catch (Exception $e) {
             error_log("RegistrationController::register Error: " . $e->getMessage());
             SessionHelper::setFlash('error', 'Có lỗi xảy ra. Vui lòng thử lại sau.');
-            header('Location: index.php?page=registration');
+            header('Location: index.php?page=register');
             exit;
         }
     }

@@ -420,14 +420,13 @@ class AdminOrderController extends BaseController {
      * @return array
      */
     private function getOrderStatuses() {
+        // Keep values as Vietnamese labels for UI, keys as DB enum codes.
         return [
-            'Chờ xác nhận' => 'Chờ xác nhận',
-            'Đã xác nhận' => 'Đã xác nhận',
-            'Đang xử lý' => 'Đang xử lý',
-            'Đang giao hàng' => 'Đang giao hàng',
-            'Đã giao' => 'Đã giao',
-            'Đã hủy' => 'Đã hủy',
-            'Hoàn trả' => 'Hoàn trả'
+            'pending' => 'Chờ xác nhận',
+            'confirmed' => 'Đã xác nhận',
+            'shipping' => 'Đang giao hàng',
+            'completed' => 'Đã giao',
+            'cancelled' => 'Đã hủy'
         ];
     }
     
@@ -437,11 +436,10 @@ class AdminOrderController extends BaseController {
      * @return array
      */
     private function getPaymentStatuses() {
+        // DB enum: unpaid|paid
         return [
-            'Chờ thanh toán' => 'Chờ thanh toán',
-            'Đã thanh toán' => 'Đã thanh toán',
-            'Thanh toán thất bại' => 'Thanh toán thất bại',
-            'Hoàn tiền' => 'Hoàn tiền'
+            'unpaid' => 'Chờ thanh toán',
+            'paid' => 'Đã thanh toán'
         ];
     }
     
@@ -455,13 +453,11 @@ class AdminOrderController extends BaseController {
     private function isValidStatusTransition($currentStatus, $newStatus) {
         // Define allowed transitions
         $allowedTransitions = [
-            'Chờ xác nhận' => ['Đã xác nhận', 'Đã hủy'],
-            'Đã xác nhận' => ['Đang xử lý', 'Đã hủy'],
-            'Đang xử lý' => ['Đang giao hàng', 'Đã hủy'],
-            'Đang giao hàng' => ['Đã giao', 'Hoàn trả'],
-            'Đã giao' => ['Hoàn trả'],
-            'Đã hủy' => [],
-            'Hoàn trả' => []
+            'pending' => ['confirmed', 'cancelled'],
+            'confirmed' => ['shipping', 'cancelled'],
+            'shipping' => ['completed', 'cancelled'],
+            'completed' => [],
+            'cancelled' => []
         ];
         
         if (!isset($allowedTransitions[$currentStatus])) {

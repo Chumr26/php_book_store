@@ -186,6 +186,50 @@ class EmailSender {
         
         return $this->sendEmail($email, $name, $subject, $body);
     }
+
+    /**
+     * Send password reset email using a pre-built reset link (MVC route)
+     *
+     * @param string $email Customer email
+     * @param string $name Customer name
+     * @param string $resetLink Full reset link
+     * @return bool
+     */
+    public function sendPasswordResetEmail($email, $name, $resetLink) {
+        $subject = "Đặt lại mật khẩu - BookStore";
+
+        $body = "
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background-color: #007bff; color: white; padding: 20px; text-align: center; }
+                .content { padding: 20px; background-color: #f9f9f9; }
+                .button { background-color: #ffc107; color: black; padding: 10px 20px; text-decoration: none; display: inline-block; margin: 10px 0; }
+                .warning { color: #dc3545; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1>BookStore</h1>
+                </div>
+                <div class='content'>
+                    <h2>Xin chào {$name}!</h2>
+                    <p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản BookStore của mình.</p>
+                    <p>Vui lòng nhấp vào nút bên dưới để đặt lại mật khẩu:</p>
+                    <a href='{$resetLink}' class='button'>Đặt lại mật khẩu</a>
+                    <p class='warning'>Liên kết này sẽ hết hạn sau 1 giờ.</p>
+                    <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
+                    <p>Trân trọng,<br>Đội ngũ BookStore</p>
+                </div>
+            </div>
+        </body>
+        </html>";
+
+        return $this->sendEmail($email, $name, $subject, $body);
+    }
     
     /**
      * Send order confirmation email

@@ -22,45 +22,56 @@ $pageTitle = "Đơn hàng của tôi";
                 <?php foreach ($orders as $order): ?>
                 <tr>
                     <td>
-                        <strong><?php echo htmlspecialchars($order['ma_don_hang']); ?></strong>
+                        <strong><?php echo htmlspecialchars($order['ma_hoadon'] ?? $order['order_number'] ?? ''); ?></strong>
                     </td>
-                    <td><?php echo date('d/m/Y H:i', strtotime($order['ngay_dat_hang'])); ?></td>
+                    <td><?php echo date('d/m/Y H:i', strtotime($order['ngay_dat_hang'] ?? $order['order_date'] ?? 'now')); ?></td>
                     <td class="text-danger font-weight-bold">
-                        <?php echo number_format($order['tong_tien'], 0, ',', '.'); ?>đ
+                        <?php echo number_format($order['tong_tien'] ?? $order['total_amount'] ?? 0, 0, ',', '.'); ?>đ
                     </td>
                     <td>
                         <?php
-                        $statusClass = [
-                            'Chờ xác nhận' => 'warning',
-                            'Đã xác nhận' => 'info',
-                            'Đang xử lý' => 'primary',
-                            'Đang giao hàng' => 'primary',
-                            'Đã giao' => 'success',
-                            'Đã hủy' => 'danger',
-                            'Hoàn trả' => 'secondary'
+                        $statusLabels = [
+                            'pending' => 'Chờ xác nhận',
+                            'confirmed' => 'Đã xác nhận',
+                            'shipping' => 'Đang giao hàng',
+                            'completed' => 'Đã giao',
+                            'cancelled' => 'Đã hủy'
                         ];
-                        $class = $statusClass[$order['trang_thai_don_hang']] ?? 'secondary';
+                        $statusCode = $order['trang_thai'] ?? $order['status'] ?? '';
+                        $statusText = $statusLabels[$statusCode] ?? $statusCode;
+                        $statusClass = [
+                            'pending' => 'warning',
+                            'confirmed' => 'info',
+                            'shipping' => 'primary',
+                            'completed' => 'success',
+                            'cancelled' => 'danger'
+                        ];
+                        $class = $statusClass[$statusCode] ?? 'secondary';
                         ?>
                         <span class="badge badge-<?php echo $class; ?>">
-                            <?php echo htmlspecialchars($order['trang_thai_don_hang']); ?>
+                            <?php echo htmlspecialchars($statusText); ?>
                         </span>
                     </td>
                     <td>
                         <?php
-                        $paymentClass = [
-                            'Chờ thanh toán' => 'warning',
-                            'Đã thanh toán' => 'success',
-                            'Thanh toán thất bại' => 'danger',
-                            'Hoàn tiền' => 'info'
+                        $payLabels = [
+                            'unpaid' => 'Chờ thanh toán',
+                            'paid' => 'Đã thanh toán'
                         ];
-                        $pClass = $paymentClass[$order['trang_thai_thanh_toan']] ?? 'secondary';
+                        $payCode = $order['trang_thai_thanh_toan'] ?? $order['payment_status'] ?? '';
+                        $payText = $payLabels[$payCode] ?? $payCode;
+                        $paymentClass = [
+                            'unpaid' => 'warning',
+                            'paid' => 'success'
+                        ];
+                        $pClass = $paymentClass[$payCode] ?? 'secondary';
                         ?>
                         <span class="badge badge-<?php echo $pClass; ?>">
-                            <?php echo htmlspecialchars($order['trang_thai_thanh_toan']); ?>
+                            <?php echo htmlspecialchars($payText); ?>
                         </span>
                     </td>
                     <td>
-                        <a href="?page=order_detail&id=<?php echo $order['ma_don_hang']; ?>" 
+                        <a href="?page=order_detail&id=<?php echo (int)($order['id_hoadon'] ?? $order['id_order'] ?? 0); ?>" 
                            class="btn btn-sm btn-info">
                             <i class="fas fa-eye"></i> Chi tiết
                         </a>
