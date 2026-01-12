@@ -145,16 +145,15 @@ class ProfileController extends BaseController {
             exit;
         }
 
-        $email = SessionHelper::get('customer_email', '');
-        $customer = $this->customersModel->getCustomerByEmail($email);
+        $customerId = (int) SessionHelper::getCustomerId();
+        $passwordHash = $this->customersModel->getPasswordHashById($customerId);
 
-        if (!$customer || !isset($customer['password']) || !password_verify($currentPassword, $customer['password'])) {
+        if (!$passwordHash || !password_verify($currentPassword, $passwordHash)) {
             SessionHelper::setFlash('error', 'Mật khẩu hiện tại không đúng.');
             header('Location: index.php?page=profile');
             exit;
         }
 
-        $customerId = (int) SessionHelper::getCustomerId();
         $ok = $this->customersModel->updatePassword($customerId, $newPassword);
 
         if ($ok) {

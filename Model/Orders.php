@@ -231,6 +231,8 @@ class Orders {
                        oi.gia as don_gia,
                        b.ten_sach, 
                        b.ten_sach as title,
+                       b.isbn,
+                       b.isbn as isbn,
                        b.hinh_anh, 
                        b.hinh_anh as cover_image, 
                        a.ten_tacgia,

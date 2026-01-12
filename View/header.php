@@ -244,7 +244,7 @@
             top: var(--header-h);
             left: 0;
             right: 0;
-            z-index: 1020;
+            z-index: 1030;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 

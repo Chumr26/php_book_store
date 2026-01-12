@@ -22,7 +22,7 @@ require_once __DIR__ . '/helpers/cover.php';
                         <div class="form-group">
                             <label>Họ và tên người nhận <span class="text-danger">*</span></label>
                             <input type="text" name="recipient_name" class="form-control" required
-                                   value="<?php echo htmlspecialchars($_SESSION['customer_name'] ?? ''); ?>">
+                                   value="<?php echo htmlspecialchars($customer_info['ten_khachhang'] ?? ($_SESSION['customer_name'] ?? '')); ?>">
                         </div>
                         
                         <div class="row">
@@ -30,15 +30,15 @@ require_once __DIR__ . '/helpers/cover.php';
                                 <div class="form-group">
                                     <label>Số điện thoại <span class="text-danger">*</span></label>
                                     <input type="tel" name="phone" class="form-control" required
-                                           value="<?php echo htmlspecialchars($_SESSION['customer_phone'] ?? ''); ?>">
+                                           value="<?php echo htmlspecialchars($customer_info['dien_thoai'] ?? ($_SESSION['customer_phone'] ?? '')); ?>">
                                 </div>
                             </div>
                             
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Email</label>
-                                    <input type="email" name="email" class="form-control"
-                                           value="<?php echo htmlspecialchars($_SESSION['customer_email'] ?? ''); ?>">
+                                    <label>Email <span class="text-danger">*</span></label>
+                                    <input type="email" name="email" class="form-control" required
+                                           value="<?php echo htmlspecialchars($customer_info['email'] ?? ($_SESSION['customer_email'] ?? '')); ?>">
                                 </div>
                             </div>
                         </div>
@@ -46,6 +46,7 @@ require_once __DIR__ . '/helpers/cover.php';
                         <div class="form-group">
                             <label>Địa chỉ chi tiết <span class="text-danger">*</span></label>
                             <input type="text" name="address" class="form-control" required
+                                   value="<?php echo htmlspecialchars($customer_info['dia_chi'] ?? ''); ?>"
                                    placeholder="Số nhà, tên đường...">
                         </div>
                         
@@ -146,7 +147,7 @@ require_once __DIR__ . '/helpers/cover.php';
                             <strong class="text-danger h5"><?php echo number_format($cartSummary['total'] ?? 0, 0, ',', '.'); ?>đ</strong>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary btn-block btn-lg">
+                        <button type="submit" class="btn btn-primary btn-block btn-lg" id="placeOrderBtn">
                             <i class="fas fa-check-circle"></i> Đặt hàng
                         </button>
                         
@@ -173,11 +174,60 @@ require_once __DIR__ . '/helpers/cover.php';
 
 <script>
 $(document).ready(function() {
-    $('#checkoutForm').submit(function(e) {
-        // Basic validation
-        if (!confirm('Xác nhận đặt hàng?')) {
-            e.preventDefault();
+    var $form = $('#checkoutForm');
+    var $btn = $('#placeOrderBtn');
+    var originalHtml = $btn.html();
+    var isSubmitting = false;
+
+    function setLoading(loading) {
+        if (loading) {
+            $btn.prop('disabled', true);
+            $btn.text('Đang đặt hàng...');
+        } else {
+            $btn.prop('disabled', false);
+            $btn.html(originalHtml);
         }
+    }
+
+    var checkoutConfirmed = false;
+
+    $form.on('submit', function(e) {
+        // Block double-submit.
+        if (isSubmitting) {
+            e.preventDefault();
+            return;
+        }
+
+        // If not confirmed yet, validate + show modal.
+        if (!checkoutConfirmed) {
+            var formEl = $form.get(0);
+            if (formEl && typeof formEl.checkValidity === 'function' && !formEl.checkValidity()) {
+                if (typeof formEl.reportValidity === 'function') {
+                    formEl.reportValidity();
+                }
+                return;
+            }
+
+            e.preventDefault();
+
+            // Use the global confirm modal (defined in View/footer.php)
+            if (typeof window.showConfirmModal === 'function') {
+                window.showConfirmModal('Xác nhận đặt hàng?', function() {
+                    checkoutConfirmed = true;
+                    $form.trigger('submit');
+                });
+                return;
+            }
+
+            // If modal helper isn't available for some reason, proceed without blocking.
+            checkoutConfirmed = true;
+            $form.trigger('submit');
+            return;
+        }
+
+        // Confirmed: submit and show loading.
+        isSubmitting = true;
+        setLoading(true);
     });
 });
 </script>

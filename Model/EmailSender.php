@@ -19,8 +19,12 @@ class EmailSender {
     private $smtpPort;
     private $smtpUsername;
     private $smtpPassword;
+    private $smtpSecure;
     private $fromEmail;
     private $fromName;
+    private $smtpDebug;
+    private $lastError;
+    private $isConfigured;
     
     /**
      * Constructor - Initialize PHPMailer
@@ -29,40 +33,137 @@ class EmailSender {
      */
     public function __construct($config = []) {
         $this->mail = new PHPMailer(true);
+
+        $this->lastError = null;
+        $this->isConfigured = false;
+
+        // Load configuration from env and optional config file, then override with provided $config
+        $baseConfig = $this->loadConfig();
+        if (is_array($config) && !empty($config)) {
+            $baseConfig = array_merge($baseConfig, $config);
+        }
         
         // Default SMTP configuration (can be overridden)
-        $this->smtpHost = $config['smtp_host'] ?? 'smtp.gmail.com';
-        $this->smtpPort = $config['smtp_port'] ?? 587;
-        $this->smtpUsername = $config['smtp_username'] ?? '';
-        $this->smtpPassword = $config['smtp_password'] ?? '';
-        $this->fromEmail = $config['from_email'] ?? 'noreply@bookstore.com';
-        $this->fromName = $config['from_name'] ?? 'BookStore';
+        $this->smtpHost = $baseConfig['smtp_host'] ?? 'smtp.gmail.com';
+        $this->smtpPort = (int)($baseConfig['smtp_port'] ?? 587);
+        $this->smtpUsername = $baseConfig['smtp_username'] ?? '';
+        $this->smtpPassword = $baseConfig['smtp_password'] ?? '';
+        $this->smtpSecure = $baseConfig['smtp_secure'] ?? 'starttls';
+        $this->fromEmail = $baseConfig['from_email'] ?? 'noreply@bookstore.com';
+        $this->fromName = $baseConfig['from_name'] ?? 'BookStore';
+        $this->smtpDebug = (int)($baseConfig['smtp_debug'] ?? 0);
+
+        // If from_email not explicitly configured, default it to smtp_username (common requirement for Gmail)
+        if (($this->fromEmail === 'noreply@bookstore.com' || empty($this->fromEmail))
+            && is_string($this->smtpUsername)
+            && strpos($this->smtpUsername, '@') !== false) {
+            $this->fromEmail = $this->smtpUsername;
+        }
         
         // Configure SMTP
-        $this->configureSMTP();
+        $this->configureTransport();
+    }
+
+    /**
+     * Load config from optional file + environment variables.
+     *
+     * Priority: config/email.php (if exists) then environment vars.
+     * Constructor parameter overrides everything.
+     *
+     * @return array
+     */
+    private function loadConfig() {
+        $config = [];
+
+        $configFile = __DIR__ . '/../config/email.php';
+        if (file_exists($configFile)) {
+            $fileConfig = include $configFile;
+            if (is_array($fileConfig)) {
+                $config = array_merge($config, $fileConfig);
+            }
+        }
+
+        // Environment variables (works well for local dev + deployment)
+        $env = [
+            'smtp_host' => getenv('SMTP_HOST') ?: null,
+            'smtp_port' => getenv('SMTP_PORT') ?: null,
+            'smtp_username' => getenv('SMTP_USERNAME') ?: null,
+            'smtp_password' => getenv('SMTP_PASSWORD') ?: null,
+            'smtp_secure' => getenv('SMTP_SECURE') ?: null,
+            'from_email' => getenv('SMTP_FROM_EMAIL') ?: null,
+            'from_name' => getenv('SMTP_FROM_NAME') ?: null,
+            'smtp_debug' => getenv('SMTP_DEBUG') ?: null,
+        ];
+
+        foreach ($env as $key => $value) {
+            if ($value !== null && $value !== '') {
+                $config[$key] = $value;
+            }
+        }
+
+        return $config;
+    }
+
+    private function logMailError($message) {
+        // Always send to PHP error log
+        error_log($message);
+
+        // Additionally write to tmp/logs/email.log (useful on XAMPP where error log location is unclear)
+        $logDir = __DIR__ . '/../tmp/logs';
+        if (!is_dir($logDir)) {
+            @mkdir($logDir, 0775, true);
+        }
+
+        $logFile = $logDir . '/email.log';
+        $line = '[' . date('Y-m-d H:i:s') . '] ' . $message . PHP_EOL;
+        @file_put_contents($logFile, $line, FILE_APPEND);
     }
     
     /**
      * Configure SMTP settings
      */
-    private function configureSMTP() {
+    private function configureTransport() {
         try {
+            $this->isConfigured = false;
+
+            // If SMTP credentials are missing, we cannot authenticate to most SMTP servers (e.g., Gmail).
+            // Keep behavior explicit and log a clear message.
+            if (empty($this->smtpUsername) || empty($this->smtpPassword)) {
+                $this->lastError = 'Missing SMTP credentials (SMTP_USERNAME / SMTP_PASSWORD).';
+                $this->logMailError('EmailSender not configured: ' . $this->lastError);
+                return;
+            }
+
             // Server settings
-            // $this->mail->SMTPDebug = SMTP::DEBUG_SERVER; // Enable for debugging
+            if ($this->smtpDebug > 0) {
+                $this->mail->SMTPDebug = SMTP::DEBUG_SERVER;
+            }
             $this->mail->isSMTP();
             $this->mail->Host = $this->smtpHost;
             $this->mail->SMTPAuth = true;
             $this->mail->Username = $this->smtpUsername;
             $this->mail->Password = $this->smtpPassword;
-            $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $secure = strtolower(trim((string)$this->smtpSecure));
+            if ($secure === 'smtps' || $secure === 'ssl' || $secure === 'implicit') {
+                $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            } elseif ($secure === 'starttls' || $secure === 'tls' || $secure === 'explicit') {
+                $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            } else {
+                // No encryption (not recommended)
+                $this->mail->SMTPSecure = '';
+                $this->mail->SMTPAutoTLS = false;
+            }
             $this->mail->Port = $this->smtpPort;
             $this->mail->CharSet = 'UTF-8';
             
             // Set default sender
             $this->mail->setFrom($this->fromEmail, $this->fromName);
+
+            $this->isConfigured = true;
             
         } catch (Exception $e) {
-            error_log("PHPMailer configuration error: {$e->getMessage()}");
+            $this->lastError = $e->getMessage();
+            $this->logMailError("PHPMailer configuration error: {$e->getMessage()}");
         }
     }
     
@@ -78,6 +179,24 @@ class EmailSender {
      */
     public function sendEmail($to, $toName, $subject, $body, $altBody = '') {
         try {
+            $this->lastError = null;
+
+            if (!$this->isConfigured) {
+                $this->lastError = $this->lastError ?: 'EmailSender is not configured.';
+                $this->logMailError('Email send skipped: ' . $this->lastError);
+                return false;
+            }
+
+            if (empty($to) || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
+                $this->lastError = 'Invalid recipient email.';
+                $this->logMailError('Email send failed: ' . $this->lastError . ' to=' . (string)$to);
+                return false;
+            }
+
+            // Clear any previous state (important if the same instance is reused)
+            $this->mail->clearAllRecipients();
+            $this->mail->clearAttachments();
+
             // Recipients
             $this->mail->addAddress($to, $toName);
             
@@ -89,16 +208,27 @@ class EmailSender {
             
             // Send
             $result = $this->mail->send();
-            
-            // Clear addresses for next email
-            $this->mail->clearAddresses();
+
+            // Clear recipients for next email
+            $this->mail->clearAllRecipients();
             
             return $result;
             
         } catch (Exception $e) {
-            error_log("Email sending failed: {$this->mail->ErrorInfo}");
+            $info = $this->mail->ErrorInfo;
+            $this->lastError = $info ?: $e->getMessage();
+            $this->logMailError("Email sending failed: {$this->lastError}");
             return false;
         }
+    }
+
+    /**
+     * Get last mail error (best-effort).
+     *
+     * @return string|null
+     */
+    public function getLastError() {
+        return $this->lastError;
     }
     
     /**

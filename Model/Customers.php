@@ -117,6 +117,24 @@ class Customers {
         
         return $row;
     }
+
+    /**
+     * Get password hash by customer ID
+     * @param int $id Customer ID
+     * @return string|null Password hash or null
+     */
+    public function getPasswordHashById($id) {
+        $sql = "SELECT password FROM khachhang WHERE id_khachhang = ? LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return null;
+        }
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result ? $result->fetch_assoc() : null;
+        return $row['password'] ?? null;
+    }
     
     /**
      * Check if email already exists

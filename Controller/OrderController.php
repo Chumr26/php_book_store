@@ -126,27 +126,41 @@ class OrderController extends BaseController {
      * @return bool
      */
     public function validateCheckout() {
-        $validator = new Validator();
-        
-        // Thông tin giao hàng
-        $validator->required('recipient_name', $_POST['recipient_name'] ?? '', 'Vui lòng nhập tên người nhận');
-        $validator->minLength('recipient_name', $_POST['recipient_name'] ?? '', 3, 'Tên người nhận phải có ít nhất 3 ký tự');
-        
-        $validator->required('phone', $_POST['phone'] ?? '', 'Vui lòng nhập số điện thoại');
-        $validator->phone('phone', $_POST['phone'] ?? '', 'Số điện thoại không hợp lệ');
-        
-        $validator->required('address', $_POST['address'] ?? '', 'Vui lòng nhập địa chỉ giao hàng');
-        $validator->minLength('address', $_POST['address'] ?? '', 10, 'Địa chỉ phải có ít nhất 10 ký tự');
-        
-        $validator->required('city', $_POST['city'] ?? '', 'Vui lòng chọn tỉnh/thành phố');
-        $validator->required('district', $_POST['district'] ?? '', 'Vui lòng chọn quận/huyện');
-        
-        // Phương thức thanh toán
-        $validator->required('payment_method', $_POST['payment_method'] ?? '', 'Vui lòng chọn phương thức thanh toán');
-        $paymentMethods = array_keys($this->getPaymentMethods());
-        $validator->inArray('payment_method', $_POST['payment_method'] ?? '', $paymentMethods, 'Phương thức thanh toán không hợp lệ');
-        
+        $validator = $this->buildCheckoutValidator($_POST);
         return !$validator->hasErrors();
+    }
+
+    /**
+     * Build the checkout validator for provided input.
+     *
+     * @param array $input
+     * @return Validator
+     */
+    private function buildCheckoutValidator($input) {
+        $validator = new Validator();
+
+        // Thông tin giao hàng
+        $validator->required('recipient_name', $input['recipient_name'] ?? '', 'Vui lòng nhập tên người nhận');
+        $validator->minLength('recipient_name', $input['recipient_name'] ?? '', 3, 'Tên người nhận phải có ít nhất 3 ký tự');
+
+        $validator->required('phone', $input['phone'] ?? '', 'Vui lòng nhập số điện thoại');
+        $validator->phone('phone', $input['phone'] ?? '', 'Số điện thoại không hợp lệ');
+
+        $validator->required('email', $input['email'] ?? '', 'Vui lòng nhập email để nhận xác nhận đơn hàng');
+        $validator->email('email', $input['email'] ?? '', 'Email không hợp lệ');
+
+        $validator->required('address', $input['address'] ?? '', 'Vui lòng nhập địa chỉ giao hàng');
+        $validator->minLength('address', $input['address'] ?? '', 10, 'Địa chỉ phải có ít nhất 10 ký tự');
+
+        $validator->required('city', $input['city'] ?? '', 'Vui lòng chọn tỉnh/thành phố');
+        $validator->required('district', $input['district'] ?? '', 'Vui lòng chọn quận/huyện');
+
+        // Phương thức thanh toán
+        $validator->required('payment_method', $input['payment_method'] ?? '', 'Vui lòng chọn phương thức thanh toán');
+        $paymentMethods = array_keys($this->getPaymentMethods());
+        $validator->inArray('payment_method', $input['payment_method'] ?? '', $paymentMethods, 'Phương thức thanh toán không hợp lệ');
+
+        return $validator;
     }
     
     /**
@@ -174,9 +188,9 @@ class OrderController extends BaseController {
             }
             
             // Validate thông tin checkout
-            if (!$this->validateCheckout()) {
-                $validator = new Validator();
-                throw new Exception($validator->getFirstError());
+            $validator = $this->buildCheckoutValidator($_POST);
+            if ($validator->hasErrors()) {
+                throw new Exception($validator->getFirstError() ?? 'Thông tin thanh toán không hợp lệ');
             }
             
             $customerId = SessionHelper::get('customer_id');
@@ -236,12 +250,14 @@ class OrderController extends BaseController {
             $this->cartModel->clearCart($customerId);
 
             // Best-effort email (do not block order success)
-            $this->sendOrderConfirmation($orderId);
+            $emailSent = $this->sendOrderConfirmation($orderId);
+            if (!$emailSent) {
+                SessionHelper::setFlash('warning', 'Đặt hàng thành công nhưng không gửi được email xác nhận. Vui lòng kiểm tra cấu hình SMTP.');
+            }
 
             SessionHelper::set('last_order_id', $orderId);
             SessionHelper::set('last_order_code', $orderNumber);
 
-            SessionHelper::setFlash('success', 'Đặt hàng thành công!');
             header('Location: index.php?page=order_confirmation&order=' . urlencode($orderNumber));
             exit;
             
@@ -273,9 +289,9 @@ class OrderController extends BaseController {
             }
             
             // Validate checkout
-            if (!$this->validateCheckout()) {
-                $validator = new Validator();
-                throw new Exception($validator->getFirstError());
+            $validator = $this->buildCheckoutValidator($_POST);
+            if ($validator->hasErrors()) {
+                throw new Exception($validator->getFirstError() ?? 'Thông tin thanh toán không hợp lệ');
             }
             
             // COD only: create the order immediately
@@ -558,19 +574,34 @@ class OrderController extends BaseController {
             }
             
             // Lấy thông tin khách hàng
-            $customerInfo = $this->getCustomerInfo($order['ma_khach_hang']);
+            $customerId = $order['id_khachhang'] ?? $order['ma_khach_hang'] ?? null;
+            if (empty($customerId)) {
+                throw new Exception('Không xác định được khách hàng của đơn hàng');
+            }
+            $customerInfo = $this->getCustomerInfo((int)$customerId);
             
             // Lấy chi tiết đơn hàng
             $orderItems = $this->orderModel->getOrderItems($orderId);
+
+            // Chọn email nhận: ưu tiên email giao hàng (nhập ở checkout), fallback sang email tài khoản
+            $recipientEmail = trim((string)($order['email_giao'] ?? $order['email'] ?? ($customerInfo['email'] ?? '')));
+            if (empty($recipientEmail)) {
+                throw new Exception('Không có email để gửi xác nhận đơn hàng');
+            }
+
+            // Chọn tên nhận: ưu tiên người nhận, fallback tên tài khoản
+            $recipientName = (string)($order['recipient_name'] ?? $order['ten_nguoi_nhan'] ?? ($customerInfo['ho_ten'] ?? $customerInfo['ten_khachhang'] ?? ''));
+            $recipientName = trim($recipientName);
             
             // Tạo nội dung email
-            $subject = "Xác nhận đơn hàng #{$order['ma_don_hang']}";
+            $orderNumber = $order['ma_hoadon'] ?? $order['order_number'] ?? $order['ma_don_hang'] ?? '';
+            $subject = "Xác nhận đơn hàng #{$orderNumber}";
             $body = $this->buildOrderConfirmationEmail($order, $orderItems, $customerInfo);
             
             // Gửi email
             return $this->emailSender->sendEmail(
-                $customerInfo['email'],
-                $customerInfo['ho_ten'],
+                $recipientEmail,
+                $recipientName,
                 $subject,
                 $body
             );
@@ -635,7 +666,7 @@ class OrderController extends BaseController {
      * @return array|null
      */
     private function getCustomerInfo($customerId) {
-        $query = "SELECT * FROM khachhang WHERE id_khachhang = ? LIMIT 1";
+        $query = "SELECT *, ten_khachhang as ho_ten FROM khachhang WHERE id_khachhang = ? LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param("i", $customerId);
         $stmt->execute();
@@ -756,67 +787,185 @@ class OrderController extends BaseController {
      * @return string
      */
     private function buildOrderConfirmationEmail($order, $orderItems, $customerInfo) {
-        $html = "
-        <h2>Xin chào {$customerInfo['ho_ten']},</h2>
-        <p>Cảm ơn bạn đã đặt hàng tại BookStore!</p>
-        
-        <h3>Thông tin đơn hàng</h3>
-        <p><strong>Mã đơn hàng:</strong> {$order['ma_don_hang']}</p>
-        <p><strong>Ngày đặt:</strong> {$order['ngay_dat']}</p>
-        <p><strong>Trạng thái:</strong> {$order['trang_thai_don_hang']}</p>
-        
-        <h3>Thông tin giao hàng</h3>
-        <p><strong>Người nhận:</strong> {$order['ten_nguoi_nhan']}</p>
-        <p><strong>Số điện thoại:</strong> {$order['sdt_nguoi_nhan']}</p>
-        <p><strong>Địa chỉ:</strong> {$order['dia_chi_giao_hang']}, {$order['phuong_xa']}, {$order['quan_huyen']}, {$order['thanh_pho']}</p>
-        
-        <h3>Chi tiết đơn hàng</h3>
-        <table border='1' cellpadding='10' style='border-collapse: collapse; width: 100%;'>
-            <tr>
-                <th>Sản phẩm</th>
-                <th>Số lượng</th>
-                <th>Đơn giá</th>
-                <th>Thành tiền</th>
-            </tr>
-        ";
-        
-        foreach ($orderItems as $item) {
-            $html .= "
-            <tr>
-                <td>{$item['ten_sach']}</td>
-                <td>{$item['so_luong']}</td>
-                <td>" . number_format($item['gia']) . " đ</td>
-                <td>" . number_format($item['thanh_tien']) . " đ</td>
-            </tr>
-            ";
-        }
-        
-        $html .= "
-            <tr>
-                <td colspan='3' align='right'><strong>Tạm tính:</strong></td>
-                <td>" . number_format($order['tong_tien']) . " đ</td>
-            </tr>
-            <tr>
-                <td colspan='3' align='right'><strong>Phí vận chuyển:</strong></td>
-                <td>" . number_format($order['phi_van_chuyen']) . " đ</td>
-            </tr>
-            <tr>
-                <td colspan='3' align='right'><strong>Thuế VAT:</strong></td>
-                <td>" . number_format($order['thue']) . " đ</td>
-            </tr>
-            <tr>
-                <td colspan='3' align='right'><strong>Tổng cộng:</strong></td>
-                <td><strong>" . number_format($order['tong_thanh_toan']) . " đ</strong></td>
-            </tr>
-        </table>
-        
-        <p>Chúng tôi sẽ liên hệ với bạn sớm nhất để xác nhận đơn hàng.</p>
-        <p>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi.</p>
-        
-        <p>Trân trọng,<br>BookStore Team</p>
-        ";
-        
-        return $html;
+                $customerName = htmlspecialchars((string)($customerInfo['ho_ten'] ?? $customerInfo['ten_khachhang'] ?? ''), ENT_QUOTES, 'UTF-8');
+                $orderNumberRaw = (string)($order['ma_hoadon'] ?? $order['order_number'] ?? '');
+                $orderNumber = htmlspecialchars($orderNumberRaw, ENT_QUOTES, 'UTF-8');
+
+                $orderDateRaw = (string)($order['ngay_dat_hang'] ?? $order['order_date'] ?? '');
+                $orderDate = $orderDateRaw ? date('d/m/Y H:i', strtotime($orderDateRaw)) : '';
+                $orderDate = htmlspecialchars($orderDate, ENT_QUOTES, 'UTF-8');
+
+                $statusCode = (string)($order['trang_thai'] ?? $order['status'] ?? '');
+                $statusLabels = [
+                        'pending' => 'Chờ xác nhận',
+                        'confirmed' => 'Đã xác nhận',
+                        'shipping' => 'Đang giao hàng',
+                        'completed' => 'Đã giao',
+                        'cancelled' => 'Đã hủy'
+                ];
+                $status = htmlspecialchars($statusLabels[$statusCode] ?? $statusCode, ENT_QUOTES, 'UTF-8');
+
+                $paymentCode = (string)($order['trang_thai_thanh_toan'] ?? $order['payment_status'] ?? '');
+                $paymentLabels = [
+                        'unpaid' => 'Chờ thanh toán',
+                        'paid' => 'Đã thanh toán'
+                ];
+                $paymentStatus = htmlspecialchars($paymentLabels[$paymentCode] ?? $paymentCode, ENT_QUOTES, 'UTF-8');
+
+                $paymentMethod = htmlspecialchars((string)($order['phuong_thuc_thanh_toan'] ?? $order['payment_method'] ?? ''), ENT_QUOTES, 'UTF-8');
+
+                $recipientName = htmlspecialchars((string)($order['ten_nguoi_nhan'] ?? $order['recipient_name'] ?? ''), ENT_QUOTES, 'UTF-8');
+                $recipientPhone = htmlspecialchars((string)($order['sdt_giao'] ?? $order['phone'] ?? ''), ENT_QUOTES, 'UTF-8');
+                $deliveryAddress = htmlspecialchars((string)($order['dia_chi_giao'] ?? $order['delivery_address'] ?? ''), ENT_QUOTES, 'UTF-8');
+
+                $total = (float)($order['tong_tien'] ?? $order['total_amount'] ?? 0);
+                $totalFormatted = number_format($total, 0, ',', '.') . ' đ';
+
+                $itemsRows = '';
+                foreach (($orderItems ?? []) as $item) {
+                        $title = htmlspecialchars((string)($item['ten_sach'] ?? $item['title'] ?? ''), ENT_QUOTES, 'UTF-8');
+                        $qty = (int)($item['so_luong'] ?? $item['quantity'] ?? 0);
+                        $price = (float)($item['gia'] ?? $item['price'] ?? 0);
+                        $lineTotal = (float)($item['thanh_tien'] ?? ($qty * $price));
+
+                        $itemsRows .= "
+                                <tr>
+                                        <td style=\"padding:12px; border-bottom:1px solid #E5E7EB;\">{$title}</td>
+                                        <td style=\"padding:12px; border-bottom:1px solid #E5E7EB; text-align:center;\">{$qty}</td>
+                                        <td style=\"padding:12px; border-bottom:1px solid #E5E7EB; text-align:right; white-space:nowrap;\">" . number_format($price, 0, ',', '.') . " đ</td>
+                                        <td style=\"padding:12px; border-bottom:1px solid #E5E7EB; text-align:right; white-space:nowrap;\">" . number_format($lineTotal, 0, ',', '.') . " đ</td>
+                                </tr>
+                        ";
+                }
+
+                if ($itemsRows === '') {
+                        $itemsRows = "
+                                <tr>
+                                        <td colspan=\"4\" style=\"padding:12px; border-bottom:1px solid #E5E7EB; color:#6B7280; text-align:center;\">Không có sản phẩm</td>
+                                </tr>
+                        ";
+                }
+
+                // Use only inline CSS for best email client compatibility
+                return "
+<!doctype html>
+<html lang=\"vi\">
+<head>
+    <meta charset=\"utf-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+    <title>Xác nhận đơn hàng</title>
+</head>
+<body style=\"margin:0; padding:0; background:#F3F4F6;\">
+    <div style=\"display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;\">
+        BookStore xác nhận đơn hàng #{$orderNumber}
+    </div>
+
+    <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background:#F3F4F6; padding:24px 0;\">
+        <tr>
+            <td align=\"center\">
+                <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\" style=\"width:600px; max-width:600px; background:#FFFFFF; border-radius:12px; overflow:hidden;\">
+                    <tr>
+                        <td style=\"padding:20px 24px; background:#111827;\">
+                            <div style=\"font-family:Arial, sans-serif; color:#FFFFFF; font-size:18px; font-weight:bold;\">BookStore</div>
+                            <div style=\"font-family:Arial, sans-serif; color:#D1D5DB; font-size:13px; margin-top:4px;\">Xác nhận đơn hàng</div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style=\"padding:24px; font-family:Arial, sans-serif; color:#111827;\">
+                            <div style=\"font-size:16px; line-height:24px;\">Xin chào <strong>{$customerName}</strong>,</div>
+                            <div style=\"margin-top:8px; font-size:14px; line-height:22px; color:#374151;\">Cảm ơn bạn đã đặt hàng tại BookStore. Chúng tôi đã nhận được đơn hàng của bạn và sẽ xử lý sớm nhất.</div>
+
+                            <div style=\"margin-top:20px; padding:16px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:10px;\">
+                                <div style=\"font-size:14px; font-weight:bold; margin-bottom:10px;\">Thông tin đơn hàng</div>
+                                <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"font-size:14px; color:#111827;\">
+                                    <tr>
+                                        <td style=\"padding:4px 0; color:#6B7280; width:42%;\">Mã đơn hàng</td>
+                                        <td style=\"padding:4px 0; font-weight:bold;\">#{$orderNumber}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style=\"padding:4px 0; color:#6B7280;\">Ngày đặt</td>
+                                        <td style=\"padding:4px 0;\">{$orderDate}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style=\"padding:4px 0; color:#6B7280;\">Trạng thái</td>
+                                        <td style=\"padding:4px 0;\">{$status}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style=\"padding:4px 0; color:#6B7280;\">Thanh toán</td>
+                                        <td style=\"padding:4px 0;\">{$paymentStatus}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style=\"padding:4px 0; color:#6B7280;\">Phương thức</td>
+                                        <td style=\"padding:4px 0;\">{$paymentMethod}</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div style=\"margin-top:16px; padding:16px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:10px;\">
+                                <div style=\"font-size:14px; font-weight:bold; margin-bottom:10px;\">Thông tin giao hàng</div>
+                                <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"font-size:14px; color:#111827;\">
+                                    <tr>
+                                        <td style=\"padding:4px 0; color:#6B7280; width:42%;\">Người nhận</td>
+                                        <td style=\"padding:4px 0;\">{$recipientName}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style=\"padding:4px 0; color:#6B7280;\">Số điện thoại</td>
+                                        <td style=\"padding:4px 0;\">{$recipientPhone}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style=\"padding:4px 0; color:#6B7280; vertical-align:top;\">Địa chỉ</td>
+                                        <td style=\"padding:4px 0;\">{$deliveryAddress}</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div style=\"margin-top:22px; font-size:14px; font-weight:bold;\">Chi tiết sản phẩm</div>
+                            <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"margin-top:10px; border:1px solid #E5E7EB; border-radius:10px; border-collapse:separate; border-spacing:0; overflow:hidden;\">
+                                <tr style=\"background:#F9FAFB;\">
+                                    <th align=\"left\" style=\"padding:12px; font-family:Arial, sans-serif; font-size:12px; text-transform:uppercase; letter-spacing:.02em; color:#6B7280; border-bottom:1px solid #E5E7EB;\">Sản phẩm</th>
+                                    <th align=\"center\" style=\"padding:12px; font-family:Arial, sans-serif; font-size:12px; text-transform:uppercase; letter-spacing:.02em; color:#6B7280; border-bottom:1px solid #E5E7EB;\">SL</th>
+                                    <th align=\"right\" style=\"padding:12px; font-family:Arial, sans-serif; font-size:12px; text-transform:uppercase; letter-spacing:.02em; color:#6B7280; border-bottom:1px solid #E5E7EB;\">Đơn giá</th>
+                                    <th align=\"right\" style=\"padding:12px; font-family:Arial, sans-serif; font-size:12px; text-transform:uppercase; letter-spacing:.02em; color:#6B7280; border-bottom:1px solid #E5E7EB;\">Thành tiền</th>
+                                </tr>
+                                {$itemsRows}
+                            </table>
+
+                            <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"margin-top:14px;\">
+                                <tr>
+                                    <td style=\"font-family:Arial, sans-serif; font-size:14px; color:#6B7280;\">Tổng cộng</td>
+                                    <td align=\"right\" style=\"font-family:Arial, sans-serif; font-size:18px; font-weight:bold; color:#111827; white-space:nowrap;\">{$totalFormatted}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan=\"2\" style=\"padding-top:6px; font-family:Arial, sans-serif; font-size:12px; color:#6B7280;\">(Tổng tiền có thể đã bao gồm phí vận chuyển/VAT theo cấu hình hệ thống.)</td>
+                                </tr>
+                            </table>
+
+                            <div style=\"margin-top:18px; font-family:Arial, sans-serif; font-size:13px; line-height:20px; color:#374151;\">
+                                Chúng tôi sẽ liên hệ với bạn sớm nhất để xác nhận đơn hàng.
+                            </div>
+
+                            <div style=\"margin-top:18px; font-family:Arial, sans-serif; font-size:13px; line-height:20px; color:#6B7280;\">
+                                Trân trọng,<br>
+                                <strong style=\"color:#111827;\">BookStore Team</strong>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style=\"padding:16px 24px; background:#F9FAFB; border-top:1px solid #E5E7EB;\">
+                            <div style=\"font-family:Arial, sans-serif; font-size:12px; color:#6B7280; line-height:18px;\">
+                                Email này được gửi tự động để xác nhận đơn hàng. Nếu bạn không thực hiện giao dịch này, vui lòng liên hệ hỗ trợ.
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+";
     }
     
     /**
