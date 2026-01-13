@@ -1052,12 +1052,16 @@ $(document).ready(function() {
         
         // Simple validation
         if (!email || !email.includes('@')) {
-            alert('Vui lòng nhập email hợp lệ!');
+            if (typeof window.showMessageModal === 'function') {
+                window.showMessageModal('Thông báo', 'Vui lòng nhập email hợp lệ!');
+            }
             return;
         }
         
         // TODO: Add AJAX call to save newsletter subscription
-        alert('Cảm ơn bạn đã đăng ký nhận tin! Chúng tôi sẽ gửi thông tin mới nhất đến email của bạn.');
+        if (typeof window.showMessageModal === 'function') {
+            window.showMessageModal('Thông báo', 'Cảm ơn bạn đã đăng ký nhận tin! Chúng tôi sẽ gửi thông tin mới nhất đến email của bạn.');
+        }
         $('#newsletterEmail').val('');
     });
     

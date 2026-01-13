@@ -204,8 +204,10 @@
                 e.preventDefault();
                 var count = document.querySelectorAll('.category-check:checked').length;
                 if (count > 0) {
-                    if (confirm(`Bạn có chắc chắn muốn xóa ${count} danh mục đã chọn?`)) {
-                        document.getElementById('bulk-action-form').submit();
+                    if (typeof window.showConfirmModal === 'function') {
+                        window.showConfirmModal(`Bạn có chắc chắn muốn xóa ${count} danh mục đã chọn?`, function() {
+                            document.getElementById('bulk-action-form').submit();
+                        });
                     }
                 }
             });

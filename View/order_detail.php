@@ -49,7 +49,7 @@ $paymentLabels = [
             <div class="mt-2"><strong>Tổng tiền:</strong> <span class="text-danger font-weight-bold"><?php echo number_format($order['total_amount'] ?? $order['tong_tien'] ?? 0, 0, ',', '.'); ?>đ</span></div>
 
             <?php if (($statusCode === 'pending') && !empty($csrf_token)): ?>
-                <form method="POST" action="?page=cancel_order" class="mt-3" onsubmit="return confirm('Xác nhận hủy đơn hàng?');">
+                <form method="POST" action="?page=cancel_order" class="mt-3" id="cancelOrderForm">
                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
                     <input type="hidden" name="order_id" value="<?php echo (int)($order['id_order'] ?? 0); ?>">
                     <button type="submit" class="btn btn-danger">
@@ -93,3 +93,19 @@ $paymentLabels = [
         </div>
     </div>
 </div>
+
+<script>
+$(document).ready(function() {
+    var $form = $('#cancelOrderForm');
+    if ($form.length) {
+        $form.on('submit', function(e) {
+            e.preventDefault();
+            if (typeof window.showConfirmModal === 'function') {
+                window.showConfirmModal('Xác nhận hủy đơn hàng?', function() {
+                    document.getElementById('cancelOrderForm').submit();
+                });
+            }
+        });
+    }
+});
+</script>

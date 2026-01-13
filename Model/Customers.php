@@ -283,8 +283,8 @@ class Customers {
      * @return bool Success status
      */
     public function deleteCustomer($id) {
-        // Soft delete - set status to inactive/blocked? Or 'inactive'
-        $sql = "UPDATE khachhang SET trang_thai = 'inactive' WHERE id_khachhang = ?";
+        // Hard delete (remove row). Related rows will follow DB foreign-key rules.
+        $sql = "DELETE FROM khachhang WHERE id_khachhang = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $id);
         return $stmt->execute();

@@ -269,6 +269,12 @@ try {
             $controller->updateStatus();
             break;
 
+        case 'customer_delete':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminCustomerController.php';
+            $controller = new AdminCustomerController($conn);
+            $controller->delete();
+            break;
+
         case 'customer_bulk_delete':
             require_once ADMIN_BASE_PATH . 'Controller/AdminCustomerController.php';
             $controller = new AdminCustomerController($conn);
@@ -385,6 +391,40 @@ if ($viewFile && file_exists(ADMIN_BASE_PATH . $viewFile)) {
         <!-- Custom Admin JavaScript -->
 
         <script src="<?php echo BASE_URL; ?>Content/JS/admin.js"></script>
+        <script>
+            // Fallback: ensure modal helpers exist on all admin pages
+            (function() {
+                if (typeof window.showMessageModal !== 'function') {
+                    window.showMessageModal = function(title, message) {
+                        if (typeof jQuery === 'undefined') return;
+                        jQuery('#globalMessageTitle').text(title || 'Thông báo');
+                        jQuery('#globalMessageContent').html(message || '');
+                        jQuery('#globalMessageModal').modal('show');
+                    };
+                }
+
+                if (typeof window.showConfirmModal !== 'function') {
+                    var globalConfirmCallback = null;
+                    window.showConfirmModal = function(message, callback) {
+                        if (typeof jQuery === 'undefined') return;
+                        jQuery('#globalConfirmMessage').text(message || 'Bạn có chắc chắn muốn thực hiện hành động này?');
+                        jQuery('#globalConfirmModal').modal('show');
+                        globalConfirmCallback = callback || null;
+                    };
+
+                    jQuery(document).on('click', '#globalConfirmBtn', function() {
+                        if (!globalConfirmCallback) {
+                            jQuery('#globalConfirmModal').modal('hide');
+                            return;
+                        }
+                        var cb = globalConfirmCallback;
+                        globalConfirmCallback = null;
+                        jQuery('#globalConfirmModal').modal('hide');
+                        cb();
+                    });
+                }
+            })();
+        </script>
         <script>
             // AJAX setup for CSRF tokens
             $.ajaxSetup({

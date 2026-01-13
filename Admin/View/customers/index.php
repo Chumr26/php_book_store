@@ -342,8 +342,10 @@
                 e.preventDefault();
                 var count = document.querySelectorAll('.customer-check:checked').length;
                 if (count > 0) {
-                    if (confirm(`Bạn có chắc chắn muốn xóa ${count} khách hàng đã chọn?`)) {
-                        document.getElementById('bulk-action-form').submit();
+                    if (typeof window.showConfirmModal === 'function') {
+                        window.showConfirmModal(`Bạn có chắc chắn muốn xóa ${count} khách hàng đã chọn?`, function() {
+                            document.getElementById('bulk-action-form').submit();
+                        });
                     }
                 }
             });

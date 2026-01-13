@@ -112,46 +112,6 @@ require_once __DIR__ . '/helpers/cover.php';
         </a>
     </div>
     <?php endif; ?>
-    <!-- Confirmation Modal -->
-    <div class="modal fade" id="globalConfirmModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="globalConfirmTitle">Xác nhận</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p id="globalConfirmMessage">Bạn có chắc chắn muốn thực hiện hành động này?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-danger" id="globalConfirmBtn">Đồng ý</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Message Modal -->
-    <div class="modal fade" id="globalMessageModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="globalMessageTitle">Thông báo</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p id="globalMessageContent"></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Đóng</button>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
@@ -193,7 +153,9 @@ $(document).ready(function() {
                 $('#total').text(formatCurrency(summary.total));
             } else {
                 // If error (e.g. out of stock), reset to previous value or just alert
-                alert(response.message || 'Có lỗi xảy ra');
+                if (typeof window.showMessageModal === 'function') {
+                    window.showMessageModal('Thông báo', response.message || 'Có lỗi xảy ra');
+                }
                 // Optional: Reload to reset invalid state if needed, or just let user fix it
                 if (response.message.includes('tồn kho')) {
                     // Could reset input value here if we tracked previous value
@@ -201,60 +163,47 @@ $(document).ready(function() {
             }
         }, 'json').fail(function() {
             input.prop('disabled', false);
-            alert('Lỗi kết nối');
+            if (typeof window.showMessageModal === 'function') {
+                window.showMessageModal('Thông báo', 'Lỗi kết nối');
+            }
         });
     });
-    
-    // State for confirmation modal
-    let pendingAction = null;
 
     // Remove item click
     $('.remove-item').click(function() {
         const bookId = $(this).data('book-id');
-        
-        // Confirm logic
-        $('#confirmMessage').text('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?');
-        $('#confirmModal').modal('show');
-        
-        pendingAction = function() {
-            $.post('?page=remove_from_cart', {
-                book_id: bookId,
-                csrf_token: '<?php echo $_SESSION["csrf_token"] ?? ""; ?>'
-            }, function(response) {
-                if (response.success) {
-                    location.reload();
-                } else {
-                    alert(response.message || 'Có lỗi xảy ra');
-                }
-            }, 'json');
-        };
+
+        if (typeof window.showConfirmModal === 'function') {
+            window.showConfirmModal('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?', function() {
+                $.post('?page=remove_from_cart', {
+                    book_id: bookId,
+                    csrf_token: '<?php echo $_SESSION["csrf_token"] ?? ""; ?>'
+                }, function(response) {
+                    if (response.success) {
+                        location.reload();
+                    } else if (typeof window.showMessageModal === 'function') {
+                        window.showMessageModal('Thông báo', response.message || 'Có lỗi xảy ra');
+                    }
+                }, 'json');
+            });
+        }
     });
     
     // Clear cart click
     $('#clearCart').click(function() {
-        // Confirm logic
-        $('#confirmMessage').text('Bạn có chắc muốn xóa toàn bộ giỏ hàng? Hành động này không thể hoàn tác.');
-        $('#confirmModal').modal('show');
-        
-        pendingAction = function() {
-            $.post('?page=clear_cart', {
-                csrf_token: '<?php echo $_SESSION["csrf_token"] ?? ""; ?>'
-            }, function(response) {
-                if (response.success) {
-                    location.reload();
-                } else {
-                    alert(response.message || 'Có lỗi xảy ra');
-                }
-            }, 'json');
-        };
-    });
-    
-    // Handle modal confirm button click
-    $('#confirmBtn').click(function() {
-        if (pendingAction) {
-            pendingAction();
-            $('#confirmModal').modal('hide');
-            pendingAction = null; // Reset
+
+        if (typeof window.showConfirmModal === 'function') {
+            window.showConfirmModal('Bạn có chắc muốn xóa toàn bộ giỏ hàng? Hành động này không thể hoàn tác.', function() {
+                $.post('?page=clear_cart', {
+                    csrf_token: '<?php echo $_SESSION["csrf_token"] ?? ""; ?>'
+                }, function(response) {
+                    if (response.success) {
+                        location.reload();
+                    } else if (typeof window.showMessageModal === 'function') {
+                        window.showMessageModal('Thông báo', response.message || 'Có lỗi xảy ra');
+                    }
+                }, 'json');
+            });
         }
     });
 });

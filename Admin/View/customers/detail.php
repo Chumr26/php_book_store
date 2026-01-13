@@ -12,12 +12,24 @@
         <h1 class="h3 mb-0 text-gray-800">
             <i class="fas fa-user"></i> Chi tiết khách hàng
         </h1>
-        <a href="index.php?page=customers" class="btn btn-secondary btn-icon-split shadow-sm">
-            <span class="icon text-white-50">
-                <i class="fas fa-arrow-left"></i>
-            </span>
-            <span class="text">Quay lại danh sách</span>
-        </a>
+        <div>
+            <form action="index.php?page=customer_delete" method="POST" class="d-inline" id="customerDeleteForm">
+                <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+                <input type="hidden" name="customer_id" value="<?php echo (int)$customer['id_khachhang']; ?>">
+                <button type="submit" class="btn btn-danger btn-icon-split shadow-sm mr-2">
+                    <span class="icon text-white-50">
+                        <i class="fas fa-trash"></i>
+                    </span>
+                    <span class="text">Xóa</span>
+                </button>
+            </form>
+            <a href="index.php?page=customers" class="btn btn-secondary btn-icon-split shadow-sm">
+                <span class="icon text-white-50">
+                    <i class="fas fa-arrow-left"></i>
+                </span>
+                <span class="text">Quay lại danh sách</span>
+            </a>
+        </div>
     </div>
 
     <!-- Customer Info Card -->
@@ -229,6 +241,28 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var form = document.getElementById('customerDeleteForm');
+        if (!form) return;
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (typeof window.showConfirmModal === 'function') {
+                window.showConfirmModal('Bạn có chắc chắn muốn xóa khách hàng này?', function() {
+                    form.submit();
+                });
+                return;
+            }
+
+            if (typeof window.showMessageModal === 'function') {
+                window.showMessageModal('Thông báo', 'Không thể hiển thị hộp thoại xác nhận. Vui lòng tải lại trang và thử lại.');
+            }
+        });
+    });
+</script>
 <script>
     // Standardized Admin Dropdown Handler
     function selectOption(name, value, label) {

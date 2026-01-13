@@ -197,7 +197,7 @@ class AdminCustomerController extends BaseController
         } catch (Exception $e) {
             error_log("Error in show: " . $e->getMessage());
             SessionHelper::setFlash('error', $e->getMessage());
-            header('Location: index.php?page=admin_customers');
+            header('Location: index.php?page=customers');
             exit;
         }
     }
@@ -255,6 +255,45 @@ class AdminCustomerController extends BaseController
     }
 
     /**
+     * Xóa một khách hàng (Xóa mềm - set inactive)
+     *
+     * @return void
+     */
+    public function delete()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new Exception('Invalid request method');
+            }
+
+            // CSRF validation
+            $token = $_POST['csrf_token'] ?? '';
+            if (!SessionHelper::verifyCSRFToken($token)) {
+                throw new Exception('Invalid CSRF token');
+            }
+
+            $customerId = isset($_POST['customer_id']) ? (int)$_POST['customer_id'] : 0;
+            if ($customerId <= 0) {
+                throw new Exception('ID khách hàng không hợp lệ');
+            }
+
+            // Hard delete via model
+            $success = $this->customerModel->deleteCustomer($customerId);
+            if (!$success) {
+                throw new Exception('Không thể xóa khách hàng');
+            }
+
+            SessionHelper::setFlash('success', 'Đã xóa khách hàng thành công');
+        } catch (Exception $e) {
+            error_log("Error in AdminCustomerController::delete: " . $e->getMessage());
+            SessionHelper::setFlash('error', $e->getMessage());
+        }
+
+        header('Location: index.php?page=customers');
+        exit;
+    }
+
+    /**
      * Xóa nhiều khách hàng (Xóa mềm - set inactive)
      * 
      * @return void
@@ -285,7 +324,7 @@ class AdminCustomerController extends BaseController
                 $id = (int)$id;
                 if ($id <= 0) continue;
 
-                // Using deleteCustomer method which implements soft delete (inactive)
+                // Using deleteCustomer method which hard-deletes the customer
                 if ($this->customerModel->deleteCustomer($id)) {
                     $deletedCount++;
                 } else {
@@ -293,7 +332,7 @@ class AdminCustomerController extends BaseController
                 }
             }
 
-            $message = "Đã xóa (vô hiệu hóa) $deletedCount khách hàng.";
+            $message = "Đã xóa $deletedCount khách hàng.";
             $messageType = 'success';
 
             if ($errors > 0) {
@@ -307,7 +346,7 @@ class AdminCustomerController extends BaseController
             SessionHelper::setFlash('error', $e->getMessage());
         }
 
-        header('Location: index.php?page=admin_customers');
+        header('Location: index.php?page=customers');
         exit;
     }
 
@@ -397,7 +436,7 @@ class AdminCustomerController extends BaseController
         } catch (Exception $e) {
             error_log("Error in exportCustomers: " . $e->getMessage());
             SessionHelper::setFlash('error', 'Không thể export danh sách khách hàng');
-            header('Location: index.php?page=admin_customers');
+            header('Location: index.php?page=customers');
             exit;
         }
     }

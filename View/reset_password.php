@@ -226,7 +226,9 @@ $(document).ready(function() {
         if (password !== confirmPassword) {
             e.preventDefault();
             $('#confirm_password').addClass('is-invalid');
-            alert('Mật khẩu xác nhận không khớp!');
+            if (typeof window.showMessageModal === 'function') {
+                window.showMessageModal('Thông báo', 'Mật khẩu xác nhận không khớp!');
+            }
             return false;
         }
         

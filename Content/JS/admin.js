@@ -95,3 +95,43 @@ function selectOption(name, value, label) {
         }
     }
 }
+
+// Global Modal Helpers (Admin)
+// Requires the global modal markup to exist in Admin/View/footer.php
+(function () {
+    if (typeof window === 'undefined') return;
+
+    window.showMessageModal = function (title, message) {
+        if (typeof jQuery === 'undefined') {
+            return;
+        }
+
+        jQuery('#globalMessageTitle').text(title || 'Thông báo');
+        jQuery('#globalMessageContent').html(message || '');
+        jQuery('#globalMessageModal').modal('show');
+    };
+
+    var globalConfirmCallback = null;
+    window.showConfirmModal = function (message, callback) {
+        if (typeof jQuery === 'undefined') {
+            return;
+        }
+
+        jQuery('#globalConfirmMessage').text(message || 'Bạn có chắc chắn muốn thực hiện hành động này?');
+        jQuery('#globalConfirmModal').modal('show');
+        globalConfirmCallback = callback || null;
+    };
+
+    if (typeof jQuery !== 'undefined') {
+        jQuery(document).on('click', '#globalConfirmBtn', function () {
+            if (globalConfirmCallback) {
+                var cb = globalConfirmCallback;
+                globalConfirmCallback = null;
+                jQuery('#globalConfirmModal').modal('hide');
+                cb();
+            } else {
+                jQuery('#globalConfirmModal').modal('hide');
+            }
+        });
+    }
+})();
