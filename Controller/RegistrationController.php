@@ -89,7 +89,7 @@ class RegistrationController extends BaseController {
             $validator->required('address', $address, 'Địa chỉ là bắt buộc.');
             
             if (!empty($gender)) {
-                $validator->inArray('gender', $gender, ['Nam', 'Nữ'], 'Giới tính không hợp lệ.');
+                $validator->inArray('gender', $gender, ['Nam', 'Nữ', 'Khác'], 'Giới tính không hợp lệ.');
             }
             
             if (!empty($dateOfBirth)) {
