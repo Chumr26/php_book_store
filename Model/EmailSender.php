@@ -43,65 +43,44 @@ class EmailSender {
             $baseConfig = array_merge($baseConfig, $config);
         }
         
-        // Default SMTP configuration (can be overridden)
-        $this->smtpHost = $baseConfig['smtp_host'] ?? 'smtp.gmail.com';
+        // Default SMTP configuration (Resend-first; can be overridden)
+        $this->smtpHost = $baseConfig['smtp_host'] ?? 'smtp.resend.com';
         $this->smtpPort = (int)($baseConfig['smtp_port'] ?? 587);
-        $this->smtpUsername = $baseConfig['smtp_username'] ?? '';
+        $this->smtpUsername = $baseConfig['smtp_username'] ?? 'resend';
         $this->smtpPassword = $baseConfig['smtp_password'] ?? '';
         $this->smtpSecure = $baseConfig['smtp_secure'] ?? 'starttls';
-        $this->fromEmail = $baseConfig['from_email'] ?? 'noreply@bookstore.com';
+        $this->fromEmail = $baseConfig['from_email'] ?? '';
         $this->fromName = $baseConfig['from_name'] ?? 'BookStore';
         $this->smtpDebug = (int)($baseConfig['smtp_debug'] ?? 0);
-
-        // If from_email not explicitly configured, default it to smtp_username (common requirement for Gmail)
-        if (($this->fromEmail === 'noreply@bookstore.com' || empty($this->fromEmail))
-            && is_string($this->smtpUsername)
-            && strpos($this->smtpUsername, '@') !== false) {
-            $this->fromEmail = $this->smtpUsername;
-        }
         
         // Configure SMTP
         $this->configureTransport();
     }
 
     /**
-     * Load config from optional file + environment variables.
+     * Load config from required local config file.
      *
-     * Priority: config/email.php (if exists) then environment vars.
-     * Constructor parameter overrides everything.
+     * This project keeps SMTP secrets out of git by using config/email.local.php.
+     * Constructor parameter overrides the file.
      *
      * @return array
      */
     private function loadConfig() {
-        $config = [];
+        $localConfigFile = __DIR__ . '/../config/email.local.php';
 
-        $configFile = __DIR__ . '/../config/email.php';
-        if (file_exists($configFile)) {
-            $fileConfig = include $configFile;
-            if (is_array($fileConfig)) {
-                $config = array_merge($config, $fileConfig);
-            }
+        if (!file_exists($localConfigFile)) {
+            throw new RuntimeException(
+                'Missing required SMTP config file: config/email.local.php. ' .
+                'Copy config/email.local.php.example to config/email.local.php and set smtp_password.'
+            );
         }
 
-        // Environment variables (works well for local dev + deployment)
-        $env = [
-            'smtp_host' => getenv('SMTP_HOST') ?: null,
-            'smtp_port' => getenv('SMTP_PORT') ?: null,
-            'smtp_username' => getenv('SMTP_USERNAME') ?: null,
-            'smtp_password' => getenv('SMTP_PASSWORD') ?: null,
-            'smtp_secure' => getenv('SMTP_SECURE') ?: null,
-            'from_email' => getenv('SMTP_FROM_EMAIL') ?: null,
-            'from_name' => getenv('SMTP_FROM_NAME') ?: null,
-            'smtp_debug' => getenv('SMTP_DEBUG') ?: null,
-        ];
-
-        foreach ($env as $key => $value) {
-            if ($value !== null && $value !== '') {
-                $config[$key] = $value;
-            }
+        $localFileConfig = include $localConfigFile;
+        if (!is_array($localFileConfig)) {
+            throw new RuntimeException('Invalid SMTP config in config/email.local.php (expected a PHP array).');
         }
 
-        return $config;
+        return $localFileConfig;
     }
 
     private function logMailError($message) {
@@ -129,7 +108,13 @@ class EmailSender {
             // If SMTP credentials are missing, we cannot authenticate to most SMTP servers (e.g., Gmail).
             // Keep behavior explicit and log a clear message.
             if (empty($this->smtpUsername) || empty($this->smtpPassword)) {
-                $this->lastError = 'Missing SMTP credentials (SMTP_USERNAME / SMTP_PASSWORD).';
+                $this->lastError = 'Missing SMTP credentials (smtp_username / smtp_password) in config/email.local.php.';
+                $this->logMailError('EmailSender not configured: ' . $this->lastError);
+                return;
+            }
+
+            if (empty($this->fromEmail)) {
+                $this->lastError = 'Missing sender address (from_email) in config/email.local.php.';
                 $this->logMailError('EmailSender not configured: ' . $this->lastError);
                 return;
             }
@@ -272,51 +257,6 @@ class EmailSender {
         return $this->sendEmail($email, $name, $subject, $body);
     }
     
-    /**
-     * Send password reset email
-     * 
-     * @param string $email Customer email
-     * @param string $name Customer name
-     * @param string $resetToken Reset token
-     * @return bool Success status
-     */
-    public function sendPasswordReset($email, $name, $resetToken) {
-        $resetLink = "http://localhost/book_store/reset_password.php?token={$resetToken}";
-        $subject = "Đặt lại mật khẩu - BookStore";
-        
-        $body = "
-        <html>
-        <head>
-            <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background-color: #007bff; color: white; padding: 20px; text-align: center; }
-                .content { padding: 20px; background-color: #f9f9f9; }
-                .button { background-color: #ffc107; color: black; padding: 10px 20px; text-decoration: none; display: inline-block; margin: 10px 0; }
-                .warning { color: #dc3545; font-weight: bold; }
-            </style>
-        </head>
-        <body>
-            <div class='container'>
-                <div class='header'>
-                    <h1>BookStore</h1>
-                </div>
-                <div class='content'>
-                    <h2>Xin chào {$name}!</h2>
-                    <p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản BookStore của mình.</p>
-                    <p>Vui lòng nhấp vào nút bên dưới để đặt lại mật khẩu:</p>
-                    <a href='{$resetLink}' class='button'>Đặt lại mật khẩu</a>
-                    <p class='warning'>Liên kết này sẽ hết hạn sau 1 giờ.</p>
-                    <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
-                    <p>Trân trọng,<br>Đội ngũ BookStore</p>
-                </div>
-            </div>
-        </body>
-        </html>";
-        
-        return $this->sendEmail($email, $name, $subject, $body);
-    }
-
     /**
      * Send password reset email using a pre-built reset link (MVC route)
      *

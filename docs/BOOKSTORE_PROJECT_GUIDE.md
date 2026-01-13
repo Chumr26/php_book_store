@@ -518,30 +518,9 @@ echo '</pre>';
 
 **Test email sending:**
 ```php
-// File: test_email.php
-<?php
-require 'Model/class.phpmailer.php';
-require 'Model/class.smtp.php';
-
-$mail = new PHPMailer();
-$mail->isSMTP();
-$mail->Host = 'smtp.gmail.com';
-$mail->Port = 587;
-$mail->SMTPAuth = true;
-$mail->Username = 'your-email@gmail.com';
-$mail->Password = 'your-app-password';
-
-$mail->setFrom('your-email@gmail.com', 'BookStore');
-$mail->addAddress('test@example.com');
-$mail->Subject = 'Test Email';
-$mail->Body = 'This is a test email from BookStore';
-
-if($mail->send()) {
-    echo 'Email sent successfully!';
-} else {
-    echo 'Email error: ' . $mail->ErrorInfo;
-}
-?>
+// Run from project root:
+//   php scripts/test_email.php recipient@example.com "Optional Name"
+// Email settings are loaded from config/email.local.php
 ```
 
 ## 🎨 ADVANCED FEATURES (Optional Enhancements)

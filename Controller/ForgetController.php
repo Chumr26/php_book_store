@@ -17,7 +17,12 @@ class ForgetController extends BaseController {
     public function __construct($conn) {
         parent::__construct($conn);
         $this->customersModel = new Customers($conn);
-        $this->emailSender = new EmailSender();
+        try {
+            $this->emailSender = new EmailSender();
+        } catch (Throwable $e) {
+            $this->emailSender = null;
+            error_log('ForgetController: EmailSender not available: ' . $e->getMessage());
+        }
     }
     
     /**
@@ -95,8 +100,14 @@ class ForgetController extends BaseController {
             
             // Send reset email
             $resetLink = BASE_URL . '/index.php?page=reset_password&token=' . $resetToken . '&email=' . urlencode($email);
-            $this->sendResetEmail($email, $customer['ten_khachhang'], $resetLink);
-            
+            $mailOk = $this->sendResetEmail($email, $customer['ten_khachhang'], $resetLink);
+
+            if (!$mailOk) {
+                SessionHelper::setFlash('error', 'Không thể gửi email đặt lại mật khẩu lúc này. Vui lòng cấu hình Resend SMTP trong config/email.local.php (xem tmp/logs/email.log) và thử lại.');
+                header('Location: index.php?page=forgot_password');
+                exit;
+            }
+
             SessionHelper::setFlash('success', 'Link đặt lại mật khẩu đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.');
             header('Location: index.php?page=login');
             exit;
@@ -247,6 +258,9 @@ class ForgetController extends BaseController {
      */
     public function sendResetEmail($email, $name, $resetLink) {
         try {
+            if (!$this->emailSender) {
+                throw new Exception('EmailSender is not configured. Please configure config/email.local.php.');
+            }
             return $this->emailSender->sendPasswordResetEmail($email, $name, $resetLink);
         } catch (Exception $e) {
             error_log("Error sending reset email: " . $e->getMessage());

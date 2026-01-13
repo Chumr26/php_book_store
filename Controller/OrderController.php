@@ -48,7 +48,12 @@ class OrderController extends BaseController {
         $this->orderModel = new Orders($db_connection);
         $this->bookModel = new Books($db_connection);
         $this->cartModel = new ShoppingCart($db_connection);
-        $this->emailSender = new EmailSender();
+        try {
+            $this->emailSender = new EmailSender();
+        } catch (Throwable $e) {
+            $this->emailSender = null;
+            error_log('OrderController: EmailSender not available: ' . $e->getMessage());
+        }
         
         // Khởi động session
         SessionHelper::start();
@@ -252,7 +257,7 @@ class OrderController extends BaseController {
             // Best-effort email (do not block order success)
             $emailSent = $this->sendOrderConfirmation($orderId);
             if (!$emailSent) {
-                SessionHelper::setFlash('warning', 'Đặt hàng thành công nhưng không gửi được email xác nhận. Vui lòng kiểm tra cấu hình SMTP.');
+                SessionHelper::setFlash('warning', 'Đặt hàng thành công nhưng không gửi được email xác nhận. Vui lòng cấu hình Resend SMTP trong config/email.local.php.');
             }
 
             SessionHelper::set('last_order_id', $orderId);
@@ -566,6 +571,10 @@ class OrderController extends BaseController {
      */
     public function sendOrderConfirmation($orderId) {
         try {
+            if (!$this->emailSender) {
+                throw new Exception('EmailSender is not configured. Please configure config/email.local.php.');
+            }
+
             // Lấy thông tin đơn hàng
             $order = $this->orderModel->getOrderById($orderId);
             

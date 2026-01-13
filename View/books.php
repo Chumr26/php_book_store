@@ -384,7 +384,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 col.className = 'col-lg-4 col-md-6 col-sm-6 mb-4 book-item-col';
                 // Reset any inline styles
                 const img = col.querySelector('img');
-                if (img) img.style = 'height: 340px; object-fit: contain; background: #fff;';
+                if (img) img.style = 'height: 420px; object-fit: contain; background: #fff;';
             });
             
             localStorage.setItem('booksViewMode', 'grid');

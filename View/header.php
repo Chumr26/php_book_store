@@ -41,7 +41,7 @@
             top: 0;
             left: 0;
             right: 0;
-            z-index: 1030;
+            z-index: 1040;
             padding: 0;
             height: var(--header-h);
             display: flex;
@@ -498,11 +498,11 @@
                                 <div class="user-menu" id="userMenu">
                                     <div class="user-menu-header">
                                         <div class="user-info-mini">
-                                            <strong><?php echo htmlspecialchars($_SESSION['customer_name'] ?? 'Khách hàng'); ?></strong>
+                                            <!-- <strong><?php echo htmlspecialchars($_SESSION['customer_name'] ?? 'Khách hàng'); ?></strong> -->
                                             <small class="text-muted d-block"><?php echo htmlspecialchars($_SESSION['customer_email'] ?? ''); ?></small>
                                         </div>
                                     </div>
-                                    <div class="dropdown-divider"></div>
+                                    <!-- <div class="dropdown-divider"></div> -->
                                     <a href="?page=orders"><i class="fas fa-box text-primary"></i> Đơn hàng của tôi</a>
                                     <a href="?page=profile"><i class="fas fa-user text-info"></i> Thông tin cá nhân</a>
                                     <a href="?page=change_password"><i class="fas fa-key text-warning"></i> Đổi mật khẩu</a>

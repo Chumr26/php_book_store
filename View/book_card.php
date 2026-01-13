@@ -18,7 +18,7 @@ $coverUrl = book_cover_url($book['isbn'] ?? null, 'medium');
                      alt="<?php echo htmlspecialchars($book['ten_sach']); ?>"
                      loading="lazy" decoding="async"
                      onerror="this.onerror=null;this.src='/book_store/Content/images/books/no-image.jpg';"
-                     style="height: 340px; object-fit: cover; background: #fff;">
+                     style="height: 420px; object-fit: cover; background: #fff;">
             </a>
             
             <!-- Stock badge -->

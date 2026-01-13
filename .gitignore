@@ -28,6 +28,7 @@ yarn-error.log
 .env.local
 .env.*.local
 config/database.local.php
+config/email.local.php
 
 # Logs
 *.log
