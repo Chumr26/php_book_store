@@ -215,6 +215,74 @@ class EmailSender {
     public function getLastError() {
         return $this->lastError;
     }
+
+    /**
+     * Render a consistent, modern HTML email layout.
+     *
+     * @param string $title
+     * @param string $greetingHtml
+     * @param string $contentHtml
+     * @param string|null $ctaText
+     * @param string|null $ctaUrl
+     * @param string|null $noteHtml
+     * @return string
+     */
+    private function renderEmailLayout($title, $greetingHtml, $contentHtml, $ctaText = null, $ctaUrl = null, $noteHtml = null) {
+        $safeTitle = htmlspecialchars((string)$title, ENT_QUOTES, 'UTF-8');
+
+        $ctaBlock = '';
+        if (!empty($ctaText) && !empty($ctaUrl)) {
+            $safeCtaText = htmlspecialchars((string)$ctaText, ENT_QUOTES, 'UTF-8');
+            $safeCtaUrl = htmlspecialchars((string)$ctaUrl, ENT_QUOTES, 'UTF-8');
+            $ctaBlock = "<div style='margin: 18px 0 6px;'>
+                <a href='{$safeCtaUrl}' style='display:inline-block;background:#007bff;color:#fff;text-decoration:none;padding:12px 18px;border-radius:10px;font-weight:600'>
+                    {$safeCtaText}
+                </a>
+            </div>";
+        }
+
+        $noteBlock = '';
+        if (!empty($noteHtml)) {
+            $noteBlock = "<div style='margin-top: 14px; padding: 12px 14px; background:#f8f9fa; border:1px solid #e9ecef; border-radius:12px; color:#6c757d; font-size:13px;'>
+                {$noteHtml}
+            </div>";
+        }
+
+        return "
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        </head>
+        <body style='margin:0;padding:0;background:#f1f3f5;font-family: Arial, sans-serif;line-height:1.6;color:#212529;'>
+            <div style='max-width: 640px; margin: 0 auto; padding: 28px 16px;'>
+                <div style='background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e9ecef;'>
+                    <div style='background:#0b5ed7;color:#ffffff;padding:22px 24px;'>
+                        <div style='font-size:18px;font-weight:700;letter-spacing:.2px'>BookStore</div>
+                        <div style='opacity:.95;font-size:13px;margin-top:4px'>{$safeTitle}</div>
+                    </div>
+
+                    <div style='padding: 22px 24px;'>
+                        <div style='font-size:16px;font-weight:700;margin-bottom:10px'>{$greetingHtml}</div>
+                        <div style='font-size:14px;color:#343a40'>{$contentHtml}</div>
+                        {$ctaBlock}
+                        {$noteBlock}
+                        <div style='margin-top: 18px; font-size: 13px; color:#6c757d'>Trân trọng,<br>Đội ngũ BookStore</div>
+                    </div>
+                </div>
+
+                <div style='text-align:center;color:#868e96;font-size:12px;margin-top:14px'>
+                    Nếu bạn không yêu cầu email này, bạn có thể bỏ qua.
+                </div>
+            </div>
+        </body>
+        </html>";
+    }
+
+    private function renderGreeting($name) {
+        $safeName = htmlspecialchars((string)$name, ENT_QUOTES, 'UTF-8');
+        return "Xin chào {$safeName}!";
+    }
     
     /**
      * Send registration confirmation email
@@ -225,35 +293,21 @@ class EmailSender {
      */
     public function sendRegistrationConfirmation($email, $name) {
         $subject = "Chào mừng đến với BookStore!";
-        
-        $body = "
-        <html>
-        <head>
-            <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background-color: #007bff; color: white; padding: 20px; text-align: center; }
-                .content { padding: 20px; background-color: #f9f9f9; }
-                .button { background-color: #28a745; color: white; padding: 10px 20px; text-decoration: none; display: inline-block; margin: 10px 0; }
-            </style>
-        </head>
-        <body>
-            <div class='container'>
-                <div class='header'>
-                    <h1>BookStore</h1>
-                </div>
-                <div class='content'>
-                    <h2>Xin chào {$name}!</h2>
-                    <p>Cảm ơn bạn đã đăng ký tài khoản tại BookStore.</p>
-                    <p>Tài khoản của bạn đã được tạo thành công. Bạn có thể đăng nhập và bắt đầu mua sắm ngay bây giờ!</p>
-                    <a href='http://localhost/book_store/login.php' class='button'>Đăng nhập ngay</a>
-                    <p>Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi.</p>
-                    <p>Trân trọng,<br>Đội ngũ BookStore</p>
-                </div>
-            </div>
-        </body>
-        </html>";
-        
+
+        $loginUrl = (defined('BASE_URL') ? BASE_URL : '') . 'index.php?page=login';
+        $greeting = $this->renderGreeting($name);
+        $content = "<p>Cảm ơn bạn đã đăng ký tài khoản tại BookStore.</p>
+                    <p>Tài khoản của bạn đã được tạo thành công. Bạn có thể đăng nhập và bắt đầu mua sắm.</p>";
+
+        $body = $this->renderEmailLayout(
+            'Chào mừng bạn đến với BookStore',
+            $greeting,
+            $content,
+            'Đăng nhập',
+            $loginUrl,
+            "<strong>Lưu ý:</strong> Nếu bạn vừa đăng ký tài khoản, bạn có thể cần xác minh email trước khi đăng nhập."
+        );
+
         return $this->sendEmail($email, $name, $subject, $body);
     }
 
@@ -269,39 +323,23 @@ class EmailSender {
     public function sendEmailVerification($email, $name, $verifyUrl, $expiresMinutes = 30) {
         $subject = "Xác minh email của bạn - BookStore";
 
-        $safeName = htmlspecialchars((string)$name, ENT_QUOTES, 'UTF-8');
-        $safeUrl = htmlspecialchars((string)$verifyUrl, ENT_QUOTES, 'UTF-8');
-        $expiresMinutes = (int)$expiresMinutes;
+        $greeting = $this->renderGreeting($name);
+        $content = "<p>Vui lòng xác minh email để kích hoạt tài khoản của bạn.</p>
+                    <p>Nhấp vào nút bên dưới để hoàn tất xác minh.</p>";
 
-        $body = "
-        <html>
-        <head>
-            <meta charset='UTF-8'>
-            <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background-color: #007bff; color: white; padding: 20px; text-align: center; }
-                .content { padding: 20px; background-color: #f9f9f9; }
-                .button { background-color: #28a745; color: white; padding: 10px 20px; text-decoration: none; display: inline-block; margin: 10px 0; border-radius: 6px; }
-                .muted { color: #666; font-size: 13px; }
-            </style>
-        </head>
-        <body>
-            <div class='container'>
-                <div class='header'>
-                    <h1>BookStore</h1>
-                </div>
-                <div class='content'>
-                    <h2>Xin chào {$safeName}!</h2>
-                    <p>Vui lòng xác minh email để kích hoạt tài khoản của bạn.</p>
-                    <p><a href='{$safeUrl}' class='button'>Xác minh email</a></p>
-                    <p class='muted'>Liên kết này sẽ hết hạn sau {$expiresMinutes} phút.</p>
-                    <p class='muted'>Nếu bạn không tạo tài khoản, vui lòng bỏ qua email này.</p>
-                    <p class='muted'>Trân trọng,<br>Đội ngũ BookStore</p>
-                </div>
-            </div>
-        </body>
-        </html>";
+        $expiresMinutes = (int)$expiresMinutes;
+        if ($expiresMinutes <= 0) $expiresMinutes = 30;
+
+        $note = "Liên kết này sẽ hết hạn sau <strong>{$expiresMinutes} phút</strong>.";
+
+        $body = $this->renderEmailLayout(
+            'Xác minh email',
+            $greeting,
+            $content,
+            'Xác minh email',
+            $verifyUrl,
+            $note
+        );
 
         return $this->sendEmail($email, $name, $subject, $body);
     }
@@ -317,35 +355,20 @@ class EmailSender {
     public function sendPasswordResetEmail($email, $name, $resetLink) {
         $subject = "Đặt lại mật khẩu - BookStore";
 
-        $body = "
-        <html>
-        <head>
-            <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background-color: #007bff; color: white; padding: 20px; text-align: center; }
-                .content { padding: 20px; background-color: #f9f9f9; }
-                .button { background-color: #ffc107; color: black; padding: 10px 20px; text-decoration: none; display: inline-block; margin: 10px 0; }
-                .warning { color: #dc3545; font-weight: bold; }
-            </style>
-        </head>
-        <body>
-            <div class='container'>
-                <div class='header'>
-                    <h1>BookStore</h1>
-                </div>
-                <div class='content'>
-                    <h2>Xin chào {$name}!</h2>
-                    <p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản BookStore của mình.</p>
-                    <p>Vui lòng nhấp vào nút bên dưới để đặt lại mật khẩu:</p>
-                    <a href='{$resetLink}' class='button'>Đặt lại mật khẩu</a>
-                    <p class='warning'>Liên kết này sẽ hết hạn sau 1 giờ.</p>
-                    <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
-                    <p>Trân trọng,<br>Đội ngũ BookStore</p>
-                </div>
-            </div>
-        </body>
-        </html>";
+        $greeting = $this->renderGreeting($name);
+        $content = "<p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản BookStore của mình.</p>
+                    <p>Nhấp vào nút bên dưới để đặt lại mật khẩu.</p>";
+
+        $note = "Liên kết này sẽ hết hạn sau <strong>1 giờ</strong>.";
+
+        $body = $this->renderEmailLayout(
+            'Đặt lại mật khẩu',
+            $greeting,
+            $content,
+            'Đặt lại mật khẩu',
+            $resetLink,
+            $note
+        );
 
         return $this->sendEmail($email, $name, $subject, $body);
     }
@@ -364,68 +387,67 @@ class EmailSender {
         // Build items list
         $itemsHtml = '';
         foreach ($orderData['items'] as $item) {
+            $title = htmlspecialchars((string)($item['title'] ?? ''), ENT_QUOTES, 'UTF-8');
+            $qty = (int)($item['quantity'] ?? 0);
+            $unit = (float)($item['unit_price'] ?? 0);
+            $total = (float)($item['total_price'] ?? 0);
             $itemsHtml .= "<tr>
-                <td>{$item['title']}</td>
-                <td>{$item['quantity']}</td>
-                <td>" . number_format($item['unit_price'], 0, ',', '.') . " đ</td>
-                <td>" . number_format($item['total_price'], 0, ',', '.') . " đ</td>
+                <td>{$title}</td>
+                <td>{$qty}</td>
+                <td>" . number_format($unit, 0, ',', '.') . " đ</td>
+                <td>" . number_format($total, 0, ',', '.') . " đ</td>
             </tr>";
         }
-        
-        $body = "
-        <html>
-        <head>
-            <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background-color: #28a745; color: white; padding: 20px; text-align: center; }
-                .content { padding: 20px; background-color: #f9f9f9; }
-                table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-                th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-                th { background-color: #007bff; color: white; }
-                .total { font-size: 18px; font-weight: bold; text-align: right; }
-            </style>
-        </head>
-        <body>
-            <div class='container'>
-                <div class='header'>
-                    <h1>Đơn hàng đã được xác nhận!</h1>
-                </div>
-                <div class='content'>
-                    <h2>Xin chào {$name}!</h2>
-                    <p>Cảm ơn bạn đã đặt hàng tại BookStore. Đơn hàng của bạn đã được xác nhận.</p>
-                    <p><strong>Mã đơn hàng:</strong> {$orderData['order_number']}</p>
-                    <p><strong>Ngày đặt:</strong> {$orderData['order_date']}</p>
-                    
-                    <h3>Chi tiết đơn hàng:</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Sản phẩm</th>
-                                <th>Số lượng</th>
-                                <th>Đơn giá</th>
-                                <th>Thành tiền</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {$itemsHtml}
-                        </tbody>
-                    </table>
-                    
-                    <p class='total'>Tổng cộng: " . number_format($orderData['total_amount'], 0, ',', '.') . " đ</p>
-                    
-                    <h3>Thông tin giao hàng:</h3>
-                    <p><strong>Người nhận:</strong> {$orderData['recipient_name']}<br>
-                    <strong>Địa chỉ:</strong> {$orderData['delivery_address']}<br>
-                    <strong>Điện thoại:</strong> {$orderData['phone']}</p>
-                    
-                    <p>Chúng tôi sẽ liên hệ với bạn sớm nhất để xác nhận giao hàng.</p>
-                    <p>Trân trọng,<br>Đội ngũ BookStore</p>
-                </div>
+
+        $greeting = $this->renderGreeting($name);
+
+        $orderNumber = htmlspecialchars((string)($orderData['order_number'] ?? ''), ENT_QUOTES, 'UTF-8');
+        $orderDate = htmlspecialchars((string)($orderData['order_date'] ?? ''), ENT_QUOTES, 'UTF-8');
+        $recipientName = htmlspecialchars((string)($orderData['recipient_name'] ?? ''), ENT_QUOTES, 'UTF-8');
+        $deliveryAddress = htmlspecialchars((string)($orderData['delivery_address'] ?? ''), ENT_QUOTES, 'UTF-8');
+        $phone = htmlspecialchars((string)($orderData['phone'] ?? ''), ENT_QUOTES, 'UTF-8');
+        $totalAmount = (float)($orderData['total_amount'] ?? 0);
+
+        $content = "
+            <p>Cảm ơn bạn đã đặt hàng tại BookStore. Đơn hàng của bạn đã được xác nhận.</p>
+            <p><strong>Mã đơn hàng:</strong> {$orderNumber}<br>
+               <strong>Ngày đặt:</strong> {$orderDate}</p>
+
+            <div style='margin:14px 0;'>
+                <div style='font-weight:700;margin-bottom:8px;'>Chi tiết đơn hàng</div>
+                <table style='width:100%;border-collapse:collapse;border:1px solid #e9ecef;border-radius:12px;overflow:hidden;'>
+                    <thead>
+                        <tr style='background:#f8f9fa;'>
+                            <th style='padding:10px;border-bottom:1px solid #e9ecef;text-align:left;'>Sản phẩm</th>
+                            <th style='padding:10px;border-bottom:1px solid #e9ecef;text-align:left;'>SL</th>
+                            <th style='padding:10px;border-bottom:1px solid #e9ecef;text-align:left;'>Đơn giá</th>
+                            <th style='padding:10px;border-bottom:1px solid #e9ecef;text-align:left;'>Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {$itemsHtml}
+                    </tbody>
+                </table>
+                <div style='margin-top:10px;text-align:right;font-weight:700;'>Tổng cộng: " . number_format($totalAmount, 0, ',', '.') . " đ</div>
             </div>
-        </body>
-        </html>";
-        
+
+            <div style='margin-top:14px;'>
+                <div style='font-weight:700;margin-bottom:6px;'>Thông tin giao hàng</div>
+                <div><strong>Người nhận:</strong> {$recipientName}</div>
+                <div><strong>Địa chỉ:</strong> {$deliveryAddress}</div>
+                <div><strong>Điện thoại:</strong> {$phone}</div>
+            </div>
+        ";
+
+        $body = $this->renderEmailLayout(
+            'Xác nhận đơn hàng',
+            $greeting,
+            $content,
+            null,
+            null,
+            null
+        );
+
         return $this->sendEmail($email, $name, $subject, $body);
     }
 }

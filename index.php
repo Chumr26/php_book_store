@@ -500,6 +500,50 @@ if ($viewFile && file_exists(BASE_PATH . $viewFile)) {
                     }
                 });
             });
+
+            // Global form submit UX: disable submit + show loading label (POST only)
+            // - Skips forms that preventDefault (AJAX flows)
+            // - Skips forms opting out via data-no-loading="1"
+            (function() {
+                function isPostForm(form) {
+                    var method = (form.getAttribute('method') || '').toLowerCase();
+                    return method === 'post';
+                }
+
+                document.addEventListener('submit', function(e) {
+                    try {
+                        var form = e.target;
+                        if (!form || form.nodeName !== 'FORM') return;
+                        if (!isPostForm(form)) return;
+                        if (form.getAttribute('data-no-loading') === '1') return;
+                        if (e.defaultPrevented) return;
+
+                        var submitButtons = form.querySelectorAll('button[type="submit"], input[type="submit"]');
+                        if (!submitButtons || submitButtons.length === 0) return;
+
+                        submitButtons.forEach(function(btn) {
+                            if (btn.disabled) return;
+                            btn.disabled = true;
+
+                            var loadingText = btn.getAttribute('data-loading-text') || 'Đang xử lý...';
+
+                            // Preserve original label once (useful if the form stays on the page)
+                            if (!btn.getAttribute('data-original-label')) {
+                                btn.setAttribute('data-original-label', btn.innerHTML || btn.value || '');
+                            }
+
+                            if (btn.tagName === 'INPUT') {
+                                btn.value = loadingText;
+                                return;
+                            }
+
+                            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>' + loadingText;
+                        });
+                    } catch (err) {
+                        // no-op
+                    }
+                }, false);
+            })();
         </script>
     </body>
     </html>
