@@ -106,7 +106,6 @@ class Customers {
         
         // Map to English keys
         if ($row) {
-            $row['password'] = $row['password']; // Needed for verification
             $row['status'] = ($row['trang_thai'] == 'active') ? 1 : 0; // rough mapping
             $row['trang_thai_code'] = $row['trang_thai'];
             
@@ -116,6 +115,37 @@ class Customers {
         }
         
         return $row;
+    }
+
+    /**
+     * Store email verification token hash and expiry, using database time.
+     * This prevents immediate expiry when PHP timezone differs from MySQL server timezone.
+     *
+     * @param int $customerId
+     * @param string $tokenHash sha256 hex string
+     * @param int $expiresMinutes TTL in minutes
+     * @return bool
+     */
+    public function setEmailVerificationTokenWithTtlMinutes($customerId, $tokenHash, $expiresMinutes = 30) {
+        $minutes = (int)$expiresMinutes;
+        if ($minutes <= 0) {
+            $minutes = 30;
+        }
+
+        // NOTE: Some MySQL/MariaDB builds don't support binding the INTERVAL value,
+        // so we inline a validated integer.
+        $sql = "UPDATE khachhang
+                SET email_verify_token_hash = ?,
+                    email_verify_expires_at = DATE_ADD(NOW(), INTERVAL {$minutes} MINUTE),
+                    email_verified_at = NULL
+                WHERE id_khachhang = ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return false;
+        }
+        $stmt->bind_param('si', $tokenHash, $customerId);
+        return $stmt->execute();
     }
 
     /**
@@ -362,6 +392,85 @@ class Customers {
         
         $result = $this->conn->query($sql);
         return $result->fetch_assoc();
+    }
+
+    /**
+     * Store email verification token hash and expiry.
+     *
+     * @param int $customerId
+     * @param string $tokenHash sha256 hex string
+     * @param string $expiresAt MySQL datetime/timestamp string (Y-m-d H:i:s)
+     * @return bool
+     */
+    public function setEmailVerificationToken($customerId, $tokenHash, $expiresAt) {
+        $sql = "UPDATE khachhang
+                SET email_verify_token_hash = ?,
+                    email_verify_expires_at = ?,
+                    email_verified_at = NULL
+                WHERE id_khachhang = ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return false;
+        }
+        $stmt->bind_param('ssi', $tokenHash, $expiresAt, $customerId);
+        return $stmt->execute();
+    }
+
+    /**
+     * Verify email by raw token.
+     * If valid and not expired, marks email_verified_at and clears token fields.
+     *
+     * @param string $token Raw token from URL
+     * @return array|null Customer row (limited fields) on success, null otherwise
+     */
+    public function verifyEmailByToken($token) {
+        $token = (string)$token;
+        if ($token === '') {
+            return null;
+        }
+
+        $tokenHash = hash('sha256', $token);
+
+        $sql = "SELECT id_khachhang, ten_khachhang, email, trang_thai
+                FROM khachhang
+                WHERE email_verify_token_hash = ?
+                  AND email_verify_expires_at >= NOW()
+                  AND email_verified_at IS NULL
+                LIMIT 1";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return null;
+        }
+        $stmt->bind_param('s', $tokenHash);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result ? $result->fetch_assoc() : null;
+
+        if (!$row) {
+            return null;
+        }
+
+        $update = "UPDATE khachhang
+                   SET email_verified_at = NOW(),
+                       email_verify_token_hash = NULL,
+                       email_verify_expires_at = NULL
+                   WHERE id_khachhang = ?
+                     AND email_verify_token_hash = ?";
+
+        $stmt2 = $this->conn->prepare($update);
+        if (!$stmt2) {
+            return null;
+        }
+        $stmt2->bind_param('is', $row['id_khachhang'], $tokenHash);
+        $stmt2->execute();
+
+        if ($stmt2->affected_rows <= 0) {
+            return null;
+        }
+
+        return $row;
     }
 }
 ?>

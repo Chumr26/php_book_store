@@ -210,6 +210,28 @@ class SessionHelper {
         self::start();
         return isset($_SESSION['admin_id']) && !empty($_SESSION['admin_id']);
     }
+
+    /**
+     * Determine whether the current request is coming from the local machine.
+     * Used to safely enable developer-only helpers (e.g., quick login).
+     *
+     * @return bool
+     */
+    public static function isLocalRequest() {
+        $remoteAddr = $_SERVER['REMOTE_ADDR'] ?? '';
+        $serverName = $_SERVER['SERVER_NAME'] ?? '';
+
+        if ($remoteAddr === '127.0.0.1' || $remoteAddr === '::1') {
+            return true;
+        }
+
+        // Common XAMPP setup
+        if ($serverName === 'localhost') {
+            return true;
+        }
+
+        return false;
+    }
     
     /**
      * Set user login session

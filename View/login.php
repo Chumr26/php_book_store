@@ -1,5 +1,11 @@
 <?php
 $pageTitle = "Đăng nhập";
+
+$prefillEmail = '';
+if (class_exists('SessionHelper')) {
+    $prefillEmail = SessionHelper::get('login_email', '');
+    SessionHelper::remove('login_email');
+}
 ?>
 
 <div class="container mt-5">
@@ -11,7 +17,7 @@ $pageTitle = "Đăng nhập";
                         <i class="fas fa-sign-in-alt"></i> Đăng nhập
                     </h3>
                     
-                    <form method="POST" action="?page=login">
+                    <form method="POST" action="?page=login" autocomplete="on">
                         
                         <?php if (isset($debug_users) && !empty($debug_users)): ?>
                         <!-- Quick Login (Dev Mode) -->
@@ -25,7 +31,7 @@ $pageTitle = "Đăng nhập";
                                     <div class="dropdown-divider"></div>
                                     <?php foreach ($debug_users as $user): ?>
                                         <a class="dropdown-item d-flex justify-content-between align-items-center" href="#" 
-                                           onclick="autofillUser('<?php echo htmlspecialchars($user['email']); ?>'); return false;">
+                                           onclick="devQuickLoginCustomer('<?php echo (int)($user['id_khachhang'] ?? 0); ?>', '<?php echo htmlspecialchars($user['email']); ?>'); return false;">
                                             <span><i class="fas fa-user-circle text-muted mr-2"></i> <?php echo htmlspecialchars($user['full_name']); ?></span>
                                             <small class="text-muted ml-2"><?php echo htmlspecialchars($user['email']); ?></small>
                                         </a>
@@ -34,34 +40,35 @@ $pageTitle = "Đăng nhập";
                             </div>
                             
                             <script>
-                                function autofillUser(email) {
-                                    if (email) {
-                                        // Update inputs
-                                        const emailInput = document.getElementById('emailInput');
-                                        const passwordInput = document.getElementById('passwordInput');
-                                        
-                                        emailInput.value = email;
-                                        passwordInput.value = 'password'; // Correct seed password
-                                        
-                                        // Visual feedback
-                                        emailInput.style.backgroundColor = '#e8f0fe';
-                                        passwordInput.style.backgroundColor = '#e8f0fe';
-                                        
-                                        // Update dropdown text to show selection
-                                        const btn = document.getElementById('quickLoginDropdown');
-                                        btn.innerHTML = '<i class="fas fa-check text-success"></i> Selected: ' + email;
-                                        btn.classList.remove('btn-outline-info');
-                                        btn.classList.add('btn-info');
-                                        
-                                        // Optional: Flash effect
-                                        setTimeout(() => {
-                                            emailInput.style.backgroundColor = '';
-                                            passwordInput.style.backgroundColor = '';
-                                        }, 1000);
-                                        
-                                        // Show toast notification
-                                        // Toastr notification removed as requested
-                                    }
+                                const devQuickLoginCsrfToken = '<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>';
+
+                                function devQuickLoginCustomer(customerId, email) {
+                                    if (!customerId) return;
+
+                                    // Keep a nice visual cue about what's happening
+                                    const btn = document.getElementById('quickLoginDropdown');
+                                    btn.innerHTML = '<i class="fas fa-spinner fa-spin text-warning"></i> Logging in: ' + (email || '...');
+                                    btn.classList.remove('btn-outline-info');
+                                    btn.classList.add('btn-info');
+
+                                    const form = document.createElement('form');
+                                    form.method = 'POST';
+                                    form.action = '?page=dev_quick_login';
+
+                                    const csrf = document.createElement('input');
+                                    csrf.type = 'hidden';
+                                    csrf.name = 'csrf_token';
+                                    csrf.value = devQuickLoginCsrfToken;
+                                    form.appendChild(csrf);
+
+                                    const id = document.createElement('input');
+                                    id.type = 'hidden';
+                                    id.name = 'customer_id';
+                                    id.value = customerId;
+                                    form.appendChild(id);
+
+                                    document.body.appendChild(form);
+                                    form.submit();
                                 }
                             </script>
                         </div>
@@ -71,13 +78,15 @@ $pageTitle = "Đăng nhập";
                         <div class="form-group">
                             <label><i class="fas fa-envelope"></i> Email</label>
                             <input type="email" name="email" id="emailInput" class="form-control" required 
-                                   value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>">
+                                   autocomplete="username"
+                                value="<?php echo htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                         </div>
                         
                         <div class="form-group">
                             <label><i class="fas fa-lock"></i> Mật khẩu</label>
                             <div class="input-group">
-                                <input type="password" name="password" id="passwordInput" class="form-control" required>
+                                <input type="password" name="password" id="passwordInput" class="form-control" required autocomplete="current-password">
+                                
                                 <div class="input-group-append">
                                     <button class="btn btn-outline-secondary" type="button" id="togglePassword" style="transition: none !important;">
                                         <i class="fas fa-eye"></i>
@@ -125,6 +134,21 @@ $pageTitle = "Đăng nhập";
                     
                     <div class="text-center">
                         <a href="?page=forgot_password" class="text-muted">Quên mật khẩu?</a>
+                    </div>
+
+                    <div class="mt-3">
+                        <p class="text-muted small mb-2">Chưa nhận được email xác minh?</p>
+                        <form method="POST" action="?page=resend_verification">
+                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
+                            <div class="form-group">
+                                <input type="email" name="email" class="form-control" required
+                                       placeholder="Nhập email để gửi lại"
+                                       value="<?php echo htmlspecialchars($prefillEmail ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                            </div>
+                            <button type="submit" class="btn btn-outline-primary btn-block">
+                                Gửi lại email xác minh
+                            </button>
+                        </form>
                     </div>
                     
                     <div class="text-center mt-3">

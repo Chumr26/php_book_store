@@ -29,12 +29,87 @@ class LoginController extends BaseController {
             exit;
         }
         
-        return [
+        $viewData = [
             'csrf_token' => SessionHelper::generateCSRFToken(),
             'page_title' => 'Đăng nhập',
-            // Fetch users for Quick Login (Dev Mode)
-            'debug_users' => $this->customersModel->getAllCustomers(1, 20)
         ];
+
+        // Quick Login (Dev Mode) - only allow on local environment
+        if (SessionHelper::isLocalRequest()) {
+            $users = $this->customersModel->getAllCustomers(1, 20);
+            // Only expose minimal fields needed for the dropdown
+            $viewData['debug_users'] = array_map(function ($user) {
+                return [
+                    'id_khachhang' => $user['id_khachhang'] ?? null,
+                    'full_name' => $user['full_name'] ?? ($user['ten_khachhang'] ?? ''),
+                    'email' => $user['email'] ?? ''
+                ];
+            }, is_array($users) ? $users : []);
+        }
+
+        return $viewData;
+    }
+
+    /**
+     * Dev-only: login as a selected customer without needing the password.
+     * This avoids stale/hardcoded autofill passwords when the DB changes.
+     */
+    public function devQuickLogin() {
+        try {
+            SessionHelper::start();
+
+            if (!SessionHelper::isLocalRequest()) {
+                SessionHelper::setFlash('error', 'Tính năng này chỉ dành cho môi trường local.');
+                header('Location: index.php?page=login');
+                exit;
+            }
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                header('Location: index.php?page=login');
+                exit;
+            }
+
+            $token = $_POST['csrf_token'] ?? '';
+            if (!SessionHelper::verifyCSRFToken($token)) {
+                SessionHelper::setFlash('error', 'Token không hợp lệ. Vui lòng thử lại.');
+                header('Location: index.php?page=login');
+                exit;
+            }
+
+            $customerId = (int)($_POST['customer_id'] ?? 0);
+            if ($customerId <= 0) {
+                SessionHelper::setFlash('error', 'Tài khoản không hợp lệ.');
+                header('Location: index.php?page=login');
+                exit;
+            }
+
+            $customer = $this->customersModel->getCustomerById($customerId);
+            if (!$customer) {
+                SessionHelper::setFlash('error', 'Không tìm thấy khách hàng.');
+                header('Location: index.php?page=login');
+                exit;
+            }
+
+            if (($customer['trang_thai'] ?? '') !== 'active') {
+                SessionHelper::setFlash('error', 'Tài khoản đã bị khóa.');
+                header('Location: index.php?page=login');
+                exit;
+            }
+
+            SessionHelper::setCustomerLogin(
+                $customer['id_khachhang'],
+                $customer['email'],
+                $customer['ten_khachhang']
+            );
+
+            header('Location: index.php');
+            exit;
+        } catch (Exception $e) {
+            error_log('LoginController::devQuickLogin Error: ' . $e->getMessage());
+            SessionHelper::setFlash('error', 'Có lỗi xảy ra. Vui lòng thử lại sau.');
+            header('Location: index.php?page=login');
+            exit;
+        }
     }
     
     /**
@@ -87,6 +162,14 @@ class LoginController extends BaseController {
                 // Check if account is active
                 if ($customer['trang_thai'] !== 'active') {
                     SessionHelper::setFlash('error', 'Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.');
+                    header('Location: index.php?page=login');
+                    exit;
+                }
+
+                // Block login until email verified
+                if (empty($customer['email_verified_at'] ?? null)) {
+                    SessionHelper::set('login_email', $email);
+                    SessionHelper::setFlash('error', 'Tài khoản chưa được xác minh email. Vui lòng kiểm tra hộp thư và bấm link xác minh (hiệu lực 30 phút).');
                     header('Location: index.php?page=login');
                     exit;
                 }
@@ -242,6 +325,13 @@ class LoginController extends BaseController {
             $customer = $this->verifyCredentials($email, $password);
             
             if ($customer && $customer['trang_thai'] === 'active') {
+                if (empty($customer['email_verified_at'] ?? null)) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Tài khoản chưa được xác minh email. Vui lòng kiểm tra email.'
+                    ]);
+                    exit;
+                }
                 // Login successful
                 SessionHelper::setCustomerLogin(
                     $customer['id_khachhang'],
@@ -272,6 +362,94 @@ class LoginController extends BaseController {
                 'success' => false,
                 'message' => 'Có lỗi xảy ra. Vui lòng thử lại.'
             ]);
+            exit;
+        }
+    }
+
+    /**
+     * Resend email verification link
+     */
+    public function resendVerification() {
+        try {
+            SessionHelper::start();
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                header('Location: index.php?page=login');
+                exit;
+            }
+
+            // Verify CSRF token
+            $token = isset($_POST['csrf_token']) ? $_POST['csrf_token'] : '';
+            if (!SessionHelper::verifyCSRFToken($token)) {
+                SessionHelper::setFlash('error', 'Token không hợp lệ. Vui lòng thử lại.');
+                header('Location: index.php?page=login');
+                exit;
+            }
+
+            $email = isset($_POST['email']) ? trim($_POST['email']) : '';
+
+            $validator = new Validator();
+            $validator->required('email', $email, 'Email là bắt buộc.');
+            $validator->email('email', $email, 'Email không hợp lệ.');
+
+            if ($validator->hasErrors()) {
+                SessionHelper::setFlash('error', $validator->getFirstError());
+                header('Location: index.php?page=login');
+                exit;
+            }
+
+            SessionHelper::set('login_email', $email);
+
+            $customer = $this->customersModel->getCustomerByEmail($email);
+
+            // Avoid account enumeration
+            if (!$customer) {
+                SessionHelper::setFlash('success', 'Nếu email tồn tại, hệ thống đã gửi lại email xác minh.');
+                header('Location: index.php?page=login');
+                exit;
+            }
+
+            if (($customer['trang_thai'] ?? '') !== 'active') {
+                SessionHelper::setFlash('error', 'Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.');
+                header('Location: index.php?page=login');
+                exit;
+            }
+
+            if (!empty($customer['email_verified_at'] ?? null)) {
+                SessionHelper::setFlash('info', 'Email đã được xác minh. Bạn có thể đăng nhập.');
+                header('Location: index.php?page=login');
+                exit;
+            }
+
+            require_once __DIR__ . '/../Model/EmailSender.php';
+
+            $tokenRaw = bin2hex(random_bytes(32));
+            $tokenHash = hash('sha256', $tokenRaw);
+            $this->customersModel->setEmailVerificationTokenWithTtlMinutes((int)$customer['id_khachhang'], $tokenHash, 30);
+
+            $baseUrl = defined('BASE_URL')
+                ? BASE_URL
+                : ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
+                    . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost')
+                    . rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/'), '/') . '/');
+            $verifyUrl = $baseUrl . 'index.php?page=verify_email&token=' . urlencode($tokenRaw);
+
+            $mail = new EmailSender();
+            $sent = $mail->sendEmailVerification($email, $customer['ten_khachhang'] ?? 'Bạn', $verifyUrl, 30);
+
+            if ($sent) {
+                SessionHelper::setFlash('success', 'Đã gửi lại email xác minh. Vui lòng kiểm tra hộp thư (hiệu lực 30 phút).');
+            } else {
+                SessionHelper::setFlash('warning', 'Không thể gửi email xác minh. Vui lòng kiểm tra cấu hình SMTP trong config/email.local.php.');
+            }
+
+            header('Location: index.php?page=login');
+            exit;
+
+        } catch (Exception $e) {
+            error_log("LoginController::resendVerification Error: " . $e->getMessage());
+            SessionHelper::setFlash('error', 'Có lỗi xảy ra. Vui lòng thử lại sau.');
+            header('Location: index.php?page=login');
             exit;
         }
     }

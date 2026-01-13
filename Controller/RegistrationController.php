@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../Model/Customers.php';
+require_once __DIR__ . '/../Model/EmailSender.php';
 require_once __DIR__ . '/helpers/SessionHelper.php';
 require_once __DIR__ . '/helpers/Validator.php';
 
@@ -131,10 +132,29 @@ class RegistrationController extends BaseController {
             if ($customerId) {
                 // Registration successful
                 SessionHelper::remove('registration_data');
-                SessionHelper::setFlash('success', 'Đăng ký thành công! Vui lòng đăng nhập.');
-                
-                // TODO: Send registration confirmation email
-                // $this->sendRegistrationEmail($email, $fullName);
+
+                // Create verification token (30 minutes TTL)
+                $tokenRaw = bin2hex(random_bytes(32));
+                $tokenHash = hash('sha256', $tokenRaw);
+                $this->customersModel->setEmailVerificationTokenWithTtlMinutes((int)$customerId, $tokenHash, 30);
+
+                // Build verification URL
+                $baseUrl = defined('BASE_URL')
+                    ? BASE_URL
+                    : ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
+                        . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost')
+                        . rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/'), '/') . '/');
+                $verifyUrl = $baseUrl . 'index.php?page=verify_email&token=' . urlencode($tokenRaw);
+
+                // Send verification email
+                $mail = new EmailSender();
+                $sent = $mail->sendEmailVerification($email, $fullName, $verifyUrl, 30);
+
+                if ($sent) {
+                    SessionHelper::setFlash('success', 'Đăng ký thành công! Vui lòng kiểm tra email để xác minh tài khoản (hiệu lực 30 phút).');
+                } else {
+                    SessionHelper::setFlash('warning', 'Đăng ký thành công nhưng không gửi được email xác minh. Vui lòng thử “Gửi lại email xác minh” ở trang đăng nhập.');
+                }
                 
                 header('Location: index.php?page=login');
                 exit;

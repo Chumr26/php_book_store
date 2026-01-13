@@ -39,8 +39,12 @@ CREATE TABLE khachhang (
     gioi_tinh ENUM('Nam', 'Nữ', 'Khác'),
     trang_thai ENUM('active', 'inactive', 'blocked') DEFAULT 'active',
     ngay_dang_ky TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    email_verified_at TIMESTAMP NULL DEFAULT NULL,
+    email_verify_token_hash VARCHAR(64) NULL,
+    email_verify_expires_at TIMESTAMP NULL DEFAULT NULL,
     INDEX idx_email (email),
-    INDEX idx_dien_thoai (dien_thoai)
+    INDEX idx_dien_thoai (dien_thoai),
+    INDEX idx_email_verify_token (email_verify_token_hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: Thể loại sách (Book Categories)
@@ -821,3 +825,5 @@ SELECT COUNT(*) AS 'Total Publishers' FROM nhaxuatban;
 SELECT COUNT(*) AS 'Total Categories' FROM theloai;
 SELECT COUNT(*) AS 'Total Customers' FROM khachhang;
 SELECT COUNT(*) AS 'Total Orders' FROM hoadon;
+--
+UPDATE khachhang SET email_verified_at = NOW() WHERE email_verified_at IS NULL;

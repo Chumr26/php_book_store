@@ -20,7 +20,7 @@
                                 <div class="dropdown-divider"></div>
                                 <?php foreach ($debug_users as $user): ?>
                                     <a class="dropdown-item d-flex justify-content-between align-items-center" href="#" 
-                                       onclick="autofillAdmin('<?php echo htmlspecialchars($user['username']); ?>', '<?php echo htmlspecialchars($user['password']); ?>', '<?php echo htmlspecialchars($user['full_name']); ?>'); return false;">
+                                       onclick="devQuickLoginAdmin('<?php echo htmlspecialchars($user['username']); ?>', '<?php echo htmlspecialchars($user['full_name']); ?>'); return false;">
                                         <span><i class="fas fa-user-tie text-muted mr-2"></i> <?php echo htmlspecialchars($user['full_name']); ?></span>
                                         <small class="text-muted ml-2">@<?php echo htmlspecialchars($user['username']); ?></small>
                                     </a>
@@ -28,9 +28,11 @@
                             </div>
                         </div>
                         <script>
-                            function autofillAdmin(username, password, name) {
+                            const devAdminQuickLoginCsrfToken = '<?php echo htmlspecialchars(SessionHelper::generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>';
+
+                            function devQuickLoginAdmin(username, name) {
                                 document.getElementById('username').value = username;
-                                document.getElementById('password').value = password;
+                                document.getElementById('password').value = '';
                                 
                                 // Visual feedback
                                 const btn = document.getElementById('adminQuickLogin');
@@ -45,6 +47,26 @@
                                     document.getElementById('username').style.backgroundColor = '';
                                     document.getElementById('password').style.backgroundColor = '';
                                 }, 1000);
+
+                                // Submit dev quick login (localhost-only)
+                                const form = document.createElement('form');
+                                form.method = 'POST';
+                                form.action = 'index.php?page=dev_quick_login';
+
+                                const csrf = document.createElement('input');
+                                csrf.type = 'hidden';
+                                csrf.name = 'csrf_token';
+                                csrf.value = devAdminQuickLoginCsrfToken;
+                                form.appendChild(csrf);
+
+                                const u = document.createElement('input');
+                                u.type = 'hidden';
+                                u.name = 'username';
+                                u.value = username;
+                                form.appendChild(u);
+
+                                document.body.appendChild(form);
+                                form.submit();
                             }
                         </script>
                     </div>

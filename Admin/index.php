@@ -70,6 +70,12 @@ try {
             $pageTitle = 'Admin Login - BookStore';
             break;
 
+        case 'dev_quick_login':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminAuthController.php';
+            $controller = new AdminAuthController($conn);
+            $controller->devQuickLogin();
+            break;
+
         case 'logout':
             require_once ADMIN_BASE_PATH . 'Controller/AdminAuthController.php';
             $controller = new AdminAuthController($conn);

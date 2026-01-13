@@ -256,6 +256,55 @@ class EmailSender {
         
         return $this->sendEmail($email, $name, $subject, $body);
     }
+
+    /**
+     * Send email verification mail (account activation)
+     *
+     * @param string $email Customer email
+     * @param string $name Customer name
+     * @param string $verifyUrl Verification URL
+     * @param int $expiresMinutes Token TTL in minutes
+     * @return bool
+     */
+    public function sendEmailVerification($email, $name, $verifyUrl, $expiresMinutes = 30) {
+        $subject = "Xác minh email của bạn - BookStore";
+
+        $safeName = htmlspecialchars((string)$name, ENT_QUOTES, 'UTF-8');
+        $safeUrl = htmlspecialchars((string)$verifyUrl, ENT_QUOTES, 'UTF-8');
+        $expiresMinutes = (int)$expiresMinutes;
+
+        $body = "
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background-color: #007bff; color: white; padding: 20px; text-align: center; }
+                .content { padding: 20px; background-color: #f9f9f9; }
+                .button { background-color: #28a745; color: white; padding: 10px 20px; text-decoration: none; display: inline-block; margin: 10px 0; border-radius: 6px; }
+                .muted { color: #666; font-size: 13px; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1>BookStore</h1>
+                </div>
+                <div class='content'>
+                    <h2>Xin chào {$safeName}!</h2>
+                    <p>Vui lòng xác minh email để kích hoạt tài khoản của bạn.</p>
+                    <p><a href='{$safeUrl}' class='button'>Xác minh email</a></p>
+                    <p class='muted'>Liên kết này sẽ hết hạn sau {$expiresMinutes} phút.</p>
+                    <p class='muted'>Nếu bạn không tạo tài khoản, vui lòng bỏ qua email này.</p>
+                    <p class='muted'>Trân trọng,<br>Đội ngũ BookStore</p>
+                </div>
+            </div>
+        </body>
+        </html>";
+
+        return $this->sendEmail($email, $name, $subject, $body);
+    }
     
     /**
      * Send password reset email using a pre-built reset link (MVC route)

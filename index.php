@@ -102,6 +102,12 @@ try {
                 $pageTitle = 'Đăng nhập - BookStore';
             }
             break;
+
+        case 'dev_quick_login':
+            require_once BASE_PATH . 'Controller/LoginController.php';
+            $controller = new LoginController($conn);
+            $controller->devQuickLogin();
+            break;
         
         case 'logout':
             require_once BASE_PATH . 'Controller/LoginController.php';
@@ -120,6 +126,18 @@ try {
                 $viewFile = 'View/register.php';
                 $pageTitle = 'Đăng ký tài khoản - BookStore';
             }
+            break;
+
+        case 'verify_email':
+            require_once BASE_PATH . 'Controller/EmailVerificationController.php';
+            $controller = new EmailVerificationController($conn);
+            $controller->verify();
+            break;
+
+        case 'resend_verification':
+            require_once BASE_PATH . 'Controller/LoginController.php';
+            $controller = new LoginController($conn);
+            $controller->resendVerification();
             break;
         
         case 'forgot_password':

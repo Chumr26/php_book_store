@@ -71,17 +71,93 @@ class AdminAuthController {
         }
         
         // Handle GET (Show Form)
-        // Add Quick Login data (Hardcoded for now as per AdminAuth.php)
-        $viewData['debug_users'] = [
-            [
-                'username' => 'admin',
-                'full_name' => 'Super Administrator',
-                'email' => 'admin@bookstore.com',
-                'password' => 'admin123'
-            ]
-        ];
+        // Add Quick Login data (Dev Mode) - only allow on local environment
+        if (SessionHelper::isLocalRequest()) {
+            $viewData['debug_users'] = [
+                [
+                    'username' => 'admin',
+                    'full_name' => 'Super Administrator',
+                    'email' => 'admin@bookstore.com'
+                ]
+            ];
+        }
         
         return $viewData;
+    }
+
+    /**
+     * Dev-only: login as an admin without needing the password.
+     * Localhost-only to prevent security issues.
+     */
+    public function devQuickLogin() {
+        SessionHelper::start();
+
+        if (!SessionHelper::isLocalRequest()) {
+            SessionHelper::setFlash('error', 'Tính năng này chỉ dành cho môi trường local.');
+            header('Location: ' . ADMIN_BASE_URL . 'index.php?page=login');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . ADMIN_BASE_URL . 'index.php?page=login');
+            exit;
+        }
+
+        $token = $_POST['csrf_token'] ?? '';
+        if (!SessionHelper::verifyCSRFToken($token)) {
+            SessionHelper::setFlash('error', 'Token bảo mật không hợp lệ. Vui lòng thử lại.');
+            header('Location: ' . ADMIN_BASE_URL . 'index.php?page=login');
+            exit;
+        }
+
+        $username = trim($_POST['username'] ?? '');
+        if ($username === '') {
+            SessionHelper::setFlash('error', 'Tài khoản admin không hợp lệ.');
+            header('Location: ' . ADMIN_BASE_URL . 'index.php?page=login');
+            exit;
+        }
+
+        // Try DB first
+        try {
+            $sql = "SELECT id_admin, ten_admin, username, email, quyen FROM admin WHERE username = ? OR email = ? LIMIT 1";
+            $stmt = $this->conn->prepare($sql);
+            if ($stmt) {
+                $stmt->bind_param('ss', $username, $username);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $row = $result ? $result->fetch_assoc() : null;
+                if ($row) {
+                    $this->authModel->createAdminSession([
+                        'id_admin' => (int)$row['id_admin'],
+                        'username' => $row['username'],
+                        'full_name' => $row['ten_admin'],
+                        'email' => $row['email'],
+                        'role' => $row['quyen'] ?? 'admin'
+                    ]);
+                    header('Location: ' . ADMIN_BASE_URL . 'index.php?page=dashboard');
+                    exit;
+                }
+            }
+        } catch (Exception $e) {
+            // fall back
+        }
+
+        // Fallback: hardcoded admin (for environments without DB seed)
+        if ($username === 'admin' || $username === 'admin@bookstore.com') {
+            $this->authModel->createAdminSession([
+                'id_admin' => 1,
+                'username' => 'admin',
+                'full_name' => 'Administrator',
+                'email' => 'admin@bookstore.com',
+                'role' => 'admin'
+            ]);
+            header('Location: ' . ADMIN_BASE_URL . 'index.php?page=dashboard');
+            exit;
+        }
+
+        SessionHelper::setFlash('error', 'Không tìm thấy admin trong hệ thống.');
+        header('Location: ' . ADMIN_BASE_URL . 'index.php?page=login');
+        exit;
     }
     
     /**
