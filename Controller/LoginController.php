@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../Model/Customers.php';
+require_once __DIR__ . '/CartController.php';
 require_once __DIR__ . '/helpers/SessionHelper.php';
 require_once __DIR__ . '/helpers/Validator.php';
 
@@ -102,6 +103,14 @@ class LoginController extends BaseController {
                 $customer['ten_khachhang']
             );
 
+            // Merge guest cart into DB cart after login
+            try {
+                $cartController = new CartController($this->conn);
+                $cartController->mergeSessionCartToDatabase($customer['id_khachhang']);
+            } catch (Exception $e) {
+                error_log('LoginController::devQuickLogin Cart Merge Error: ' . $e->getMessage());
+            }
+
             header('Location: index.php');
             exit;
         } catch (Exception $e) {
@@ -180,6 +189,14 @@ class LoginController extends BaseController {
                     $customer['email'],
                     $customer['ten_khachhang']
                 );
+
+                // Merge guest cart into DB cart after login
+                try {
+                    $cartController = new CartController($this->conn);
+                    $cartController->mergeSessionCartToDatabase($customer['id_khachhang']);
+                } catch (Exception $e) {
+                    error_log('LoginController::login Cart Merge Error: ' . $e->getMessage());
+                }
                 
                 // Handle remember me
                 if ($rememberMe) {
@@ -338,6 +355,14 @@ class LoginController extends BaseController {
                     $customer['email'],
                     $customer['ten_khachhang']
                 );
+
+                // Merge guest cart into DB cart after login
+                try {
+                    $cartController = new CartController($this->conn);
+                    $cartController->mergeSessionCartToDatabase($customer['id_khachhang']);
+                } catch (Exception $e) {
+                    error_log('LoginController::ajaxLogin Cart Merge Error: ' . $e->getMessage());
+                }
                 
                 echo json_encode([
                     'success' => true,

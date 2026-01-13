@@ -487,21 +487,39 @@ class CartController extends BaseController {
             }
             
             foreach ($sessionCart as $bookId => $quantity) {
+                $bookId = (int)$bookId;
+                $quantity = (int)$quantity;
+
+                if ($bookId <= 0 || $quantity <= 0) {
+                    continue;
+                }
+
+                // Kiểm tra tồn kho/tình trạng sách
+                $book = $this->bookModel->getBookById($bookId);
+                if (!$book) {
+                    continue;
+                }
+
+                $stock = (int)($book['so_luong_ton'] ?? 0);
+                if (($book['tinh_trang'] ?? '') !== 'Còn hàng' || $stock <= 0) {
+                    continue;
+                }
+
+                // Clamp số lượng merge theo tồn kho
+                $quantityToMerge = min($quantity, $stock);
+                if ($quantityToMerge <= 0) {
+                    continue;
+                }
+
                 // Kiểm tra xem sản phẩm đã có trong giỏ database chưa
                 $existingItem = $this->cartModel->getItem($customerId, $bookId);
                 
                 if ($existingItem) {
-                    // Cộng dồn số lượng
-                    $newQuantity = $existingItem['so_luong'] + $quantity;
-                    
-                    // Kiểm tra tồn kho
-                    $book = $this->bookModel->getBookById($bookId);
-                    if ($book && $newQuantity <= $book['so_luong_ton']) {
-                        $this->cartModel->updateQuantity($customerId, $bookId, $newQuantity);
-                    }
+                    $currentQuantity = (int)($existingItem['so_luong'] ?? 0);
+                    $newQuantity = min($currentQuantity + $quantityToMerge, $stock);
+                    $this->cartModel->updateQuantity($customerId, $bookId, $newQuantity);
                 } else {
-                    // Thêm mới
-                    $this->cartModel->addItem($customerId, $bookId, $quantity);
+                    $this->cartModel->addItem($customerId, $bookId, $quantityToMerge);
                 }
             }
             
