@@ -164,8 +164,10 @@ CREATE TABLE danhgia (
     noi_dung TEXT,
     trang_thai ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
     ngay_danh_gia TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ngay_cap_nhat TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (id_sach) REFERENCES sach(id_sach) ON DELETE CASCADE,
     FOREIGN KEY (id_khachhang) REFERENCES khachhang(id_khachhang) ON DELETE CASCADE,
+    UNIQUE KEY uq_danhgia_customer_book (id_sach, id_khachhang),
     INDEX idx_sach (id_sach),
     INDEX idx_khachhang (id_khachhang),
     INDEX idx_so_sao (so_sao)
@@ -225,6 +227,8 @@ CREATE TABLE banner (
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+
+  
 -- =============================================
 -- SEED DATA - ADMIN
 -- =============================================
@@ -634,6 +638,65 @@ DELIMITER ;
 CALL sp_seed_bulk_orders('2024-01-01', 18, 20);
 
 DROP PROCEDURE sp_seed_bulk_orders;
+
+-- =============================================
+-- SEED DATA - REVIEWS
+-- =============================================
+DELIMITER $$
+CREATE PROCEDURE sp_seed_reviews(IN p_count INT)
+BEGIN
+    DECLARE i INT DEFAULT 0;
+    DECLARE v_cust INT;
+    DECLARE v_book INT;
+    DECLARE v_rating INT;
+    DECLARE v_title VARCHAR(255);
+    DECLARE v_content TEXT;
+    DECLARE v_status VARCHAR(20);
+    
+    WHILE i < p_count DO
+        -- Pick random customer and book
+        SELECT id_khachhang INTO v_cust FROM khachhang ORDER BY RAND() LIMIT 1;
+        SELECT id_sach INTO v_book FROM sach ORDER BY RAND() LIMIT 1;
+        
+        -- Generate content
+        SET v_rating = FLOOR(1 + RAND() * 5);
+        
+        CASE v_rating
+            WHEN 1 THEN SET v_title = 'Thất vọng';
+            WHEN 2 THEN SET v_title = 'Chưa hài lòng';
+            WHEN 3 THEN SET v_title = 'Tạm ổn';
+            WHEN 4 THEN SET v_title = 'Sách hay';
+            ELSE SET v_title = 'Tuyệt vời, nên đọc!';
+        END CASE;
+        
+        SET v_content = CONCAT('Nội dung đánh giá mẫu cho sách #', v_book, '. Đánh giá này được tạo tự động.');
+        
+        -- 90% approved, 10% pending
+        IF RAND() < 0.9 THEN
+            SET v_status = 'approved';
+        ELSE
+            SET v_status = 'pending';
+        END IF;
+        
+        -- Insert ignoring duplicates (same user on same book)
+        INSERT IGNORE INTO danhgia (id_sach, id_khachhang, so_sao, tieu_de, noi_dung, trang_thai)
+        VALUES (v_book, v_cust, v_rating, v_title, v_content, v_status);
+        
+        -- Only increment if successful insert (row_count > 0)
+        IF ROW_COUNT() > 0 THEN
+            SET i = i + 1;
+        END IF;
+        
+        -- Breaker to prevent infinite loop if highly populated
+        IF i > p_count * 5 THEN -- Allow more attempts
+             SET i = p_count;
+        END IF;
+    END WHILE;
+END$$
+DELIMITER ;
+
+CALL sp_seed_reviews(100);
+DROP PROCEDURE sp_seed_reviews;
 
 -- =============================================
 -- CREATE VIEWS FOR REPORTING

@@ -8,7 +8,7 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
         <div class="col-lg-3 col-md-4 mb-4">
             <?php include 'sidebar.php'; ?>
         </div>
-        
+
         <!-- Main Content -->
         <div class="col-lg-9 col-md-8">
             <!-- Breadcrumb -->
@@ -24,7 +24,7 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
                     <?php endif; ?>
                 </ol>
             </nav>
-            
+
             <!-- Page Header -->
             <div class="page-header mb-4">
                 <h2 class="mb-2">
@@ -36,12 +36,12 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
                         <i class="fas fa-book"></i> Tất cả sách
                     <?php endif; ?>
                 </h2>
-                
+
                 <?php if (isset($totalBooks)): ?>
                     <p class="text-muted">Tìm thấy <?php echo $totalBooks; ?> cuốn sách</p>
                 <?php endif; ?>
             </div>
-            
+
             <!-- Filter & Sort Bar -->
             <div class="filter-sort-bar mb-4">
                 <div class="row align-items-center">
@@ -56,7 +56,7 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
                                     <i class="fas fa-list"></i>
                                 </button>
                             </div>
-                            
+
                             <form method="GET" action="?page=books" class="form-inline">
                                 <input type="hidden" name="page" value="books">
                                 <?php if (isset($_GET['category'])): ?>
@@ -68,7 +68,7 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
                                 <?php if (isset($_GET['price_range'])): ?>
                                     <input type="hidden" name="price_range" value="<?php echo htmlspecialchars($_GET['price_range']); ?>">
                                 <?php endif; ?>
-                                
+
                                 <label class="mr-2 d-none d-sm-inline-block">Sắp xếp:</label>
                                 <select name="sort" class="form-control form-control-sm" onchange="this.form.submit()">
                                     <option value="default" <?php echo (!isset($_GET['sort']) || $_GET['sort'] == 'default') ? 'selected' : ''; ?>>Mặc định</option>
@@ -85,7 +85,7 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
                     </div>
                 </div>
             </div>
-            
+
             <!-- Books Grid -->
             <?php if (isset($books) && !empty($books)): ?>
                 <div class="books-container" id="booksGrid">
@@ -108,26 +108,26 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
                     </a>
                 </div>
             <?php endif; ?>
-            
+
             <!-- Pagination -->
             <?php if (isset($pagination) && $pagination instanceof Pagination && $pagination->getTotalPages() > 1): ?>
                 <nav aria-label="Page navigation" class="mt-4">
                     <ul class="pagination justify-content-center">
                         <!-- Previous -->
                         <li class="page-item <?php echo $pagination->getCurrentPage() <= 1 ? 'disabled' : ''; ?>">
-                            <a class="page-link" 
-                               href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=<?php echo $pagination->getCurrentPage() - 1; ?>">
+                            <a class="page-link"
+                                href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=<?php echo $pagination->getCurrentPage() - 1; ?>">
                                 <i class="fas fa-chevron-left"></i>
                             </a>
                         </li>
-                        
+
                         <!-- Page Numbers -->
                         <?php
                         $current_page = $pagination->getCurrentPage();
                         $total_pages = $pagination->getTotalPages();
                         $start_page = max(1, $current_page - 2);
                         $end_page = min($total_pages, $current_page + 2);
-                        
+
                         if ($start_page > 1): ?>
                             <li class="page-item">
                                 <a class="page-link" href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=1">1</a>
@@ -136,16 +136,16 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
                                 <li class="page-item disabled"><span class="page-link">...</span></li>
                             <?php endif; ?>
                         <?php endif; ?>
-                        
+
                         <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
                             <li class="page-item <?php echo $i == $current_page ? 'active' : ''; ?>">
-                                <a class="page-link" 
-                                   href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=<?php echo $i; ?>">
+                                <a class="page-link"
+                                    href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=<?php echo $i; ?>">
                                     <?php echo $i; ?>
                                 </a>
                             </li>
                         <?php endfor; ?>
-                        
+
                         <?php if ($end_page < $total_pages): ?>
                             <?php if ($end_page < $total_pages - 1): ?>
                                 <li class="page-item disabled"><span class="page-link">...</span></li>
@@ -154,11 +154,11 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
                                 <a class="page-link" href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=<?php echo $total_pages; ?>"><?php echo $total_pages; ?></a>
                             </li>
                         <?php endif; ?>
-                        
+
                         <!-- Next -->
                         <li class="page-item <?php echo $current_page >= $total_pages ? 'disabled' : ''; ?>">
-                            <a class="page-link" 
-                               href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=<?php echo $current_page + 1; ?>">
+                            <a class="page-link"
+                                href="?page=books<?php echo isset($_GET['category']) ? '&category=' . $_GET['category'] : ''; ?><?php echo isset($_GET['keyword']) ? '&keyword=' . urlencode($_GET['keyword']) : ''; ?><?php echo isset($_GET['sort']) ? '&sort=' . $_GET['sort'] : ''; ?><?php echo isset($_GET['price_range']) ? '&price_range=' . $_GET['price_range'] : ''; ?>&p=<?php echo $current_page + 1; ?>">
                                 <i class="fas fa-chevron-right"></i>
                             </a>
                         </li>
@@ -176,23 +176,23 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
         border-radius: 8px;
         border: 1px solid #dee2e6;
     }
-    
+
     .page-header h2 {
         color: #333;
         font-weight: 700;
     }
-    
+
     .pagination .page-link {
         color: #007bff;
         border-radius: 5px;
         margin: 0 3px;
     }
-    
+
     .pagination .page-item.active .page-link {
         background-color: #007bff;
         border-color: #007bff;
     }
-    
+
     .no-results {
         background: #f8f9fa;
         border-radius: 10px;
@@ -206,7 +206,8 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
     }
 
     .book-item-list .card {
-        flex-direction: row; /* Image | Body */
+        flex-direction: row;
+        /* Image | Body */
         align-items: stretch;
         border: 1px solid #e0e0e0;
     }
@@ -215,7 +216,8 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
     .book-item-list .book-image-wrapper {
         width: 200px;
         flex-shrink: 0;
-        height: auto !important; /* Override default grid height */
+        height: auto !important;
+        /* Override default grid height */
     }
 
     .book-item-list .book-image-wrapper a {
@@ -225,15 +227,17 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
 
     .book-item-list .book-image-wrapper img {
         height: 100% !important;
-        object-fit: contain !important; /* Keep contain to show full book cover */
+        object-fit: contain !important;
+        /* Keep contain to show full book cover */
         padding: 10px;
     }
-    
+
     /* Badges position fix for list view */
     .book-item-list .book-image-wrapper .badge {
         top: 10px;
         left: 10px;
     }
+
     .book-item-list .book-image-wrapper .badge-danger[style*="right"] {
         left: auto;
         right: 10px;
@@ -242,7 +246,8 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
     /* Card Body - Center & Right Side */
     .book-item-list .card-body {
         display: flex;
-        flex-direction: row; /* Info | Actions */
+        flex-direction: row;
+        /* Info | Actions */
         padding: 20px;
         flex: 1;
     }
@@ -265,15 +270,19 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
 
     /* Actions Column (Right) */
     .book-item-list .book-actions {
-        width: auto; /* Allow flexibility */
+        width: auto;
+        /* Allow flexibility */
         min-width: 300px;
         flex-shrink: 0;
         display: flex;
-        flex-direction: row; /* Horizontal layout */
-        justify-content: flex-end; /* Align right */
+        flex-direction: row;
+        /* Horizontal layout */
+        justify-content: flex-end;
+        /* Align right */
         align-items: center;
         padding-left: 25px;
-        margin-top: 0 !important; /* Reset mt-auto */
+        margin-top: 0 !important;
+        /* Reset mt-auto */
     }
 
     /* Child adjustments for horizontal layout */
@@ -281,13 +290,15 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
         margin-bottom: 0 !important;
         margin-right: 20px;
     }
-    
-    .book-item-list .book-actions > div[class*="mt-"] {
-        margin-top: 0 !important; /* Remove top margin from button container */
+
+    .book-item-list .book-actions>div[class*="mt-"] {
+        margin-top: 0 !important;
+        /* Remove top margin from button container */
     }
-    
+
     .book-item-list .add-to-cart-btn {
-        width: auto; /* Auto width instead of block */
+        width: auto;
+        /* Auto width instead of block */
         padding-left: 20px;
         padding-right: 20px;
     }
@@ -296,7 +307,7 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
     .book-item-list .book-extra-info {
         display: block !important;
     }
-    
+
     .book-item-list .btn-text {
         display: inline;
     }
@@ -306,13 +317,16 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
         .book-item-list .card {
             flex-direction: column;
         }
+
         .book-item-list .book-image-wrapper {
             width: 100%;
             height: 250px !important;
         }
+
         .book-item-list .card-body {
             flex-direction: column;
         }
+
         .book-item-list .book-info-main {
             border-right: none;
             padding-right: 0;
@@ -320,6 +334,7 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
             border-bottom: 1px solid #eee;
             padding-bottom: 20px;
         }
+
         .book-item-list .book-actions {
             width: 100%;
             min-width: 0;
@@ -328,11 +343,12 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
             justify-content: space-between;
             align-items: center;
         }
+
         .book-item-list .book-price {
             margin-right: 15px;
         }
     }
-    
+
     .btn-group .btn.active {
         background-color: #6c757d;
         color: white;
@@ -340,55 +356,60 @@ $pageTitle = isset($_GET['keyword']) ? 'Tìm kiếm: ' . htmlspecialchars($_GET[
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const btnGrid = document.getElementById('btnGrid');
-    const btnList = document.getElementById('btnList');
-    const container = document.getElementById('booksGrid');
-    
-    // Check local storage
-    const currentView = localStorage.getItem('booksViewMode') || 'grid';
-    applyViewMode(currentView);
-    
-    btnGrid.addEventListener('click', function() {
-        applyViewMode('grid');
-    });
-    
-    btnList.addEventListener('click', function() {
-        applyViewMode('list');
-    });
-    
-    function applyViewMode(mode) {
-        if (mode === 'list') {
-            // Activate Button
-            btnList.classList.add('active');
-            btnGrid.classList.remove('active');
-            
-            // Apply List Classes
-            const cols = container.querySelectorAll('.book-item-col');
-            cols.forEach(col => {
-                col.className = 'col-12 mb-3 book-item-col book-item-list';
-                // Reset any inline styles if they exist (cleanup)
-                const img = col.querySelector('img');
-                if (img) img.style = '';
-            });
-            
-            localStorage.setItem('booksViewMode', 'list');
-        } else {
-            // Activate Button
-            btnGrid.classList.add('active');
-            btnList.classList.remove('active');
-            
-            // Apply Grid Classes
-            const cols = container.querySelectorAll('.book-item-col');
-            cols.forEach(col => {
-                col.className = 'col-lg-4 col-md-6 col-sm-6 mb-4 book-item-col';
-                // Reset any inline styles
-                const img = col.querySelector('img');
-                if (img) img.style = 'height: 420px; object-fit: contain; background: #fff;';
-            });
-            
-            localStorage.setItem('booksViewMode', 'grid');
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnGrid = document.getElementById('btnGrid');
+        const btnList = document.getElementById('btnList');
+        const container = document.getElementById('booksGrid');
+
+        // Only proceed if elements exist
+        if (!btnGrid || !btnList) return;
+
+        // Check local storage
+        const currentView = localStorage.getItem('booksViewMode') || 'grid';
+        applyViewMode(currentView);
+
+        btnGrid.addEventListener('click', function() {
+            applyViewMode('grid');
+        });
+
+        btnList.addEventListener('click', function() {
+            applyViewMode('list');
+        });
+
+        function applyViewMode(mode) {
+            // Toggle active state regardless of container existence
+            if (mode === 'list') {
+                btnList.classList.add('active');
+                btnGrid.classList.remove('active');
+                localStorage.setItem('booksViewMode', 'list');
+            } else {
+                btnGrid.classList.add('active');
+                btnList.classList.remove('active');
+                localStorage.setItem('booksViewMode', 'grid');
+            }
+
+            // Only manipulate container if it exists (it might be missing if no books found)
+            if (!container) return;
+
+            if (mode === 'list') {
+                // Apply List Classes
+                const cols = container.querySelectorAll('.book-item-col');
+                cols.forEach(col => {
+                    col.className = 'col-12 mb-3 book-item-col book-item-list';
+                    // Reset any inline styles if they exist (cleanup)
+                    const img = col.querySelector('img');
+                    if (img) img.style = '';
+                });
+            } else {
+                // Apply Grid Classes
+                const cols = container.querySelectorAll('.book-item-col');
+                cols.forEach(col => {
+                    col.className = 'col-lg-4 col-md-6 col-sm-6 mb-4 book-item-col';
+                    // Reset any inline styles
+                    const img = col.querySelector('img');
+                    if (img) img.style = 'height: 420px; object-fit: contain; background: #fff;';
+                });
+            }
         }
-    }
-});
+    });
 </script>

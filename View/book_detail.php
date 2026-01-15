@@ -161,9 +161,9 @@ $pageTitle = isset($book) ? htmlspecialchars($book['ten_sach']) : 'Chi tiết s�
         <h3 class="mb-4">Đánh giá sản phẩm</h3>
         
         <!-- Write Review Form (for logged-in users) -->
-        <?php if (isset($_SESSION['customer_id'])): ?>
+        <?php if (!empty($can_review)): ?>
         <div class="write-review mb-4">
-            <h5>Viết đánh giá của bạn</h5>
+            <h5><?php echo !empty($my_review) ? 'Cập nhật đánh giá của bạn' : 'Viết đánh giá của bạn'; ?></h5>
             <form id="reviewForm">
                 <input type="hidden" name="book_id" value="<?php echo $book['ma_sach']; ?>">
                 <div class="form-group">
@@ -179,10 +179,16 @@ $pageTitle = isset($book) ? htmlspecialchars($book['ten_sach']) : 'Chi tiết s�
                 </div>
                 <div class="form-group">
                     <label>Nhận xét:</label>
-                    <textarea name="comment" class="form-control" rows="4" required></textarea>
+                    <textarea name="comment" class="form-control" rows="4" required><?php echo htmlspecialchars($my_review['noi_dung'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
+                <button type="submit" class="btn btn-primary">
+                    <?php echo !empty($my_review) ? 'Lưu thay đổi' : 'Gửi đánh giá'; ?>
+                </button>
             </form>
+        </div>
+        <?php elseif (isset($_SESSION['customer_id']) && empty($has_purchased)): ?>
+        <div class="alert alert-info">
+            Bạn cần mua sách này (đơn hàng <strong>đã hoàn thành</strong>) trước khi có thể đánh giá.
         </div>
         <?php else: ?>
         <div class="alert alert-info">
@@ -273,5 +279,15 @@ $(document).ready(function() {
             }
         }, 'json');
     });
+
+    // Prefill rating when editing
+    const existingRating = <?php echo (int)($my_review['so_sao'] ?? 0); ?>;
+    if (existingRating > 0) {
+        $('#ratingValue').val(existingRating);
+        $('.rating-input i').removeClass('fas active').addClass('far');
+        for (let i = 1; i <= existingRating; i++) {
+            $(`.rating-input i[data-rating="${i}"]`).removeClass('far').addClass('fas active');
+        }
+    }
 });
 </script>

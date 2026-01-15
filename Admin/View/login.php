@@ -19,8 +19,8 @@
                                 <h6 class="dropdown-header">Select an admin account:</h6>
                                 <div class="dropdown-divider"></div>
                                 <?php foreach ($debug_users as $user): ?>
-                                    <a class="dropdown-item d-flex justify-content-between align-items-center" href="#" 
-                                       onclick="devQuickLoginAdmin('<?php echo htmlspecialchars($user['username']); ?>', '<?php echo htmlspecialchars($user['full_name']); ?>'); return false;">
+                                                <a class="dropdown-item d-flex justify-content-between align-items-center" href="#" 
+                                                    onclick="devQuickLoginAdmin('<?php echo htmlspecialchars($user['username'], ENT_QUOTES, 'UTF-8'); ?>', '<?php echo htmlspecialchars($user['full_name'], ENT_QUOTES, 'UTF-8'); ?>'); return false;">
                                         <span><i class="fas fa-user-tie text-muted mr-2"></i> <?php echo htmlspecialchars($user['full_name']); ?></span>
                                         <small class="text-muted ml-2">@<?php echo htmlspecialchars($user['username']); ?></small>
                                     </a>

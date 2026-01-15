@@ -22,6 +22,14 @@ class CoverController extends BaseController
     {
         $placeholder = '/book_store/Content/images/books/no-image.jpg';
 
+        $cacheTtlSeconds = defined('COVER_METADATA_CACHE_TTL')
+            ? max(0, (int)constant('COVER_METADATA_CACHE_TTL'))
+            : 86400; // 1 day
+
+        $negativeCacheTtlSeconds = defined('COVER_METADATA_NEGATIVE_TTL')
+            ? max(0, (int)constant('COVER_METADATA_NEGATIVE_TTL'))
+            : 300; // 5 minutes
+
         $isbn = trim((string)$isbn);
         if ($isbn === '') {
             $this->redirect($placeholder, 302);
@@ -48,12 +56,26 @@ class CoverController extends BaseController
 
         $resolved = null;
 
-        if (is_file($cacheFile) && (time() - filemtime($cacheFile)) < 86400) {
+        if (is_file($cacheFile)) {
+            $ageSeconds = time() - (int)@filemtime($cacheFile);
             $cached = @file_get_contents($cacheFile);
             if (is_string($cached) && $cached !== '') {
                 $cachedData = json_decode($cached, true);
-                if (is_array($cachedData) && isset($cachedData['url']) && is_string($cachedData['url'])) {
-                    $resolved = trim($cachedData['url']);
+
+                // Positive cache: keep for 1 day (or configured TTL)
+                if ($cacheTtlSeconds > 0 && $ageSeconds < $cacheTtlSeconds) {
+                    if (is_array($cachedData) && isset($cachedData['url']) && is_string($cachedData['url'])) {
+                        $resolved = trim($cachedData['url']);
+                    }
+                }
+
+                // Negative cache: avoid hammering the API for short period
+                if ((!is_string($resolved) || $resolved === '') && $negativeCacheTtlSeconds > 0 && $ageSeconds < $negativeCacheTtlSeconds) {
+                    $isMiss = is_array($cachedData) && (($cachedData['status'] ?? '') === 'miss');
+                    if ($isMiss) {
+                        header('Cache-Control: public, max-age=' . $negativeCacheTtlSeconds);
+                        $this->redirect($placeholder, 302);
+                    }
                 }
             }
         }
@@ -64,13 +86,25 @@ class CoverController extends BaseController
                 if (!is_dir($cacheDir)) {
                     @mkdir($cacheDir, 0777, true);
                 }
-                @file_put_contents($cacheFile, json_encode(['url' => $resolved], JSON_UNESCAPED_SLASHES));
+                @file_put_contents(
+                    $cacheFile,
+                    json_encode(['url' => $resolved, 'cached_at' => time()], JSON_UNESCAPED_SLASHES),
+                    LOCK_EX
+                );
             }
         }
 
         if (!is_string($resolved) || $resolved === '') {
-            // Cache placeholder briefly to reduce repeated failing requests.
-            header('Cache-Control: public, max-age=300');
+            // Cache placeholder briefly (negative cache) to reduce repeated failing requests.
+            if (!is_dir($cacheDir)) {
+                @mkdir($cacheDir, 0777, true);
+            }
+            @file_put_contents(
+                $cacheFile,
+                json_encode(['status' => 'miss', 'cached_at' => time()], JSON_UNESCAPED_SLASHES),
+                LOCK_EX
+            );
+            header('Cache-Control: public, max-age=' . $negativeCacheTtlSeconds);
             $this->redirect($placeholder, 302);
         }
 
@@ -80,7 +114,7 @@ class CoverController extends BaseController
         }
 
         // Cache successful resolves for a day.
-        header('Cache-Control: public, max-age=86400');
+        header('Cache-Control: public, max-age=' . $cacheTtlSeconds);
         $this->redirect($resolved, 302);
     }
 

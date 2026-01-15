@@ -1,176 +1,171 @@
 <?php
 /**
  * Reviews Model Class
- * 
- * Handles all book review operations
+ *
+ * This project uses Vietnamese table names:
+ * - Reviews: danhgia
+ * - Books: sach
+ * - Customers: khachhang
  */
 
 class Reviews {
     private $conn;
-    
+
     /**
      * Constructor - Initialize database connection
      */
     public function __construct($connection) {
         $this->conn = $connection;
     }
-    
+
     /**
-     * Add new review
-     * 
-     * @param array $data Review data
-     * @return int|false New review ID or false
+     * Check if a customer has purchased a book (completed orders only).
+     *
+     * Business rule: only customers with a completed order containing the book can review.
      */
-    public function addReview($data) {
-        $sql = "INSERT INTO reviews (id_book, id_customer, rating, title, content, status) 
-                VALUES (?, ?, ?, ?, ?, 'pending')";
-        
+    public function customerHasPurchasedBook($customerId, $bookId) {
+        $sql = "SELECT 1
+                FROM hoadon hd
+                INNER JOIN chitiet_hoadon ct ON hd.id_hoadon = ct.id_hoadon
+                WHERE hd.id_khachhang = ?
+                  AND ct.id_sach = ?
+                  AND hd.trang_thai = 'completed'
+                LIMIT 1";
+
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param(
-            "iiiss",
-            $data['id_book'],
-            $data['id_customer'],
-            $data['rating'],
-            $data['title'],
-            $data['content']
-        );
-        
-        if ($stmt->execute()) {
-            return $this->conn->insert_id;
+        if (!$stmt) {
+            return false;
         }
-        
-        return false;
-    }
-    
-    /**
-     * Get reviews for a book
-     * 
-     * @param int $bookId Book ID
-     * @param string $status Filter by status (approved/pending/all)
-     * @return array Reviews
-     */
-    public function getBookReviews($bookId, $status = 'approved') {
-        if ($status === 'all') {
-            $sql = "SELECT r.*, c.full_name 
-                    FROM reviews r
-                    INNER JOIN customers c ON r.id_customer = c.id_customer
-                    WHERE r.id_book = ?
-                    ORDER BY r.created_at DESC";
-            
-            $stmt = $this->conn->prepare($sql);
-            $stmt->bind_param("i", $bookId);
-        } else {
-            $sql = "SELECT r.*, c.full_name 
-                    FROM reviews r
-                    INNER JOIN customers c ON r.id_customer = c.id_customer
-                    WHERE r.id_book = ? AND r.status = ?
-                    ORDER BY r.created_at DESC";
-            
-            $stmt = $this->conn->prepare($sql);
-            $stmt->bind_param("is", $bookId, $status);
-        }
-        
+        $stmt->bind_param('ii', $customerId, $bookId);
         $stmt->execute();
         $result = $stmt->get_result();
-        
+        return (bool)($result && $result->fetch_assoc());
+    }
+
+    /**
+     * Get approved reviews for a book.
+     * Returned keys match what the customer view expects.
+     */
+    public function getApprovedReviewsForBook($bookId) {
+        $sql = "SELECT dg.so_sao, dg.noi_dung, dg.ngay_danh_gia, kh.ten_khachhang
+                FROM danhgia dg
+                LEFT JOIN khachhang kh ON dg.id_khachhang = kh.id_khachhang
+                WHERE dg.id_sach = ? AND dg.trang_thai = 'approved'
+                ORDER BY dg.ngay_danh_gia DESC";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return [];
+        }
+        $stmt->bind_param('i', $bookId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
         $reviews = [];
         while ($row = $result->fetch_assoc()) {
-            $reviews[] = $row;
+            $reviews[] = [
+                'ten_khach_hang' => $row['ten_khachhang'] ?? 'Khách hàng',
+                'diem' => (int)($row['so_sao'] ?? 0),
+                'noi_dung' => $row['noi_dung'] ?? '',
+                'ngay_danh_gia' => $row['ngay_danh_gia'] ?? null
+            ];
         }
-        
+
         return $reviews;
     }
-    
+
     /**
-     * Get average rating for a book
-     * 
-     * @param int $bookId Book ID
-     * @return float Average rating
+     * Get the current customer's review for a book (if any).
      */
-    public function getAverageRating($bookId) {
-        $sql = "SELECT AVG(rating) as avg_rating, COUNT(*) as review_count 
-                FROM reviews 
-                WHERE id_book = ? AND status = 'approved'";
-        
+    public function getCustomerReviewForBook($customerId, $bookId) {
+        $sql = "SELECT id_danhgia, so_sao, noi_dung, trang_thai, ngay_danh_gia
+                FROM danhgia
+                WHERE id_khachhang = ? AND id_sach = ?
+                ORDER BY ngay_danh_gia DESC
+                LIMIT 1";
+
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("i", $bookId);
+        if (!$stmt) {
+            return null;
+        }
+        $stmt->bind_param('ii', $customerId, $bookId);
         $stmt->execute();
         $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        
+        $row = $result ? $result->fetch_assoc() : null;
+
+        if (!$row) {
+            return null;
+        }
+
         return [
-            'average' => round($row['avg_rating'], 1),
-            'count' => $row['review_count']
+            'id_danhgia' => (int)$row['id_danhgia'],
+            'so_sao' => (int)($row['so_sao'] ?? 0),
+            'noi_dung' => $row['noi_dung'] ?? '',
+            'trang_thai' => $row['trang_thai'] ?? null,
+            'ngay_danh_gia' => $row['ngay_danh_gia'] ?? null
         ];
     }
-    
+
     /**
-     * Get all pending reviews (Admin function)
-     * 
-     * @return array Pending reviews
+     * Create a new review OR update the existing one, always auto-approved.
+     *
+     * Returns true on success.
      */
-    public function getPendingReviews() {
-        $sql = "SELECT r.*, c.full_name, b.title 
-                FROM reviews r
-                INNER JOIN customers c ON r.id_customer = c.id_customer
-                INNER JOIN books b ON r.id_book = b.id_book
-                WHERE r.status = 'pending'
-                ORDER BY r.created_at DESC";
-        
-        $result = $this->conn->query($sql);
-        
-        $reviews = [];
-        while ($row = $result->fetch_assoc()) {
-            $reviews[] = $row;
+    public function createOrUpdateApprovedReview($customerId, $bookId, $rating, $comment) {
+        // Update first (editable review behavior)
+        $updateSql = "UPDATE danhgia
+                      SET so_sao = ?, noi_dung = ?, trang_thai = 'approved'
+                      WHERE id_sach = ? AND id_khachhang = ?";
+        $updateStmt = $this->conn->prepare($updateSql);
+        if ($updateStmt) {
+            $updateStmt->bind_param('isii', $rating, $comment, $bookId, $customerId);
+            if ($updateStmt->execute() && $this->conn->affected_rows > 0) {
+                return true;
+            }
         }
-        
-        return $reviews;
+
+        // Insert if no existing row
+        $insertSql = "INSERT INTO danhgia (id_sach, id_khachhang, so_sao, noi_dung, trang_thai)
+                      VALUES (?, ?, ?, ?, 'approved')";
+        $insertStmt = $this->conn->prepare($insertSql);
+        if (!$insertStmt) {
+            return false;
+        }
+        $insertStmt->bind_param('iiis', $bookId, $customerId, $rating, $comment);
+        return $insertStmt->execute();
     }
-    
+
     /**
-     * Approve review (Admin function)
-     * 
-     * @param int $reviewId Review ID
-     * @return bool Success status
+     * Backwards-compatible method used by older controller code.
+     * Accepts either Vietnamese keys or English keys.
      */
-    public function approveReview($reviewId) {
-        $sql = "UPDATE reviews SET status = 'approved' WHERE id_review = ?";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("i", $reviewId);
-        return $stmt->execute();
+    public function addReview($data) {
+        $bookId = (int)($data['id_sach'] ?? $data['id_book'] ?? 0);
+        $customerId = (int)($data['id_khachhang'] ?? $data['id_customer'] ?? 0);
+        $rating = (int)($data['so_sao'] ?? $data['rating'] ?? 0);
+        $comment = (string)($data['noi_dung'] ?? $data['content'] ?? '');
+
+        if ($bookId <= 0 || $customerId <= 0) {
+            return false;
+        }
+
+        return $this->createOrUpdateApprovedReview($customerId, $bookId, $rating, $comment);
     }
-    
-    /**
-     * Delete review (Admin function)
-     * 
-     * @param int $reviewId Review ID
-     * @return bool Success status
-     */
-    public function deleteReview($reviewId) {
-        $sql = "DELETE FROM reviews WHERE id_review = ?";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("i", $reviewId);
-        return $stmt->execute();
-    }
-    
+
     /**
      * Check if customer has already reviewed a book
-     * 
-     * @param int $customerId Customer ID
-     * @param int $bookId Book ID
-     * @return bool True if review exists
      */
     public function hasReviewed($customerId, $bookId) {
-        $sql = "SELECT COUNT(*) as count FROM reviews 
-                WHERE id_customer = ? AND id_book = ?";
-        
+        $sql = "SELECT COUNT(*) as count FROM danhgia WHERE id_khachhang = ? AND id_sach = ?";
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("ii", $customerId, $bookId);
+        if (!$stmt) {
+            return false;
+        }
+        $stmt->bind_param('ii', $customerId, $bookId);
         $stmt->execute();
         $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        
-        return ($row['count'] > 0);
+        $row = $result ? $result->fetch_assoc() : null;
+        return ((int)($row['count'] ?? 0) > 0);
     }
 }
 ?>

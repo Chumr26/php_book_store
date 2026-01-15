@@ -216,7 +216,7 @@ class AdminOrderController extends BaseController {
         } catch (Exception $e) {
             error_log("Error in show: " . $e->getMessage());
             SessionHelper::setFlash('error', $e->getMessage());
-            header('Location: index.php?page=admin_orders');
+            header('Location: index.php?page=orders');
             exit;
         }
     }
@@ -279,9 +279,13 @@ class AdminOrderController extends BaseController {
             error_log("Error in updateStatus: " . $e->getMessage());
             SessionHelper::setFlash('error', $e->getMessage());
         }
-        
-        $orderId = $_POST['order_id'] ?? 0;
-        header('Location: index.php?page=admin_order_detail&id=' . $orderId);
+
+        $redirectOrderId = isset($_POST['order_id']) ? (int)$_POST['order_id'] : 0;
+        if ($redirectOrderId > 0) {
+            header('Location: index.php?page=order_detail&id=' . $redirectOrderId);
+        } else {
+            header('Location: index.php?page=orders');
+        }
         exit;
     }
     
@@ -380,7 +384,7 @@ class AdminOrderController extends BaseController {
         } catch (Exception $e) {
             error_log("Error in exportOrders: " . $e->getMessage());
             SessionHelper::setFlash('error', 'Không thể export đơn hàng');
-            header('Location: index.php?page=admin_orders');
+            header('Location: index.php?page=orders');
             exit;
         }
     }
@@ -401,13 +405,13 @@ class AdminOrderController extends BaseController {
             // TODO: Implement PDF generation using libraries like TCPDF or FPDF
             
             SessionHelper::setFlash('info', 'Tính năng in hóa đơn PDF đang được phát triển');
-            header('Location: index.php?page=admin_order_detail&id=' . $orderId);
+            header('Location: index.php?page=order_detail&id=' . $orderId);
             exit;
             
         } catch (Exception $e) {
             error_log("Error in printInvoice: " . $e->getMessage());
             SessionHelper::setFlash('error', $e->getMessage());
-            header('Location: index.php?page=admin_orders');
+            header('Location: index.php?page=orders');
             exit;
         }
     }
@@ -475,7 +479,7 @@ class AdminOrderController extends BaseController {
     private function checkAdminAuth() {
         if (!SessionHelper::isAdminLoggedIn()) {
             SessionHelper::setFlash('error', 'Vui lòng đăng nhập với quyền admin');
-            header('Location: /Admin/login.php');
+            header('Location: ' . ADMIN_BASE_URL . 'index.php?page=login');
             exit;
         }
     }

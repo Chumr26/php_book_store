@@ -45,8 +45,9 @@ if (empty($page) && !SessionHelper::isAdminLoggedIn()) {
     $page = 'dashboard';
 }
 
-// Check admin authentication (except for login page)
-if ($page !== 'login' && !SessionHelper::isAdminLoggedIn()) {
+// Check admin authentication (except for login + dev quick login)
+// dev_quick_login is a localhost-only helper invoked from the login page.
+if (!in_array($page, ['login', 'dev_quick_login'], true) && !SessionHelper::isAdminLoggedIn()) {
     SessionHelper::setFlash('warning', 'Vui lòng đăng nhập để tiếp tục');
     header('Location: ' . ADMIN_BASE_URL . 'index.php?page=login');
     exit;

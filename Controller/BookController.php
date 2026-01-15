@@ -214,28 +214,20 @@ class BookController extends BaseController {
                 exit;
             }
             
-            // Get book reviews
-            $reviews = [];
-            try {
-                $sql = "SELECT dg.*, kh.ten_khachhang as ten_khach_hang
-                        FROM danhgia dg
-                        LEFT JOIN khachhang kh ON dg.id_khachhang = kh.id_khachhang
-                        WHERE dg.id_sach = ?
-                        ORDER BY dg.ngay_danhgia DESC";
-                $stmt = $this->conn->prepare($sql);
-                $stmt->bind_param("i", $bookId);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                while ($row = $result->fetch_assoc()) {
-                    $reviews[] = [
-                        'ten_khach_hang' => $row['ten_khach_hang'],
-                        'diem' => $row['so_sao'],
-                        'noi_dung' => $row['noi_dung'],
-                        'ngay_danh_gia' => $row['ngay_danhgia']
-                    ];
+            // Get approved reviews (public)
+            $reviews = $this->reviewsModel->getApprovedReviewsForBook($bookId);
+
+            // Review permissions + existing review (editable)
+            $canReview = false;
+            $hasPurchased = false;
+            $myReview = null;
+            if (SessionHelper::isLoggedIn()) {
+                $customerId = (int)SessionHelper::getCustomerId();
+                if ($customerId > 0) {
+                    $hasPurchased = $this->reviewsModel->customerHasPurchasedBook($customerId, $bookId);
+                    $canReview = $hasPurchased;
+                    $myReview = $this->reviewsModel->getCustomerReviewForBook($customerId, $bookId);
                 }
-            } catch (Exception $e) {
-                error_log("Error getting reviews: " . $e->getMessage());
             }
             
             // Get related books (same category) - using correct table names
@@ -266,6 +258,9 @@ class BookController extends BaseController {
                 'book' => $book,
                 'reviews' => $reviews,
                 'related_books' => $relatedBooks,
+                'can_review' => $canReview,
+                'has_purchased' => $hasPurchased,
+                'my_review' => $myReview,
                 'page_title' => $book['ten_sach']
             ];
             
@@ -324,71 +319,82 @@ class BookController extends BaseController {
     public function submitReview() {
         try {
             SessionHelper::start();
+
+            header('Content-Type: application/json; charset=utf-8');
             
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Phương thức không hợp lệ.'
+                ]);
+                exit;
+            }
+
             // Check if user is logged in
             if (!SessionHelper::isLoggedIn()) {
-                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    echo json_encode([
-                        'success' => false,
-                        'message' => 'Vui lòng đăng nhập để đánh giá sách.'
-                    ]);
-                    exit;
-                }
-                SessionHelper::setFlash('error', 'Vui lòng đăng nhập để đánh giá sách.');
-                header('Location: index.php?page=login');
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Vui lòng đăng nhập để đánh giá sách.'
+                ]);
                 exit;
             }
-            
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                // Get form data
-                $bookId = isset($_POST['book_id']) ? (int)$_POST['book_id'] : 0;
-                $rating = isset($_POST['rating']) ? (int)$_POST['rating'] : 0;
-                $title = isset($_POST['title']) ? trim($_POST['title']) : '';
-                $content = isset($_POST['content']) ? trim($_POST['content']) : '';
-                $customerId = SessionHelper::getCustomerId();
-                
-                // Validate input
-                $validator = new Validator();
-                $validator->required('book_id', $bookId);
-                $validator->min('rating', $rating, 1);
-                $validator->max('rating', $rating, 5);
-                $validator->required('title', $title);
-                $validator->minLength('title', $title, 3);
-                $validator->required('content', $content);
-                $validator->minLength('content', $content, 10);
-                
-                if ($validator->hasErrors()) {
-                    echo json_encode([
-                        'success' => false,
-                        'message' => $validator->getFirstError()
-                    ]);
-                    exit;
-                }
-                
-                // Add review
-                $reviewData = [
-                    'id_sach' => $bookId,
-                    'id_khachhang' => $customerId,
-                    'so_sao' => $rating,
-                    'tieu_de' => Validator::sanitizeString($title),
-                    'noi_dung' => Validator::sanitizeString($content)
-                ];
-                
-                $result = $this->reviewsModel->addReview($reviewData);
-                
-                if ($result) {
-                    echo json_encode([
-                        'success' => true,
-                        'message' => 'Đánh giá của bạn đã được gửi và đang chờ duyệt.'
-                    ]);
-                } else {
-                    echo json_encode([
-                        'success' => false,
-                        'message' => 'Có lỗi xảy ra khi gửi đánh giá.'
-                    ]);
-                }
+
+            // Verify CSRF token
+            $token = $_POST['csrf_token'] ?? '';
+            if (!SessionHelper::verifyCSRFToken($token)) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'CSRF token không hợp lệ.'
+                ]);
                 exit;
             }
+
+            // Get form data (Option A: rating + comment)
+            $bookId = isset($_POST['book_id']) ? (int)$_POST['book_id'] : 0;
+            $rating = isset($_POST['rating']) ? (int)$_POST['rating'] : 0;
+            $comment = isset($_POST['comment']) ? trim($_POST['comment']) : '';
+            $customerId = (int)SessionHelper::getCustomerId();
+
+            // Validate input
+            $validator = new Validator();
+            $validator->required('book_id', $bookId);
+            $validator->min('rating', $rating, 1);
+            $validator->max('rating', $rating, 5);
+            $validator->required('comment', $comment, 'Vui lòng nhập nhận xét.');
+            $validator->minLength('comment', $comment, 10, 'Nhận xét phải có ít nhất 10 ký tự.');
+
+            if ($validator->hasErrors()) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => $validator->getFirstError()
+                ]);
+                exit;
+            }
+
+            // Purchase gate: only customers with a completed order containing this book can review.
+            if (!$this->reviewsModel->customerHasPurchasedBook($customerId, $bookId)) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Bạn cần mua sách trước khi đánh giá.'
+                ]);
+                exit;
+            }
+
+            // Auto-approved + editable
+            $result = $this->reviewsModel->createOrUpdateApprovedReview($customerId, $bookId, $rating, $comment);
+
+            if ($result) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Đánh giá của bạn đã được lưu.'
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Có lỗi xảy ra khi lưu đánh giá.'
+                ]);
+            }
+            exit;
             
         } catch (Exception $e) {
             error_log("BookController::submitReview Error: " . $e->getMessage());
