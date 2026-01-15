@@ -342,12 +342,13 @@ if ($viewFile && file_exists(ADMIN_BASE_PATH . $viewFile)) {
         <div class="admin-wrapper">
             <?php
             // Include admin sidebar (if exists and user is logged in)
-            if (SessionHelper::isAdminLoggedIn() && file_exists(ADMIN_BASE_PATH . 'View/sidebar.php')) {
+            $hasSidebar = SessionHelper::isAdminLoggedIn() && file_exists(ADMIN_BASE_PATH . 'View/sidebar.php');
+            if ($hasSidebar) {
                 include_once ADMIN_BASE_PATH . 'View/sidebar.php';
             }
             ?>
 
-            <div class="admin-content-wrapper">
+            <div class="admin-content-wrapper <?php echo !$hasSidebar ? 'no-sidebar' : ''; ?>">
                 <?php
                 // Include admin header (if exists and user is logged in)
                 if (SessionHelper::isAdminLoggedIn() && file_exists(ADMIN_BASE_PATH . 'View/header.php')) {

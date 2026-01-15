@@ -97,6 +97,12 @@
     padding: 25px;
 }
 
+.admin-content-wrapper.no-sidebar {
+    margin-left: 0;
+    width: 100%;
+}
+
+
 /* Card Styles */
 .border-left-primary {
     border-left: .25rem solid #4e73df !important;
