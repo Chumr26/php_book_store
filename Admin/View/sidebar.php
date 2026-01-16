@@ -34,6 +34,12 @@
             </a>
         </li>
 
+        <li class="<?php echo ($page === 'coupons') ? 'active' : ''; ?>">
+            <a href="<?php echo ADMIN_BASE_URL; ?>index.php?page=admin_coupons">
+                <i class="fas fa-ticket-alt"></i> <span>Mã giảm giá</span>
+            </a>
+        </li>
+
         <!-- <li class="<?php echo ($page === 'settings') ? 'active' : ''; ?>">
             <a href="<?php echo ADMIN_BASE_URL; ?>index.php?page=settings">
                 <i class="fas fa-cog"></i> <span>Cài đặt</span>

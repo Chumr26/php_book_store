@@ -1,4 +1,5 @@
 <?php
+
 /**
  * BookStore - Main Entry Point
  * 
@@ -53,7 +54,7 @@ try {
             $viewFile = 'View/home.php';
             $pageTitle = 'Trang chủ - BookStore';
             break;
-        
+
         // ========== BOOKS ==========
         case 'books':
             require_once BASE_PATH . 'Controller/BookController.php';
@@ -62,7 +63,7 @@ try {
             $viewFile = 'View/books.php';
             $pageTitle = 'Danh sách sách - BookStore';
             break;
-        
+
         case 'book_detail':
             require_once BASE_PATH . 'Controller/BookController.php';
             $controller = new BookController($conn);
@@ -71,7 +72,7 @@ try {
             $viewFile = 'View/book_detail.php';
             $pageTitle = ($viewData['book']['ten_sach'] ?? 'Chi tiết sách') . ' - BookStore';
             break;
-        
+
         case 'search':
             require_once BASE_PATH . 'Controller/BookController.php';
             $controller = new BookController($conn);
@@ -79,7 +80,7 @@ try {
             $viewFile = 'View/books.php';
             $pageTitle = 'Tìm kiếm sách - BookStore';
             break;
-        
+
         case 'category':
             require_once BASE_PATH . 'Controller/BookController.php';
             $controller = new BookController($conn);
@@ -88,12 +89,12 @@ try {
             $viewFile = 'View/books.php';
             $pageTitle = 'Sách theo danh mục - BookStore';
             break;
-        
+
         // ========== AUTHENTICATION ==========
         case 'login':
             require_once BASE_PATH . 'Controller/LoginController.php';
             $controller = new LoginController($conn);
-            
+
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $controller->login();
             } else {
@@ -108,17 +109,17 @@ try {
             $controller = new LoginController($conn);
             $controller->devQuickLogin();
             break;
-        
+
         case 'logout':
             require_once BASE_PATH . 'Controller/LoginController.php';
             $controller = new LoginController($conn);
             $controller->logout();
             break;
-        
+
         case 'register':
             require_once BASE_PATH . 'Controller/RegistrationController.php';
             $controller = new RegistrationController($conn);
-            
+
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $controller->register();
             } else {
@@ -139,11 +140,11 @@ try {
             $controller = new LoginController($conn);
             $controller->resendVerification();
             break;
-        
+
         case 'forgot_password':
             require_once BASE_PATH . 'Controller/ForgetController.php';
             $controller = new ForgetController($conn);
-            
+
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $controller->requestPasswordReset();
             } else {
@@ -152,11 +153,11 @@ try {
                 $pageTitle = 'Quên mật khẩu - BookStore';
             }
             break;
-        
+
         case 'reset_password':
             require_once BASE_PATH . 'Controller/ForgetController.php';
             $controller = new ForgetController($conn);
-            
+
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $controller->resetPassword();
             } else {
@@ -179,7 +180,7 @@ try {
                 $pageTitle = 'Thông tin cá nhân - BookStore';
             }
             break;
-        
+
         // ========== SHOPPING CART ==========
         case 'cart':
             require_once BASE_PATH . 'Controller/CartController.php';
@@ -188,36 +189,36 @@ try {
             $viewFile = 'View/cart.php';
             $pageTitle = 'Giỏ hàng - BookStore';
             break;
-        
+
         case 'add_to_cart':
             require_once BASE_PATH . 'Controller/CartController.php';
             $controller = new CartController($conn);
             $controller->addToCart();
             break;
-        
+
         case 'update_cart':
             require_once BASE_PATH . 'Controller/CartController.php';
             $controller = new CartController($conn);
             $controller->updateQuantity();
             break;
-        
+
         case 'remove_from_cart':
             require_once BASE_PATH . 'Controller/CartController.php';
             $controller = new CartController($conn);
             $controller->removeItem();
             break;
-        
+
         case 'clear_cart':
             require_once BASE_PATH . 'Controller/CartController.php';
             $controller = new CartController($conn);
             $controller->clearCart();
             break;
-        
+
         // ========== CHECKOUT & ORDERS ==========
         case 'checkout':
             require_once BASE_PATH . 'Controller/OrderController.php';
             $controller = new OrderController($conn);
-            
+
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Process payment - redirect to payment gateway
                 $controller->processPayment();
@@ -227,19 +228,19 @@ try {
                 $pageTitle = 'Thanh toán - BookStore';
             }
             break;
-        
+
         case 'create_order':
             require_once BASE_PATH . 'Controller/OrderController.php';
             $controller = new OrderController($conn);
             $controller->createOrder();
             break;
-        
+
         case 'payment_callback':
             require_once BASE_PATH . 'Controller/OrderController.php';
             $controller = new OrderController($conn);
             $controller->handlePaymentCallback();
             break;
-        
+
         case 'order_confirmation':
             require_once BASE_PATH . 'Controller/OrderController.php';
             $controller = new OrderController($conn);
@@ -247,7 +248,7 @@ try {
             $viewFile = 'View/order_confirmation.php';
             $pageTitle = 'Xác nhận đơn hàng - BookStore';
             break;
-        
+
         case 'orders':
             require_once BASE_PATH . 'Controller/OrderController.php';
             $controller = new OrderController($conn);
@@ -255,7 +256,7 @@ try {
             $viewFile = 'View/orders.php';
             $pageTitle = 'Đơn hàng của tôi - BookStore';
             break;
-        
+
         case 'order_detail':
             require_once BASE_PATH . 'Controller/OrderController.php';
             $controller = new OrderController($conn);
@@ -263,32 +264,44 @@ try {
             $viewFile = 'View/order_detail.php';
             $pageTitle = 'Chi tiết đơn hàng - BookStore';
             break;
-        
+
         case 'cancel_order':
             require_once BASE_PATH . 'Controller/OrderController.php';
             $controller = new OrderController($conn);
             $controller->cancelOrder();
             break;
-        
+
+        case 'apply_coupon':
+            require_once BASE_PATH . 'Controller/OrderController.php';
+            $controller = new OrderController($conn);
+            $controller->applyCoupon();
+            break;
+
+        case 'remove_coupon':
+            require_once BASE_PATH . 'Controller/OrderController.php';
+            $controller = new OrderController($conn);
+            $controller->removeCoupon();
+            break;
+
         // ========== AJAX ACTIONS ==========
         case 'ajax_quick_search':
             require_once BASE_PATH . 'Controller/HomeController.php';
             $controller = new HomeController($conn);
             $controller->quickSearch($_GET['keyword'] ?? '');
             break;
-        
+
         case 'ajax_submit_review':
             require_once BASE_PATH . 'Controller/BookController.php';
             $controller = new BookController($conn);
             $controller->submitReview();
             break;
-        
+
         case 'ajax_validate_email':
             require_once BASE_PATH . 'Controller/RegistrationController.php';
             $controller = new RegistrationController($conn);
             $controller->validateEmail();
             break;
-        
+
         case 'ajax_cart_summary':
             require_once BASE_PATH . 'Controller/CartController.php';
             $controller = new CartController($conn);
@@ -303,7 +316,7 @@ try {
             $controller = new CoverController($conn);
             $controller->redirectByIsbn($_GET['isbn'] ?? '');
             break;
-        
+
         // ========== 404 NOT FOUND ==========
         default:
             http_response_code(404);
@@ -311,11 +324,10 @@ try {
             $pageTitle = '404 - Không tìm thấy trang';
             break;
     }
-    
 } catch (Exception $e) {
     // Log error
     error_log("Error in routing: " . $e->getMessage());
-    
+
     // Show error page
     SessionHelper::setFlash('error', 'Đã xảy ra lỗi. Vui lòng thử lại.');
     $viewFile = 'View/error.php';
@@ -325,9 +337,10 @@ try {
 
 // Render view if not already handled by controller (redirect/JSON response)
 if ($viewFile && file_exists(BASE_PATH . $viewFile)) {
-    ?>
+?>
     <!DOCTYPE html>
     <html lang="vi">
+
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -337,33 +350,48 @@ if ($viewFile && file_exists(BASE_PATH . $viewFile)) {
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
         <!-- Re-adding FontAwesome (accidentally removed) -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-        
+
         <style>
             /* Force Toastr to be visible and on top */
-            #toast-container > div {
+            #toast-container>div {
                 opacity: 1 !important;
-                box-shadow: 0 0 12px rgba(0,0,0,0.2) !important;
+                box-shadow: 0 0 12px rgba(0, 0, 0, 0.2) !important;
             }
+
             .toast-top-right {
-                top: 150px; /* Push down a bit so it doesn't hide behind nav if fixed */
+                top: 150px;
+                /* Push down a bit so it doesn't hide behind nav if fixed */
                 right: 12px;
             }
-            
+
             /* FIX BOOTSTRAP 4 CONFLICT: Bootstrap defines .toast with white bg, overriding Toastr */
-            #toast-container > .toast {
+            #toast-container>.toast {
                 background-image: none !important;
             }
-            #toast-container > .toast-success { background-color: #28a745 !important; }
-            #toast-container > .toast-error { background-color: #dc3545 !important; }
-            #toast-container > .toast-info { background-color: #17a2b8 !important; }
-            #toast-container > .toast-warning { background-color: #ffc107 !important; }
+
+            #toast-container>.toast-success {
+                background-color: #28a745 !important;
+            }
+
+            #toast-container>.toast-error {
+                background-color: #dc3545 !important;
+            }
+
+            #toast-container>.toast-info {
+                background-color: #17a2b8 !important;
+            }
+
+            #toast-container>.toast-warning {
+                background-color: #ffc107 !important;
+            }
         </style>
     </head>
+
     <body>
         <?php
         // Execute global logic like calculating cart count
         $globalCartCount = 0;
-        
+
         // Check if user is logged in
         if (SessionHelper::isLoggedIn()) {
             require_once BASE_PATH . 'Model/ShoppingCart.php';
@@ -379,7 +407,7 @@ if ($viewFile && file_exists(BASE_PATH . $viewFile)) {
                 $globalCartCount = count($sessionCart);
             }
         }
-        
+
         $globalCartBookIds = [];
         if (SessionHelper::isLoggedIn()) {
             if (isset($cartModelGlobal)) {
@@ -391,38 +419,38 @@ if ($viewFile && file_exists(BASE_PATH . $viewFile)) {
                 $globalCartBookIds = array_keys($sessionCart);
             }
         }
-        
+
         // Include header (if exists)
         if (file_exists(BASE_PATH . 'View/header.php')) {
             include_once BASE_PATH . 'View/header.php';
         }
         ?>
-        
+
         <main class="main-content" <?php if ($page !== 'home') echo 'style="margin-top: 30px;"'; ?>>
             <?php
             // Extract view data to make variables available in view
             if (isset($viewData) && is_array($viewData)) {
                 extract($viewData);
             }
-            
+
             // Include the view file
             include BASE_PATH . $viewFile;
             ?>
         </main>
-        
+
         <?php
         // Include footer (if exists)
         if (file_exists(BASE_PATH . 'View/footer.php')) {
             include_once BASE_PATH . 'View/footer.php';
         }
         ?>
-        
+
         <!-- jQuery and Bootstrap JS -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
         <!-- Toastr JS -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-        
+
         <!-- Custom JavaScript -->
         <script>
             // Toastr Configuration
@@ -451,7 +479,7 @@ if ($viewFile && file_exists(BASE_PATH . $viewFile)) {
                     if ($type === 'error') $toastrType = 'error';
                     if ($type === 'success') $toastrType = 'success';
                     if ($type === 'warning') $toastrType = 'warning';
-                    
+
                     // Use json_encode to safely output string for JS (handles newlines/quotes)
                     echo "toastr.{$toastrType}(" . json_encode($message) . ");";
                 }
@@ -465,10 +493,10 @@ if ($viewFile && file_exists(BASE_PATH . $viewFile)) {
                 const bookName = $(this).data('book-name');
                 const button = $(this);
                 const originalHtml = button.html();
-                
+
                 // Disable button and show loading
                 button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
-                
+
                 $.ajax({
                     url: '?page=add_to_cart',
                     method: 'POST',
@@ -482,11 +510,11 @@ if ($viewFile && file_exists(BASE_PATH . $viewFile)) {
                         if (response.success) {
                             // Update cart badge
                             $('#cartBadge').text(response.data.item_count);
-                            
+
                             // Show success state on button
                             button.html('<i class="fas fa-check"></i> Đã thêm vào giỏ');
                             button.removeClass('btn-primary').addClass('btn-success');
-                            
+
                             // Show toast notification
                             toastr.success('Đã thêm "' + bookName + '" vào giỏ hàng!');
                         } else {
@@ -546,8 +574,9 @@ if ($viewFile && file_exists(BASE_PATH . $viewFile)) {
             })();
         </script>
     </body>
+
     </html>
-    <?php
+<?php
 } elseif ($viewFile) {
     // View file doesn't exist
     http_response_code(404);

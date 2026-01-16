@@ -294,6 +294,47 @@ try {
             $controller->exportCustomers();
             break;
 
+        // ========== COUPON MANAGEMENT ==========
+        case 'admin_coupons':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminCouponController.php';
+            $controller = new AdminCouponController($conn);
+            $viewData = $controller->index();
+            $viewFile = 'View/coupons/index.php';
+            $pageTitle = 'Quản lý mã giảm giá - Admin BookStore';
+            break;
+
+        case 'admin_coupon_create':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminCouponController.php';
+            $controller = new AdminCouponController($conn);
+
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $controller->store();
+            } else {
+                $viewData = $controller->create();
+                $viewFile = 'View/coupons/create.php';
+                $pageTitle = 'Thêm mã giảm giá - Admin BookStore';
+            }
+            break;
+
+        case 'admin_coupon_edit':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminCouponController.php';
+            $controller = new AdminCouponController($conn);
+
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $controller->update();
+            } else {
+                $viewData = $controller->edit();
+                $viewFile = 'View/coupons/edit.php';
+                $pageTitle = 'Sửa mã giảm giá - Admin BookStore';
+            }
+            break;
+
+        case 'admin_coupon_delete':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminCouponController.php';
+            $controller = new AdminCouponController($conn);
+            $controller->delete();
+            break;
+
         // ========== 404 NOT FOUND ==========
         default:
             http_response_code(404);
