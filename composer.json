@@ -3,6 +3,8 @@
     "description": "BookStore E-commerce Website",
     "type": "project",
     "require": {
-        "phpmailer/phpmailer": "^7.0"
+        "phpmailer/phpmailer": "^7.0",
+        "payos/payos": "^2.0",
+        "guzzlehttp/guzzle": "^7.10"
     }
 }

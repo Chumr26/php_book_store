@@ -87,14 +87,31 @@ require_once __DIR__ . '/helpers/cover.php';
                             <h5 class="mb-0"><i class="fas fa-money-check-alt"></i> Phương thức thanh toán</h5>
                         </div>
                         <div class="card-body">
-                            <div class="custom-control custom-radio">
-                                <input type="radio" id="cod" name="payment_method" value="cod"
-                                    class="custom-control-input" checked>
-                                <label class="custom-control-label" for="cod">
-                                    <i class="fas fa-money-bill-wave mr-2"></i>
-                                    <strong>Thanh toán khi nhận hàng (COD)</strong>
-                                </label>
-                            </div>
+                            <?php
+                            // Default icons
+                            $icons = [
+                                'cod' => 'fas fa-money-bill-wave',
+                                'payos' => 'fas fa-credit-card',
+                                'momo' => 'fas fa-wallet'
+                            ];
+
+                            $first = true;
+                            foreach ($payment_methods as $code => $name):
+                                $isChecked = $first ? 'checked' : '';
+                                $iconClass = $icons[$code] ?? 'fas fa-money-check';
+                            ?>
+                                <div class="custom-control custom-radio mb-2">
+                                    <input type="radio" id="payment_<?php echo $code; ?>" name="payment_method" value="<?php echo $code; ?>"
+                                        class="custom-control-input" <?php echo $isChecked; ?>>
+                                    <label class="custom-control-label" for="payment_<?php echo $code; ?>">
+                                        <i class="<?php echo $iconClass; ?> mr-2"></i>
+                                        <strong><?php echo htmlspecialchars($name); ?></strong>
+                                    </label>
+                                </div>
+                            <?php
+                                $first = false;
+                            endforeach;
+                            ?>
                         </div>
                     </div>
                 </div>

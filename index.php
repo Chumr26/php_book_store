@@ -241,6 +241,12 @@ try {
             $controller->handlePaymentCallback();
             break;
 
+        case 'payos_callback':
+            require_once BASE_PATH . 'Controller/OrderController.php';
+            $controller = new OrderController($conn);
+            $controller->handlePayOSCallback();
+            break;
+
         case 'order_confirmation':
             require_once BASE_PATH . 'Controller/OrderController.php';
             $controller = new OrderController($conn);

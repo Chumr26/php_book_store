@@ -1,0 +1,5 @@
+<?php
+// PayOS Configuration
+define('PAYOS_CLIENT_ID', 'b43512eb-1c35-4831-b21e-909ed7093313');
+define('PAYOS_API_KEY', '07606807-7b31-4828-9193-ffd22cff7203');
+define('PAYOS_CHECKSUM_KEY', 'bb28ab62d8b3038861e8fc4e777da80f9f2ebf4814a80a6c4a9825f22f2343a0');

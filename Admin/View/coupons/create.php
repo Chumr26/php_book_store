@@ -31,6 +31,7 @@
                                 <select class="form-control" id="loai_giam" name="loai_giam">
                                     <option value="percent">Phần trăm (%)</option>
                                     <option value="fixed">Số tiền cố định (VNĐ)</option>
+                                    <option value="free_shipping">Miễn phí vận chuyển</option>
                                 </select>
                             </div>
                             <div class="col-md-6 form-group">

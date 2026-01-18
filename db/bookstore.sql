@@ -132,10 +132,13 @@ CREATE TABLE hoadon (
     sdt_giao VARCHAR(15) NOT NULL,
     email_giao VARCHAR(100),
     ghi_chu TEXT,
+    id_magiamgia INT DEFAULT NULL,
+    so_tien_giam DECIMAL(10,2) DEFAULT 0,
     ngay_cap_nhat TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (id_khachhang) REFERENCES khachhang(id_khachhang) ON DELETE SET NULL,
     INDEX idx_ma_hoadon (ma_hoadon),
     INDEX idx_khachhang (id_khachhang),
+    INDEX idx_magiamgia (id_magiamgia),
     INDEX idx_trang_thai (trang_thai),
     INDEX idx_ngay (ngay_dat_hang)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -191,7 +194,7 @@ CREATE TABLE magiamgia (
     id_magiamgia INT PRIMARY KEY AUTO_INCREMENT,
     ma_code VARCHAR(20) UNIQUE NOT NULL,
     ten_chuongtrinh VARCHAR(100) NOT NULL,
-    loai_giam ENUM('percent', 'fixed') DEFAULT 'percent',
+    loai_giam ENUM('percent', 'fixed', 'free_shipping') DEFAULT 'percent',
     gia_tri_giam DECIMAL(10,2) NOT NULL,
     gia_tri_toi_thieu DECIMAL(10,2) DEFAULT 0,
     giam_toi_da DECIMAL(10,2),

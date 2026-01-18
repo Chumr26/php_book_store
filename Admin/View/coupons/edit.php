@@ -31,6 +31,7 @@
                                 <select class="form-control" id="loai_giam" name="loai_giam">
                                     <option value="percent" <?php echo $coupon['loai_giam'] == 'percent' ? 'selected' : ''; ?>>Phần trăm (%)</option>
                                     <option value="fixed" <?php echo $coupon['loai_giam'] == 'fixed' ? 'selected' : ''; ?>>Số tiền cố định (VNĐ)</option>
+                                    <option value="free_shipping" <?php echo $coupon['loai_giam'] == 'free_shipping' ? 'selected' : ''; ?>>Miễn phí vận chuyển</option>
                                 </select>
                             </div>
                             <div class="col-md-6 form-group">
