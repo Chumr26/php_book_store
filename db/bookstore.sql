@@ -96,6 +96,7 @@ CREATE TABLE sach (
     gia_goc DECIMAL(10,2),
     hinh_anh VARCHAR(255),
     mo_ta TEXT,
+    tu_khoa VARCHAR(255) DEFAULT NULL,
     so_trang INT,
     nam_xuat_ban YEAR,
     ngon_ngu VARCHAR(50) DEFAULT 'Tiếng Việt',

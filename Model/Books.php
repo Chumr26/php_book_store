@@ -81,6 +81,7 @@ class Books
     {
         $sql = "SELECT s.*, 
                        s.id_sach as ma_sach,
+                       s.id_tacgia as ma_tac_gia,
                        s.ten_sach,
                        s.gia,
                        s.gia_goc,

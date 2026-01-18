@@ -167,7 +167,7 @@
         <div class="form-section-card">
             <h5><i class="fas fa-dollar-sign mr-2"></i>Giá & Kho hàng</h5>
             <div class="form-row">
-                <div class="form-group col-md-4">
+                <div class="form-group col-md-3">
                     <label for="gia">Giá bán <span class="text-danger">*</span></label>
                     <div class="input-group">
                         <div class="input-group-prepend">
@@ -182,7 +182,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group col-md-4">
+                <div class="form-group col-md-3">
                     <label for="gia_goc">Giá gốc <small class="text-muted">(để hiển thị giảm giá)</small></label>
                     <div class="input-group">
                         <div class="input-group-prepend">
@@ -197,7 +197,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group col-md-4">
+                <div class="form-group col-md-3">
                     <label for="so_luong_ton">Số lượng tồn <span class="text-danger">*</span></label>
                     <div class="input-group">
                         <div class="input-group-prepend">
@@ -209,10 +209,7 @@
                             value="<?php echo $book['so_luong_ton']; ?>" required>
                     </div>
                 </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group col-md-12">
+                <div class="form-group col-md-3">
                     <label for="tinh_trang">Trạng thái</label>
                     <div class="dropdown">
                         <input type="hidden" name="tinh_trang" id="tinh_trang" value="<?php echo $book['tinh_trang']; ?>">
@@ -227,6 +224,10 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="form-row">
+
             </div>
         </div>
 
