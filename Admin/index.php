@@ -253,6 +253,100 @@ try {
             $controller->bulkDelete();
             break;
 
+        // ========== AUTHOR MANAGEMENT ==========
+        case 'authors':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminAuthorController.php';
+            $controller = new AdminAuthorController($conn);
+            $viewData = $controller->index();
+            $viewFile = 'View/authors/index.php';
+            $pageTitle = 'Quản lý tác giả - Admin BookStore';
+            break;
+
+        case 'author_create':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminAuthorController.php';
+            $controller = new AdminAuthorController($conn);
+
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $controller->store();
+            } else {
+                $viewData = $controller->create();
+                $viewFile = 'View/authors/create.php';
+                $pageTitle = 'Thêm tác giả - Admin BookStore';
+            }
+            break;
+
+        case 'author_edit':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminAuthorController.php';
+            $controller = new AdminAuthorController($conn);
+
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $controller->update();
+            } else {
+                $viewData = $controller->edit();
+                $viewFile = 'View/authors/edit.php';
+                $pageTitle = 'Sửa tác giả - Admin BookStore';
+            }
+            break;
+
+        case 'author_delete':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminAuthorController.php';
+            $controller = new AdminAuthorController($conn);
+            $controller->delete();
+            break;
+
+        case 'author_bulk_delete':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminAuthorController.php';
+            $controller = new AdminAuthorController($conn);
+            $controller->bulkDelete();
+            break;
+
+        // ========== PUBLISHER MANAGEMENT ==========
+        case 'publishers':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminPublisherController.php';
+            $controller = new AdminPublisherController($conn);
+            $viewData = $controller->index();
+            $viewFile = 'View/publishers/index.php';
+            $pageTitle = 'Quản lý nhà xuất bản - Admin BookStore';
+            break;
+
+        case 'publisher_create':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminPublisherController.php';
+            $controller = new AdminPublisherController($conn);
+
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $controller->store();
+            } else {
+                $viewData = $controller->create();
+                $viewFile = 'View/publishers/create.php';
+                $pageTitle = 'Thêm nhà xuất bản - Admin BookStore';
+            }
+            break;
+
+        case 'publisher_edit':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminPublisherController.php';
+            $controller = new AdminPublisherController($conn);
+
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $controller->update();
+            } else {
+                $viewData = $controller->edit();
+                $viewFile = 'View/publishers/edit.php';
+                $pageTitle = 'Sửa nhà xuất bản - Admin BookStore';
+            }
+            break;
+
+        case 'publisher_delete':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminPublisherController.php';
+            $controller = new AdminPublisherController($conn);
+            $controller->delete();
+            break;
+
+        case 'publisher_bulk_delete':
+            require_once ADMIN_BASE_PATH . 'Controller/AdminPublisherController.php';
+            $controller = new AdminPublisherController($conn);
+            $controller->bulkDelete();
+            break;
+
         // ========== CUSTOMER MANAGEMENT ==========
         case 'customers':
             require_once ADMIN_BASE_PATH . 'Controller/AdminCustomerController.php';

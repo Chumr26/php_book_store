@@ -24,7 +24,19 @@
 
         <li class="<?php echo ($page === 'categories') ? 'active' : ''; ?>">
             <a href="<?php echo ADMIN_BASE_URL; ?>index.php?page=categories">
-                <i class="fas fa-list"></i> <span>Thể loại</span>
+                <i class="fas fa-folder-open"></i> <span>Thể loại</span>
+            </a>
+        </li>
+
+        <li class="<?php echo ($page === 'authors') ? 'active' : ''; ?>">
+            <a href="<?php echo ADMIN_BASE_URL; ?>index.php?page=authors">
+                <i class="fas fa-pen-nib"></i> <span>Tác giả</span>
+            </a>
+        </li>
+
+        <li class="<?php echo ($page === 'publishers') ? 'active' : ''; ?>">
+            <a href="<?php echo ADMIN_BASE_URL; ?>index.php?page=publishers">
+                <i class="fas fa-building"></i> <span>Nhà xuất bản</span>
             </a>
         </li>
 
