@@ -32,6 +32,9 @@ require_once ADMIN_BASE_PATH . 'Model/connect.php';
 // Include SessionHelper
 require_once BASE_PATH . 'Controller/helpers/SessionHelper.php';
 
+// Include UI Helper
+require_once BASE_PATH . 'View/helpers/ui_helper.php';
+
 // Start session via SessionHelper
 SessionHelper::start();
 
@@ -459,6 +462,15 @@ if ($viewFile && file_exists(ADMIN_BASE_PATH . $viewFile)) {
         <title><?php echo htmlspecialchars($pageTitle); ?></title>
         <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/bookstore.css">
         <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/admin.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/admin/layout.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/admin/components.css">
+        <?php if ($page === 'dashboard'): ?>
+            <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/admin/pages/dashboard.css">
+        <?php endif; ?>
+        <?php if ($page === 'books' || $page === 'book_create' || $page === 'book_edit'): ?>
+            <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/admin/pages/books.css">
+        <?php endif; ?>
+
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">

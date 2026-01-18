@@ -364,7 +364,7 @@
                         </small>
 
                         <!-- New Image Preview -->
-                        <div id="preview-wrapper" style="display: none;">
+                        <div id="preview-wrapper" class="book-cover-preview-wrapper d-none">
                             <label class="d-block mb-2"><strong>Xem trước ảnh mới</strong></label>
                             <div class="book-cover-frame">
                                 <img id="preview" src="#" alt="Preview" class="img-fluid">
@@ -434,7 +434,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                <form action="index.php?page=book_delete" method="POST" style="margin:0;">
+                <form action="index.php?page=book_delete" method="POST" class="m-0">
                     <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
                     <input type="hidden" name="book_id" value="<?php echo $book['ma_sach']; ?>">
                     <button type="submit" class="btn btn-danger">Xóa ngay</button>
@@ -472,7 +472,12 @@
                 if (preview) {
                     preview.src = e.target.result;
                     if (previewWrapper) {
-                        previewWrapper.style.display = 'block';
+                        previewWrapper.classList.remove('d-none');
+                        previewWrapper.style.display = 'block'; // Fallback if d-none override needed, but class removal should suffice if d-none is !important? No d-none is simple display:none.
+                        // Wait, d-none has !important in bootstrap. So removing it is correct.
+                        // But I need to make sure I don't use inline style display:block if d-none is removed.
+                        // Actually, just removing d-none is enough if the element is div (block).
+                        previewWrapper.style.display = '';
                     }
                 }
             }
@@ -480,7 +485,7 @@
             reader.readAsDataURL(input.files[0]);
         } else {
             if (previewWrapper) {
-                previewWrapper.style.display = 'none';
+                previewWrapper.classList.add('d-none');
             }
         }
     }

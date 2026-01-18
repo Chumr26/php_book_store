@@ -1,0 +1,17 @@
+/* Admin Books Page Styles */
+
+/* Table Column Widths */
+.table-custom th.col-checkbox,
+.table-custom td.col-checkbox {
+    width: 40px;
+}
+
+.table-custom th.col-title,
+.table-custom td.col-title {
+    width: 35%;
+}
+
+/* Ensure no click on checkbox cell */
+.no-click {
+    cursor: default;
+}

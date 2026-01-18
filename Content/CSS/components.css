@@ -1,0 +1,52 @@
+/* ========================================
+   Component Styles
+   ======================================== */
+
+/* Book Card */
+.book-card .card {
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.book-card .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    border-color: #007bff;
+}
+
+.book-image-wrapper {
+    overflow: hidden;
+    background-color: #f8f9fa;
+}
+
+.book-image-wrapper img {
+    transition: transform 0.3s ease;
+}
+
+.book-card .card:hover .book-image-wrapper img {
+    transform: scale(1.05);
+}
+
+.card-title a:hover {
+    color: #007bff !important;
+}
+
+.text-line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

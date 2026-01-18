@@ -1,5 +1,5 @@
 <nav id="sidebar" class="sidebar">
-    <div class="sidebar-header" id="sidebarCollapse" style="cursor: pointer;">
+    <div class="sidebar-header" id="sidebarCollapse">
         <h3><i class="fas fa-book-open"></i> <span>BookStore</span></h3>
     </div>
 

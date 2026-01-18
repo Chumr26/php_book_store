@@ -1,11 +1,27 @@
-<!-- Reusable book card component -->
 <?php
-// This file is included from other views, expects $book variable to be set
+
+/**
+ * Book Card Component
+ * 
+ * Renders a single book card with image, title, price, and action buttons.
+ * 
+ * @var array $book Book data array
+ */
+
 if (!isset($book)) return;
 
-require_once __DIR__ . '/helpers/cover.php';
+// Fallback for cover helper location
+$coverHelperPath = defined('BASE_PATH') ? BASE_PATH . 'View/helpers/cover.php' : __DIR__ . '/../helpers/cover.php';
+if (file_exists($coverHelperPath)) {
+    require_once $coverHelperPath;
+}
 
-$coverUrl = book_cover_url($book['isbn'] ?? null, 'medium');
+// Helper to get global cart items if not passed
+if (!isset($globalCartBookIds) && isset($GLOBALS['globalCartBookIds'])) {
+    $globalCartBookIds = $GLOBALS['globalCartBookIds'];
+}
+
+$coverUrl = function_exists('book_cover_url') ? book_cover_url($book['isbn'] ?? null, 'medium') : '/book_store/Content/images/books/no-image.jpg';
 ?>
 
 <div class="book-card">
@@ -143,9 +159,7 @@ $coverUrl = book_cover_url($book['isbn'] ?? null, 'medium');
                 <?php if (isset($book['so_luong_ton']) && $book['so_luong_ton'] > 0): ?>
                     <?php
                     $isInCart = false;
-                    if (isset($GLOBALS['globalCartBookIds']) && in_array($book['ma_sach'], $GLOBALS['globalCartBookIds'])) {
-                        $isInCart = true;
-                    } elseif (isset($globalCartBookIds) && in_array($book['ma_sach'], $globalCartBookIds)) {
+                    if (isset($globalCartBookIds) && in_array($book['ma_sach'], $globalCartBookIds)) {
                         $isInCart = true;
                     }
                     ?>
@@ -173,52 +187,3 @@ $coverUrl = book_cover_url($book['isbn'] ?? null, 'medium');
         </div>
     </div>
 </div>
-
-<style>
-    .book-card .card {
-        transition: all 0.3s ease;
-        border: 1px solid #e0e0e0;
-    }
-
-    .book-card .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-        border-color: #007bff;
-    }
-
-    .book-image-wrapper {
-        overflow: hidden;
-        background-color: #f8f9fa;
-    }
-
-    .book-image-wrapper img {
-        transition: transform 0.3s ease;
-    }
-
-    .book-card .card:hover .book-image-wrapper img {
-        transform: scale(1.05);
-    }
-
-    .card-title a:hover {
-        color: #007bff !important;
-    }
-
-    .text-line-clamp-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-</style>

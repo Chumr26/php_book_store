@@ -1,0 +1,26 @@
+/* Admin Dashboard Styles */
+
+/* Chart Container */
+.chart-area {
+    position: relative;
+    height: 20rem;
+    width: 100%;
+}
+
+.chart-pie {
+    position: relative;
+    height: 15rem;
+    width: 100%;
+}
+
+.chart-bar {
+    position: relative;
+    height: 18rem;
+    width: 100%;
+}
+
+.chart-line-sm {
+    position: relative;
+    height: 16rem;
+    width: 100%;
+}

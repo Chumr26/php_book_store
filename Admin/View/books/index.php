@@ -153,18 +153,19 @@
                     <table class="table table-custom table-hover mb-0" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th style="width: 40px" class="text-center pl-4">
+                                <th class="text-center pl-4 col-checkbox">
                                     <div class="custom-control custom-checkbox">
                                         <input type="checkbox" class="custom-control-input" id="check-all">
                                         <label class="custom-control-label" for="check-all"></label>
                                     </div>
                                 </th>
-                                <th style="width: 35%">Tên sách</th>
+                                <th class="col-title">Tên sách</th>
                                 <th>Danh mục</th>
                                 <th>Giá bán</th>
                                 <th>Tồn kho</th>
                                 <th>Trạng thái</th>
                             </tr>
+
                         </thead>
                         <tbody>
                             <?php if (!empty($books)): ?>

@@ -30,6 +30,9 @@ require_once BASE_PATH . 'Model/connect.php';
 // Include SessionHelper (must be before any session operations)
 require_once BASE_PATH . 'Controller/helpers/SessionHelper.php';
 
+// Include UI Helper
+require_once BASE_PATH . 'View/helpers/ui_helper.php';
+
 // Start session via SessionHelper
 SessionHelper::start();
 SessionHelper::generateCSRFToken();
