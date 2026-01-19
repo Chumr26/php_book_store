@@ -105,4 +105,11 @@ This guide outlines the steps to deploy the BookStore application using **Render
     -   Ensure the `BASE_URL` in `index.php` (Line 24) matches your Render URL.
     -   *Project Update Note*: Currently `BASE_URL` is hardcoded to `http://localhost/book_store/`. You may need to update this to `getenv('BASE_URL') ?: '...'` for full compatibility, or rely on relative paths.
 
-    > **Recommendation**: Add `BASE_URL` to your Render Environment Variables (e.g., `https://your-app.onrender.com/`) and update `index.php` to use it.
+    > **Recommendation**: 
+    > 1. Add `BASE_URL` to your Render Environment Variables. Value should be your Render URL with a trailing slash (e.g., `https://your-app.onrender.com/`). Do **NOT** include `book_store/` unless you specifically set up a subdirectory.
+    > 2. Ensure `DB_SSL` is NOT required if using the auto-detection logic, but verifying connection details is always good practice.
+
+-   **500 Errors / Insecure Transport**:
+    -   If you see "Connections using insecure transport are prohibited", ensure you have updated `Model/connect.php` with the SSL fix and **re-deployed**.
+    -   The application now auto-detects TiDB Cloud.
+

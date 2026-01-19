@@ -19,18 +19,18 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<?php echo $baseUrl ?? '/book_store'; ?>/Content/CSS/style.css">
-    <link rel="stylesheet" href="<?php echo $baseUrl ?? '/book_store'; ?>/Content/CSS/layout.css">
-    <link rel="stylesheet" href="<?php echo $baseUrl ?? '/book_store'; ?>/Content/CSS/components.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/style.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/layout.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/components.css">
 
     <?php
     $page = $_GET['page'] ?? 'home';
     if ($page === 'home'):
     ?>
-        <link rel="stylesheet" href="<?php echo $baseUrl ?? '/book_store'; ?>/Content/CSS/pages/homepage.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/pages/homepage.css">
     <?php endif; ?>
     <?php if ($page === 'books'): ?>
-        <link rel="stylesheet" href="<?php echo $baseUrl ?? '/book_store'; ?>/Content/CSS/pages/books.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/pages/books.css">
     <?php endif; ?>
 </head>
 

@@ -4,7 +4,7 @@ $pageTitle = "Trang chủ";
 // Define banners directly (no database needed)
 $staticBanners = [
     [
-        'image' => '/book_store/Content/images/banners/banner_welcome_1766452567061.png',
+        'image' => 'Content/images/banners/banner_welcome_1766452567061.png',
         'title' => 'Chào mừng đến BookStore',
         'description' => 'Hàng ngàn đầu sách chất lượng với giá tốt nhất',
         'link' => '?page=books',
@@ -13,7 +13,7 @@ $staticBanners = [
         'btn_icon' => 'fa-book-open'
     ],
     [
-        'image' => '/book_store/Content/images/banners/banner_bestsellers_1766452583769.png',
+        'image' => 'Content/images/banners/banner_bestsellers_1766452583769.png',
         'title' => 'Sách Bán Chạy',
         'description' => 'Giảm giá lên đến 50% cho các đầu sách hot nhất',
         'link' => '?page=books&sort=bestseller',
@@ -22,7 +22,7 @@ $staticBanners = [
         'btn_icon' => 'fa-fire'
     ],
     [
-        'image' => '/book_store/Content/images/banners/banner_new_arrivals_1766452605679.png',
+        'image' => 'Content/images/banners/banner_new_arrivals_1766452605679.png',
         'title' => 'Sách Mới Về',
         'description' => 'Cập nhật hàng tuần với những đầu sách mới nhất',
         'link' => '?page=books&sort=new',
@@ -31,7 +31,7 @@ $staticBanners = [
         'btn_icon' => 'fa-certificate'
     ],
     [
-        'image' => '/book_store/Content/images/banners/banner_free_shipping_1766452627060.png',
+        'image' => 'Content/images/banners/banner_free_shipping_1766452627060.png',
         'title' => 'Miễn Phí Vận Chuyển',
         'description' => 'Cho đơn hàng từ 200.000đ trở lên - Giao hàng toàn quốc',
         'link' => '?page=books',
@@ -40,7 +40,7 @@ $staticBanners = [
         'btn_icon' => 'fa-shipping-fast'
     ],
     [
-        'image' => '/book_store/Content/images/banners/banner_special_offer_1766452645672.png',
+        'image' => 'Content/images/banners/banner_special_offer_1766452645672.png',
         'title' => 'Ưu Đãi Đặc Biệt',
         'description' => 'Tiết kiệm đến 40% cho sách khuyến mãi',
         'link' => '?page=books&sort=discount',
@@ -64,7 +64,7 @@ $staticBanners = [
             <?php foreach ($staticBanners as $index => $banner): ?>
                 <div class="carousel-item <?php echo $index == 0 ? 'active' : ''; ?>">
                     <div class="hero-image-wrapper">
-                        <img src="<?php echo htmlspecialchars($banner['image']); ?>"
+                        <img src="<?php echo BASE_URL . htmlspecialchars($banner['image']); ?>"
                             class="d-block w-100 hero-img"
                             alt="<?php echo htmlspecialchars($banner['title']); ?>">
                         <div class="carousel-caption d-none d-md-block">
