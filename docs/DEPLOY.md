@@ -38,6 +38,11 @@ This guide outlines the steps to deploy the BookStore application using **Render
           ```
           *(Note: TiDB requires SSL usually. The exact command depends on your OS/Setup.)*
         - Source the file: `source db/bookstore.sql`
+        
+        **For Windows (PowerShell with XAMPP/MariaDB):**
+        ```powershell
+        cmd /c "mysql -u [User] -h [Host] -P 4000 -p --ssl < db\bookstore.sql"
+        ```
 
 ---
 

@@ -77,7 +77,7 @@ CREATE TABLE nhaxuatban (
     id_nxb INT PRIMARY KEY AUTO_INCREMENT,
     ten_nxb VARCHAR(100) NOT NULL,
     dia_chi TEXT,
-    dien_thoai VARCHAR(15),
+    dien_thoai VARCHAR(20),
     email VARCHAR(100),
     website VARCHAR(255),
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -311,10 +311,10 @@ INSERT INTO sach (ten_sach, id_tacgia, id_nxb, id_theloai, isbn, gia, gia_goc, h
 ('1Q84', 2, 11, 2, '9780307476463', 450000, 500000, '1q84.jpg', 'Tác phẩm đồ sộ và tham vọng nhất của Murakami, kể về Aomame, một nữ sát thủ chuyên trừng phạt những gã đàn ông bạo hành phụ nữ, và Tengo, một giáo viên toán kiêm tiểu thuyết gia đầy triển vọng. Cả hai vô tình bước vào một thực tại song song gọi là 1Q84, nơi có hai mặt trăng trên bầu trời và những quy luật vật lý bị bẻ cong. Khi họ dần nhận ra sự tồn tại của nhau và mối liên kết sâu sắc từ quá khứ, họ bị cuốn vào một âm mưu tôn giáo bí ẩn đe dọa đến sự tồn vong của thế giới. Cuốn sách là một bản tình ca về nỗi cô đơn, định mệnh và sức mạnh của tình yêu vượt qua mọi rào cản không gian và thời gian.', 925, 2011, 95, FALSE),
 
 -- Tiểu thuyết
-('Harry Potter and the Philosopher\'s Stone', 3, 7, 5, '9781408855652', 295000, 330000, 'harry_potter_1.jpg', 'Harry Potter là một cậu bé mồ côi sống cùng dì dượng Dursley và luôn bị đối xử tệ bạc. Vào ngày sinh nhật thứ 11, cuộc đời cậu thay đổi hoàn toàn khi nhận được thư mời nhập học từ Trường Phù thủy và Pháp sư Hogwarts. Tại đây, cậu khám phá ra thân thế thực sự của mình, kết bạn với Ron Weasley và Hermione Granger, và bắt đầu cuộc hành trình khám phá thế giới phép thuật đầy màu sắc. Cậu cũng phải đối mặt với Chúa tể Voldemort, kẻ đã sát hại cha mẹ cậu và để lại vết sẹo hình tia chớp trên trán cậu. Cuốn sách mở ra một thế giới kỳ diệu nơi tình bạn và lòng dũng cảm chiến thắng mọi thế lực hắc ám.', 352, 2014, 300, TRUE),
+('Harry Potter and the Philosopher''s Stone', 3, 7, 5, '9781408855652', 295000, 330000, 'harry_potter_1.jpg', 'Harry Potter là một cậu bé mồ côi sống cùng dì dượng Dursley và luôn bị đối xử tệ bạc. Vào ngày sinh nhật thứ 11, cuộc đời cậu thay đổi hoàn toàn khi nhận được thư mời nhập học từ Trường Phù thủy và Pháp sư Hogwarts. Tại đây, cậu khám phá ra thân thế thực sự của mình, kết bạn với Ron Weasley và Hermione Granger, và bắt đầu cuộc hành trình khám phá thế giới phép thuật đầy màu sắc. Cậu cũng phải đối mặt với Chúa tể Voldemort, kẻ đã sát hại cha mẹ cậu và để lại vết sẹo hình tia chớp trên trán cậu. Cuốn sách mở ra một thế giới kỳ diệu nơi tình bạn và lòng dũng cảm chiến thắng mọi thế lực hắc ám.', 352, 2014, 300, TRUE),
 ('Harry Potter and the Chamber of Secrets', 3, 7, 5, '9781408855669', 295000, 330000, 'harry_potter_2.jpg', 'Harry Potter trở lại Hogwarts cho năm học thứ hai sau một kỳ nghỉ hè tồi tệ. Tuy nhiên, ngôi trường đang bị đe dọa bởi một thế lực đen tối cổ xưa. Những dòng thông điệp bằng máu xuất hiện trên tường, cảnh báo rằng "Phòng Chứa Bí Mật đã được mở". Học sinh gốc Muggle bị tấn công và hóa đá một cách bí ẩn. Harry, Ron và Hermione phải chạy đua với thời gian để giải mã bí ẩn 50 năm về trước và cứu ngôi trường khỏi nguy cơ đóng cửa vĩnh viễn, đồng thời đối mặt với nỗi sợ hãi sâu thẳm nhất của chính mình.', 384, 2014, 280, TRUE),
 ('Harry Potter and the Prisoner of Azkaban', 3, 7, 5, '9781408855676', 320000, 360000, 'harry_potter_3.jpg', 'Sirius Black, tên tội phạm nguy hiểm và là tay sai đắc lực của Chúa tể Voldemort, đã trốn thoát khỏi nhà tù Azkaban kiên cố. Mọi người đồn rằng hắn đang truy lùng Harry Potter để trả thù cho chủ nhân. Năm học thứ ba của Harry tại Hogwarts bao trùm bởi nỗi sợ hãi khi các Giám ngục Azkaban được điều đến để canh gác ngôi trường. Harry không chỉ phải đối mặt với mối đe dọa từ bên ngoài mà còn khám phá ra những bí mật đau lòng về cái chết của cha mẹ mình và sự thật về người cha đỡ đầu bị oan ức. Câu chuyện về lòng trung thành và sự phản bội.', 468, 2014, 260, TRUE),
-('A Game of Thrones', 4, 1, 5, '9780553593716', 420000, 470000, 'game_of_thrones.jpg', 'Trong một thế giới nơi mùa hè kéo dài hàng thập kỷ và mùa đông có thể tồn tại suốt cả một đời người, cuộc chiến tranh giành Ngôi Báu Sắt đang bắt đầu. Từ phương Nam ấm áp đầy mưu mô đến phương Bắc lạnh giá nơi Bức Tường thành cổ đại ngăn chặn những thế lực đen tối, các gia tộc lớn nhỏ bị cuốn vào vòng xoáy của quyền lực, tình yêu và sự phản bội. Eddard Stark, lãnh chúa của Winterfell, bị cuốn vào những âm mưu chính trị tại King\'s Landing khi ông chấp nhận trở thành Cánh Tay Phải của Vua. Một sử thi hào hùng và đẫm máu về danh dự và tham vọng.', 694, 2011, 200, TRUE),
+('A Game of Thrones', 4, 1, 5, '9780553593716', 420000, 470000, 'game_of_thrones.jpg', 'Trong một thế giới nơi mùa hè kéo dài hàng thập kỷ và mùa đông có thể tồn tại suốt cả một đời người, cuộc chiến tranh giành Ngôi Báu Sắt đang bắt đầu. Từ phương Nam ấm áp đầy mưu mô đến phương Bắc lạnh giá nơi Bức Tường thành cổ đại ngăn chặn những thế lực đen tối, các gia tộc lớn nhỏ bị cuốn vào vòng xoáy của quyền lực, tình yêu và sự phản bội. Eddard Stark, lãnh chúa của Winterfell, bị cuốn vào những âm mưu chính trị tại King''s Landing khi ông chấp nhận trở thành Cánh Tay Phải của Vua. Một sử thi hào hùng và đẫm máu về danh dự và tham vọng.', 694, 2011, 200, TRUE),
 ('The Shining', 5, 2, 5, '9780385121675', 350000, 390000, 'the_shining.jpg', 'Jack Torrance, một nhà văn đang gặp khó khăn và nghiện rượu, chấp nhận công việc trông coi khách sạn Overlook vào mùa đông để tìm cảm hứng sáng tác và hàn gắn tình cảm gia đình. Tuy nhiên, khi cơn bão tuyết cô lập khách sạn khỏi thế giới bên ngoài, những thế lực ma quái ẩn mình trong các hành lang trống trải bắt đầu thức tỉnh. Chúng thao túng tâm trí Jack, biến anh thành mối đe dọa kinh hoàng đối với vợ và cậu con trai nhỏ Danny - người sở hữu khả năng thấu thị gọi là "The Shining". Một kiệt tác kinh dị tâm lý đầy ám ảnh.', 447, 1977, 150, TRUE),
 ('IT', 5, 2, 5, '9781501142970', 480000, 540000, 'it.jpg', 'Tại thị trấn Derry nhỏ bé, một thế lực tà ác cổ xưa tỉnh giấc mỗi 27 năm để săn lùng trẻ em, thường xuất hiện dưới hình dạng chú hề Pennywise. Một nhóm bảy đứa trẻ bị ruồng bỏ, tự gọi mình là "Hội Thất Bại", đã cùng nhau đối mặt với nỗi sợ hãi lớn nhất của đời mình để đánh bại con quái vật đó. Nhưng khi chúng trưởng thành và quên đi quá khứ, "Nó" lại trở lại. Họ phải quay về Derry một lần nữa để thực hiện lời thề máu năm xưa và tiêu diệt cái ác vĩnh viễn. Câu chuyện về tình bạn, ký ức và chấn thương tâm lý.', 1138, 2016, 135, TRUE),
 
@@ -500,6 +500,8 @@ INSERT INTO khachhang (ten_khachhang, email, password, dien_thoai, dia_chi, ngay
 ('Vũ Hoàng Phúc', 'hoangphuc@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0918889900', '140 Lê Lai, Q1, TP.HCM', '1993-09-09', 'Nam');
 
 -- Bulk generate orders + order details for analytics
+-- NOTE: Stored Procedure disabled for Cloud Import compatibility
+/*
 DELIMITER $$
 CREATE PROCEDURE sp_seed_bulk_orders(
     IN p_start_date DATE,
@@ -642,10 +644,12 @@ DELIMITER ;
 CALL sp_seed_bulk_orders('2024-01-01', 18, 20);
 
 DROP PROCEDURE sp_seed_bulk_orders;
+*/
 
 -- =============================================
 -- SEED DATA - REVIEWS
 -- =============================================
+/*
 DELIMITER $$
 CREATE PROCEDURE sp_seed_reviews(IN p_count INT)
 BEGIN
@@ -701,6 +705,7 @@ DELIMITER ;
 
 CALL sp_seed_reviews(100);
 DROP PROCEDURE sp_seed_reviews;
+*/
 
 -- =============================================
 -- CREATE VIEWS FOR REPORTING
@@ -757,6 +762,7 @@ ORDER BY tong_chi_tieu DESC;
 -- =============================================
 
 -- Procedure: Thêm sách vào giỏ hàng
+/*
 DELIMITER $$
 CREATE PROCEDURE sp_them_vao_gio(
     IN p_id_khachhang INT,
@@ -783,8 +789,10 @@ BEGIN
     END IF;
 END$$
 DELIMITER ;
+*/
 
 -- Procedure: Tạo đơn hàng từ giỏ hàng
+/*
 DELIMITER $$
 CREATE PROCEDURE sp_tao_don_hang(
     IN p_id_khachhang INT,
@@ -841,17 +849,20 @@ BEGIN
         s.so_luong_ton = s.so_luong_ton - g.so_luong,
         s.luot_ban = s.luot_ban + g.so_luong
     WHERE g.id_khachhang = p_id_khachhang;
-    
     -- Xóa giỏ hàng
     DELETE FROM giohang WHERE id_khachhang = p_id_khachhang;
 END$$
 DELIMITER ;
+*/
+    
+
 
 -- =============================================
 -- CREATE TRIGGERS
 -- =============================================
 
 -- Trigger: Cập nhật lượt xem khi xem chi tiết sách
+/*
 DELIMITER $$
 CREATE TRIGGER tr_cap_nhat_luot_xem
 AFTER INSERT ON danhgia
@@ -862,8 +873,10 @@ BEGIN
     WHERE id_sach = NEW.id_sach;
 END$$
 DELIMITER ;
+*/
 
 -- Trigger: Kiểm tra số lượng tồn trước khi thêm vào giỏ
+/*
 DELIMITER $$
 CREATE TRIGGER tr_kiem_tra_ton_kho
 BEFORE INSERT ON giohang
@@ -881,6 +894,7 @@ BEGIN
     END IF;
 END$$
 DELIMITER ;
+*/
 
 -- =============================================
 -- COMPLETION MESSAGE

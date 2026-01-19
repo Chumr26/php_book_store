@@ -25,17 +25,21 @@ $port = getenv('DB_PORT') ?: 3306;
 // Create connection using MySQLi
 $conn = mysqli_init();
 
-// Optional: Auto-enable SSL if on cloud (TiDB/Render often utilize this)
-// if (getenv('DB_SSL_CA')) {
-//    $conn->ssl_set(NULL, NULL, getenv('DB_SSL_CA'), NULL, NULL);
-// }
-
-// Use real_connect for better control (port, flags)
-if (!$conn->real_connect($servername, $username, $password, $dbname, (int)$port)) {
-    // Log error and display user-friendly message
-    error_log("Database Connection Failed: " . $conn->connect_error);
-    die("Không thể kết nối đến cơ sở dữ liệu. Vui lòng thử lại sau.");
+// Enable SSL if configured (Required for TiDB Cloud)
+if (getenv('DB_SSL') === 'true') {
+    $conn->ssl_set(NULL, NULL, NULL, NULL, NULL);
+    if (!$conn->real_connect($servername, $username, $password, $dbname, (int)$port, NULL, MYSQLI_CLIENT_SSL)) {
+        error_log("Database Connection Failed (SSL): " . $conn->connect_error);
+        die("Không thể kết nối đến cơ sở dữ liệu (SSL). Vui lòng thử lại sau.");
+    }
+} else {
+    // Standard connection for local/non-SSL
+    if (!$conn->real_connect($servername, $username, $password, $dbname, (int)$port)) {
+        error_log("Database Connection Failed: " . $conn->connect_error);
+        die("Không thể kết nối đến cơ sở dữ liệu. Vui lòng thử lại sau.");
+    }
 }
+
 
 
 
