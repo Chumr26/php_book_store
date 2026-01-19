@@ -1,4 +1,5 @@
 <?php
+
 /**
  * BookController
  * Handles book browsing, searching, filtering, and detail viewing
@@ -14,14 +15,16 @@ require_once __DIR__ . '/../Model/Pagination.php';
 require_once __DIR__ . '/helpers/SessionHelper.php';
 require_once __DIR__ . '/helpers/Validator.php';
 
-class BookController extends BaseController {
+class BookController extends BaseController
+{
     private $booksModel;
     private $categoriesModel;
     private $authorsModel;
     private $publishersModel;
     private $reviewsModel;
-    
-    public function __construct($conn) {
+
+    public function __construct($conn)
+    {
         parent::__construct($conn);
         $this->booksModel = new Books($conn);
         $this->categoriesModel = new Categories($conn);
@@ -29,14 +32,15 @@ class BookController extends BaseController {
         $this->publishersModel = new Publishers($conn);
         $this->reviewsModel = new Reviews($conn);
     }
-    
+
     /**
      * List all books with pagination and filtering
      */
-    public function listBooks() {
+    public function listBooks()
+    {
         try {
             SessionHelper::start();
-            
+
             // Get filters from query string
             $category = isset($_GET['category']) ? (int)$_GET['category'] : 0;
             $priceRange = isset($_GET['price_range']) ? $_GET['price_range'] : '';
@@ -45,26 +49,26 @@ class BookController extends BaseController {
             $sort = isset($_GET['sort']) ? $_GET['sort'] : 'newest';
             $page = isset($_GET['p']) ? (int)$_GET['p'] : 1;
             $limit = 12;
-            
+
             // Get total count FIRST
             $totalBooks = $this->booksModel->countBooks($category, $priceRange, $rating, $search);
-            
+
             // Initialize pagination with INTEGER total count
             $pagination = new Pagination($totalBooks, $limit, $page);
-            
+
             // Get books for current page
             $offset = ($page - 1) * $limit;
             $books = $this->booksModel->getBooks($category, $priceRange, $rating, $search, $sort, $limit, $offset);
-            
+
             // Get all categories for filter sidebar
             $categories = $this->categoriesModel->getAllCategories();
-            
+
             // Get publishers for filter
             $publishers = $this->publishersModel->getAllPublishers();
-            
+
             // Get bestsellers for sidebar
             $bestsellers = $this->booksModel->getTopSellingBooks(5);
-            
+
             // Prepare data for view
             $data = [
                 'books' => $books,
@@ -82,9 +86,8 @@ class BookController extends BaseController {
                 'sort_by' => $sort,
                 'page_title' => 'Danh sách sách'
             ];
-            
+
             return $data;
-            
         } catch (Exception $e) {
             error_log("BookController::listBooks Error: " . $e->getMessage());
             error_log("Stack trace: " . $e->getTraceAsString());
@@ -99,29 +102,30 @@ class BookController extends BaseController {
             ];
         }
     }
-    
+
     /**
      * Filter books by category
      * @param int $categoryId Category ID
      */
-    public function filterByCategory($categoryId) {
+    public function filterByCategory($categoryId)
+    {
         try {
             SessionHelper::start();
-            
+
             $page = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;
             $sortBy = isset($_GET['sort']) ? $_GET['sort'] : 'ngay_tao';
             $order = isset($_GET['order']) ? $_GET['order'] : 'DESC';
             $limit = 12;
-            
+
             // Get books by category
             $result = $this->booksModel->getBooksByCategory($categoryId, $page, $limit, $sortBy, $order);
-            
+
             // Get category details
             $category = $this->categoriesModel->getCategoryById($categoryId);
-            
+
             // Get all categories for sidebar
             $categories = $this->categoriesModel->getAllCategories();
-            
+
             $data = [
                 'books' => $result['data'] ?? [],
                 'total' => $result['total'] ?? 0,
@@ -134,41 +138,41 @@ class BookController extends BaseController {
                 'order' => $order,
                 'page_title' => 'Sách ' . ($category['ten_theloai'] ?? '')
             ];
-            
+
             return $data;
-            
         } catch (Exception $e) {
             error_log("BookController::filterByCategory Error: " . $e->getMessage());
             SessionHelper::setFlash('error', 'Có lỗi xảy ra khi lọc sách.');
             return [];
         }
     }
-    
+
     /**
      * Search books by keyword
      * @param string $keyword Search keyword
      */
-    public function searchBooks($keyword) {
+    public function searchBooks($keyword)
+    {
         try {
             SessionHelper::start();
-            
+
             if (empty($keyword)) {
                 SessionHelper::setFlash('warning', 'Vui lòng nhập từ khóa tìm kiếm.');
                 header('Location: index.php?page=books');
                 exit;
             }
-            
+
             $page = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;
             $sortBy = isset($_GET['sort']) ? $_GET['sort'] : 'ten_sach';
             $order = isset($_GET['order']) ? $_GET['order'] : 'ASC';
             $limit = 12;
-            
+
             // Search books
             $result = $this->booksModel->searchBooks($keyword, $page, $limit, $sortBy, $order);
-            
+
             // Get categories for sidebar
             $categories = $this->categoriesModel->getAllCategories();
-            
+
             $data = [
                 'books' => $result['data'] ?? [],
                 'total' => $result['total'] ?? 0,
@@ -180,40 +184,40 @@ class BookController extends BaseController {
                 'order' => $order,
                 'page_title' => 'Tìm kiếm: ' . htmlspecialchars($keyword)
             ];
-            
+
             return $data;
-            
         } catch (Exception $e) {
             error_log("BookController::searchBooks Error: " . $e->getMessage());
             SessionHelper::setFlash('error', 'Có lỗi xảy ra khi tìm kiếm sách.');
             return [];
         }
     }
-    
+
     /**
      * Get single book details
      * @param int $bookId Book ID
      */
-    public function getBookDetail($bookId) {
+    public function getBookDetail($bookId)
+    {
         try {
             SessionHelper::start();
-            
+
             // Validate book ID
             if (empty($bookId) || !is_numeric($bookId)) {
                 SessionHelper::setFlash('error', 'ID sách không hợp lệ.');
                 header('Location: index.php?page=books');
                 exit;
             }
-            
+
             // Get book details (now includes author, publisher, category, and ratings)
             $book = $this->booksModel->getBookById($bookId);
-            
+
             if (!$book) {
                 SessionHelper::setFlash('error', 'Không tìm thấy sách.');
                 header('Location: index.php?page=books');
                 exit;
             }
-            
+
             // Get approved reviews (public)
             $reviews = $this->reviewsModel->getApprovedReviewsForBook($bookId);
 
@@ -229,7 +233,7 @@ class BookController extends BaseController {
                     $myReview = $this->reviewsModel->getCustomerReviewForBook($customerId, $bookId);
                 }
             }
-            
+
             // Get related books (same category) - using correct table names
             $relatedBooks = [];
             if (!empty($book['ma_danh_muc'])) {
@@ -252,7 +256,7 @@ class BookController extends BaseController {
                     error_log("Error getting related books: " . $e->getMessage());
                 }
             }
-            
+
             // Prepare data for view
             $data = [
                 'book' => $book,
@@ -263,9 +267,8 @@ class BookController extends BaseController {
                 'my_review' => $myReview,
                 'page_title' => $book['ten_sach']
             ];
-            
+
             return $data;
-            
         } catch (Exception $e) {
             error_log("BookController::getBookDetail Error: " . $e->getMessage());
             SessionHelper::setFlash('error', 'Có lỗi xảy ra khi tải chi tiết sách.');
@@ -273,37 +276,37 @@ class BookController extends BaseController {
             exit;
         }
     }
-    
+
     /**
      * Sort books
      * @param string $sortBy Sort field
      * @param string $order Sort order (ASC/DESC)
      */
-    public function sortBooks($sortBy, $order = 'ASC') {
+    public function sortBooks($sortBy, $order = 'ASC')
+    {
         try {
             SessionHelper::start();
-            
+
             // Validate sort parameters
             $allowedSortFields = ['ten_sach', 'gia', 'ngay_tao', 'luot_ban', 'luot_xem'];
             $allowedOrders = ['ASC', 'DESC'];
-            
+
             if (!in_array($sortBy, $allowedSortFields)) {
                 $sortBy = 'ngay_tao';
             }
-            
+
             if (!in_array(strtoupper($order), $allowedOrders)) {
                 $order = 'DESC';
             }
-            
+
             // Redirect to list with sort parameters
             $params = $_GET;
             $params['sort'] = $sortBy;
             $params['order'] = $order;
-            
+
             $queryString = http_build_query($params);
             header('Location: index.php?' . $queryString);
             exit;
-            
         } catch (Exception $e) {
             error_log("BookController::sortBooks Error: " . $e->getMessage());
             SessionHelper::setFlash('error', 'Có lỗi xảy ra khi sắp xếp sách.');
@@ -311,17 +314,18 @@ class BookController extends BaseController {
             exit;
         }
     }
-    
+
     /**
      * Submit book review
      * POST action for customer reviews
      */
-    public function submitReview() {
+    public function submitReview()
+    {
         try {
             SessionHelper::start();
 
             header('Content-Type: application/json; charset=utf-8');
-            
+
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 echo json_encode([
                     'success' => false,
@@ -395,7 +399,6 @@ class BookController extends BaseController {
                 ]);
             }
             exit;
-            
         } catch (Exception $e) {
             error_log("BookController::submitReview Error: " . $e->getMessage());
             echo json_encode([

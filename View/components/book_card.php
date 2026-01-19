@@ -81,7 +81,20 @@ $coverUrl = function_exists('book_cover_url') ? book_cover_url($book['isbn'] ?? 
                 <!-- Author -->
                 <?php if (isset($book['ten_tac_gia']) || isset($book['author_name'])): ?>
                     <p class="text-muted small mb-2 text-truncate">
-                        <i class="fas fa-user"></i> <?php echo htmlspecialchars($book['ten_tac_gia'] ?? $book['author_name']); ?>
+                        <i class="fas fa-user"></i>
+                        <?php
+                        $authorName = $book['ten_tac_gia'] ?? $book['author_name'];
+                        // Try to find author ID if available (ma_tac_gia or id_tacgia)
+                        $authorId = $book['ma_tac_gia'] ?? ($book['id_tacgia'] ?? null);
+
+                        if ($authorId):
+                        ?>
+                            <a href="?page=author_detail&id=<?php echo $authorId; ?>" class="text-muted text-decoration-none hover-underline">
+                                <?php echo htmlspecialchars($authorName); ?>
+                            </a>
+                        <?php else: ?>
+                            <?php echo htmlspecialchars($authorName); ?>
+                        <?php endif; ?>
                     </p>
                 <?php else: ?>
                     <p class="text-muted small mb-2 invisible">
@@ -123,7 +136,20 @@ $coverUrl = function_exists('book_cover_url') ? book_cover_url($book['isbn'] ?? 
 
                     <div class="small text-muted mb-1">
                         <?php if (isset($book['ten_nxb']) || isset($book['publisher_name'])): ?>
-                            <span class="mr-3"><i class="fas fa-building"></i> <?php echo htmlspecialchars($book['ten_nxb'] ?? $book['publisher_name']); ?></span>
+                            <span class="mr-3">
+                                <i class="fas fa-building"></i>
+                                <?php
+                                $publisherName = $book['ten_nxb'] ?? $book['publisher_name'];
+                                $publisherId = $book['ma_nha_xuat_ban'] ?? ($book['id_nxb'] ?? null); // Adjust key if needed based on query
+                                if ($publisherId):
+                                ?>
+                                    <a href="?page=publisher_detail&id=<?php echo $publisherId; ?>" class="text-muted text-decoration-none hover-underline">
+                                        <?php echo htmlspecialchars($publisherName); ?>
+                                    </a>
+                                <?php else: ?>
+                                    <?php echo htmlspecialchars($publisherName); ?>
+                                <?php endif; ?>
+                            </span>
                         <?php endif; ?>
 
                         <?php if (isset($book['ten_theloai']) || isset($book['category_name'])): ?>

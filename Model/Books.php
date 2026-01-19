@@ -792,4 +792,117 @@ class Books
 
         return $books;
     }
+    /**
+     * Get books by author with pagination
+     * 
+     * @param int $authorId Author ID
+     * @param int $page Current page
+     * @param int $limit Items per page
+     * @return array Books array
+     */
+    public function getBooksByAuthor($authorId, $page = 1, $limit = 12)
+    {
+        $offset = ($page - 1) * $limit;
+
+        $sql = "SELECT s.*, 
+                       s.id_sach as ma_sach,
+                       tg.ten_tacgia as author_name,
+                       nxb.ten_nxb as publisher_name,
+                       tl.ten_theloai as category_name,
+                       (SELECT COALESCE(AVG(so_sao), 0) FROM danhgia WHERE id_sach = s.id_sach AND trang_thai = 'approved') as diem_trung_binh,
+                       (SELECT COUNT(*) FROM danhgia WHERE id_sach = s.id_sach AND trang_thai = 'approved') as so_luong_danh_gia
+                FROM sach s
+                LEFT JOIN tacgia tg ON s.id_tacgia = tg.id_tacgia
+                LEFT JOIN nhaxuatban nxb ON s.id_nxb = nxb.id_nxb
+                LEFT JOIN theloai tl ON s.id_theloai = tl.id_theloai
+                WHERE s.trang_thai = 'available' AND s.id_tacgia = ?
+                ORDER BY s.ngay_them DESC
+                LIMIT ? OFFSET ?";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("iii", $authorId, $limit, $offset);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $books = [];
+        while ($row = $result->fetch_assoc()) {
+            $books[] = $row;
+        }
+
+        return $books;
+    }
+
+    /**
+     * Count books by author
+     * 
+     * @param int $authorId Author ID
+     * @return int Total books
+     */
+    public function countBooksByAuthor($authorId)
+    {
+        $sql = "SELECT COUNT(*) as total FROM sach WHERE trang_thai = 'available' AND id_tacgia = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $authorId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        return (int)($row['total'] ?? 0);
+    }
+
+    /**
+     * Get books by publisher with pagination
+     * 
+     * @param int $publisherId Publisher ID
+     * @param int $page Current page
+     * @param int $limit Items per page
+     * @return array Books array
+     */
+    public function getBooksByPublisher($publisherId, $page = 1, $limit = 12)
+    {
+        $offset = ($page - 1) * $limit;
+
+        $sql = "SELECT s.*, 
+                       s.id_sach as ma_sach,
+                       tg.ten_tacgia as author_name,
+                       nxb.ten_nxb as publisher_name,
+                       tl.ten_theloai as category_name,
+                       (SELECT COALESCE(AVG(so_sao), 0) FROM danhgia WHERE id_sach = s.id_sach AND trang_thai = 'approved') as diem_trung_binh,
+                       (SELECT COUNT(*) FROM danhgia WHERE id_sach = s.id_sach AND trang_thai = 'approved') as so_luong_danh_gia
+                FROM sach s
+                LEFT JOIN tacgia tg ON s.id_tacgia = tg.id_tacgia
+                LEFT JOIN nhaxuatban nxb ON s.id_nxb = nxb.id_nxb
+                LEFT JOIN theloai tl ON s.id_theloai = tl.id_theloai
+                WHERE s.trang_thai = 'available' AND s.id_nxb = ?
+                ORDER BY s.ngay_them DESC
+                LIMIT ? OFFSET ?";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("iii", $publisherId, $limit, $offset);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $books = [];
+        while ($row = $result->fetch_assoc()) {
+            $books[] = $row;
+        }
+
+        return $books;
+    }
+
+    /**
+     * Count books by publisher
+     * 
+     * @param int $publisherId Publisher ID
+     * @return int Total books
+     */
+    public function countBooksByPublisher($publisherId)
+    {
+        $sql = "SELECT COUNT(*) as total FROM sach WHERE trang_thai = 'available' AND id_nxb = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $publisherId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        return (int)($row['total'] ?? 0);
+    }
 }

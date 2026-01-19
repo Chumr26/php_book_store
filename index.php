@@ -90,7 +90,24 @@ try {
             $categoryId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             $viewData = $controller->filterByCategory($categoryId);
             $viewFile = 'View/books.php';
+            $viewFile = 'View/books.php';
             $pageTitle = 'Sách theo danh mục - BookStore';
+            break;
+
+        case 'author_detail':
+            require_once BASE_PATH . 'Controller/AuthorController.php';
+            $controller = new AuthorController($conn);
+            $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+            $viewData = $controller->detail($id);
+            $viewFile = 'View/author_detail.php';
+            break;
+
+        case 'publisher_detail':
+            require_once BASE_PATH . 'Controller/PublisherController.php';
+            $controller = new PublisherController($conn);
+            $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+            $viewData = $controller->detail($id);
+            $viewFile = 'View/publisher_detail.php';
             break;
 
         // ========== AUTHENTICATION ==========

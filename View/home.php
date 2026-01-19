@@ -337,9 +337,9 @@ $staticBanners = [
                                         <?php echo htmlspecialchars($author['tieu_su']); ?>
                                     </p>
                                 <?php endif; ?>
-                                <a href="?page=books&author=<?php echo $author['ma_tac_gia']; ?>"
+                                <a href="?page=author_detail&id=<?php echo $author['ma_tac_gia']; ?>"
                                     class="btn btn-sm btn-outline-primary btn-block mt-auto">
-                                    Xem sách của tác giả
+                                    Xem chi tiết tác giả
                                 </a>
                             </div>
                         </div>
