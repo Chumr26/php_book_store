@@ -70,7 +70,7 @@ $pageTitle = isset($book) ? htmlspecialchars($book['ten_sach']) : 'Chi ti·∫øt s√
                         <td>
                             <div class="d-flex align-items-center">
                                 <div class="mr-2 author-avatar-small" style="width: 40px; height: 40px;">
-                                    <img src="Content/images/authors/default-author.png"
+                                    <img src="Content/images/authors/default-author.svg"
                                         alt="<?php echo htmlspecialchars($book['ten_tac_gia'] ?? ''); ?>"
                                         class="rounded-circle author-img w-100 h-100"
                                         data-author-name="<?php echo htmlspecialchars($book['ten_tac_gia'] ?? ''); ?>"

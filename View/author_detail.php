@@ -18,14 +18,14 @@ $pageTitle = isset($author) ? 'Tác giả: ' . htmlspecialchars($author['ten_tac
             <div class="col-md-4 col-lg-3 text-center mb-4 mb-md-0">
                 <!-- <div class="author-image-wrapper p-3 border rounded shadow-sm bg-white"> -->
                 <?php
-                $initialImage = !empty($author['hinh_anh']) ? $author['hinh_anh'] : '/book_store/Content/images/authors/default-author.png';
+                $initialImage = !empty($author['hinh_anh']) ? $author['hinh_anh'] : '/book_store/Content/images/authors/default-author.svg';
                 ?>
                 <img src="<?php echo htmlspecialchars($initialImage); ?>"
                     alt="<?php echo htmlspecialchars($author['ten_tac_gia']); ?>"
                     class="img-fluid rounded-circle author-img-detail"
                     data-author-name="<?php echo htmlspecialchars($author['ten_tac_gia']); ?>"
                     style="width: 200px; height: 200px; object-fit: cover;"
-                    onerror="if(this.src != '/book_store/Content/images/authors/default-author.png') { this.src='/book_store/Content/images/authors/default-author.png'; }">
+                    onerror="if(this.src != '/book_store/Content/images/authors/default-author.svg') { this.src='/book_store/Content/images/authors/default-author.svg'; }">
                 <i class="fas fa-user-circle fa-10x text-muted default-icon" style="display:none;"></i>
                 <!-- </div> -->
             </div>
@@ -153,7 +153,7 @@ $pageTitle = isset($author) ? 'Tác giả: ' . htmlspecialchars($author['ten_tac
                                 img.src = imageUrl;
                                 // Reset error handler to avoid loop if OL image also fails
                                 img.onerror = function() {
-                                    this.src = '/book_store/Content/images/authors/default-author.png';
+                                    this.src = '/book_store/Content/images/authors/default-author.svg';
                                 };
                             }
                         })
@@ -162,7 +162,7 @@ $pageTitle = isset($author) ? 'Tác giả: ' . htmlspecialchars($author['ten_tac
             };
 
             // If image is already default or fails to load (triggering onerror which sets it to default), try fetch
-            if (img.src.includes('default-author.png')) {
+            if (img.src.includes('default-author.svg')) {
                 fetchAuthorImage();
             } else {
                 // If it's a custom image, wait to see if it errors out

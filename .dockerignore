@@ -1,0 +1,29 @@
+# Git
+.git
+.gitignore
+
+# Dependencies (installed via Dockerfile)
+vendor
+
+# Environment & Local Config
+.env
+config/email.local.php
+config/payos_config.local.php
+
+# Documentation & Design
+docs
+*.md
+*.jpg
+*.png
+
+# Database Dumps
+db
+*.sql
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Logs & Temp
+tmp
+error_log
