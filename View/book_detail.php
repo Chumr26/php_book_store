@@ -68,13 +68,27 @@ $pageTitle = isset($book) ? htmlspecialchars($book['ten_sach']) : 'Chi tiết s�
                     <tr>
                         <th width="30%">Tác giả</th>
                         <td>
-                            <?php if (!empty($book['ma_tac_gia'])): ?>
-                                <a href="?page=author_detail&id=<?php echo $book['ma_tac_gia']; ?>">
-                                    <?php echo htmlspecialchars($book['ten_tac_gia'] ?? 'N/A'); ?>
-                                </a>
-                            <?php else: ?>
-                                <?php echo htmlspecialchars($book['ten_tac_gia'] ?? 'N/A'); ?>
-                            <?php endif; ?>
+                            <div class="d-flex align-items-center">
+                                <div class="mr-2 author-avatar-small" style="width: 40px; height: 40px;">
+                                    <img src="Content/images/authors/default-author.png"
+                                        alt="<?php echo htmlspecialchars($book['ten_tac_gia'] ?? ''); ?>"
+                                        class="rounded-circle author-img w-100 h-100"
+                                        data-author-name="<?php echo htmlspecialchars($book['ten_tac_gia'] ?? ''); ?>"
+                                        style="object-fit: cover; display: none;"
+                                        onload="if(this.naturalWidth > 1) { this.style.display='block'; this.nextElementSibling.style.display='none'; } else { this.style.display='none'; this.nextElementSibling.style.display='block'; }"
+                                        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                    <i class="fas fa-user-circle text-muted default-icon" style="font-size: 40px;"></i>
+                                </div>
+                                <div>
+                                    <?php if (!empty($book['ma_tac_gia'])): ?>
+                                        <a href="?page=author_detail&id=<?php echo $book['ma_tac_gia']; ?>">
+                                            <?php echo htmlspecialchars($book['ten_tac_gia'] ?? 'N/A'); ?>
+                                        </a>
+                                    <?php else: ?>
+                                        <?php echo htmlspecialchars($book['ten_tac_gia'] ?? 'N/A'); ?>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                     <tr>
@@ -322,5 +336,36 @@ $pageTitle = isset($book) ? htmlspecialchars($book['ten_sach']) : 'Chi tiết s�
                 $(`.rating-input i[data-rating="${i}"]`).removeClass('far').addClass('fas active');
             }
         }
+
+        // Fetch author images from Open Library
+        const authorImages = document.querySelectorAll('.author-img');
+
+        authorImages.forEach(img => {
+            const authorName = img.getAttribute('data-author-name');
+            if (authorName && authorName !== 'N/A') {
+                // Search for author to get OLID
+                fetch(`https://openlibrary.org/search/authors.json?q=${encodeURIComponent(authorName)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.numFound > 0 && data.docs && data.docs.length > 0) {
+                            // Sort by work_count descending to get the most popular author profile
+                            data.docs.sort((a, b) => (b.work_count || 0) - (a.work_count || 0));
+
+                            // Get the most relevant result (first one after sorting)
+                            const authorDoc = data.docs[0];
+                            const olid = authorDoc.key;
+
+                            // Check if image exists by trying to load it
+                            // Size M for medium quality
+                            const imageUrl = `https://covers.openlibrary.org/a/olid/${olid}-M.jpg`;
+                            img.src = imageUrl;
+                        }
+                    })
+                    .catch(err => {
+                        console.log('Error fetching author image:', err);
+                        // Default icon will stay visible due to onerror handler
+                    });
+            }
+        });
     });
 </script>

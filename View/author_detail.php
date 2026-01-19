@@ -16,24 +16,18 @@ $pageTitle = isset($author) ? 'Tác giả: ' . htmlspecialchars($author['ten_tac
         <!-- Author Info -->
         <div class="row mb-5">
             <div class="col-md-4 col-lg-3 text-center mb-4 mb-md-0">
-                <div class="author-image-wrapper p-3 border rounded shadow-sm bg-white">
-                    <?php if (!empty($author['hinh_anh'])): ?>
-                        <img src="<?php echo htmlspecialchars($author['hinh_anh']); ?>"
-                            alt="<?php echo htmlspecialchars($author['ten_tac_gia']); ?>"
-                            class="img-fluid rounded-circle author-img-detail"
-                            style="width: 200px; height: 200px; object-fit: cover;">
-                    <?php else: ?>
-                        <!-- Fallback using Open Library API if possible, or default icon -->
-                        <img src="/book_store/Content/images/authors/default-author.png"
-                            alt="<?php echo htmlspecialchars($author['ten_tac_gia']); ?>"
-                            class="img-fluid rounded-circle author-img-detail"
-                            data-author-name="<?php echo htmlspecialchars($author['ten_tac_gia']); ?>"
-                            style="width: 200px; height: 200px; object-fit: cover; display: none;"
-                            onload="if(this.naturalWidth > 1) { this.style.display='inline-block'; this.nextElementSibling.style.display='none'; } else { this.style.display='none'; this.nextElementSibling.style.display='inline-block'; }"
-                            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
-                        <i class="fas fa-user-circle fa-10x text-muted default-icon"></i>
-                    <?php endif; ?>
-                </div>
+                <!-- <div class="author-image-wrapper p-3 border rounded shadow-sm bg-white"> -->
+                <?php
+                $initialImage = !empty($author['hinh_anh']) ? $author['hinh_anh'] : '/book_store/Content/images/authors/default-author.png';
+                ?>
+                <img src="<?php echo htmlspecialchars($initialImage); ?>"
+                    alt="<?php echo htmlspecialchars($author['ten_tac_gia']); ?>"
+                    class="img-fluid rounded-circle author-img-detail"
+                    data-author-name="<?php echo htmlspecialchars($author['ten_tac_gia']); ?>"
+                    style="width: 200px; height: 200px; object-fit: cover;"
+                    onerror="if(this.src != '/book_store/Content/images/authors/default-author.png') { this.src='/book_store/Content/images/authors/default-author.png'; }">
+                <i class="fas fa-user-circle fa-10x text-muted default-icon" style="display:none;"></i>
+                <!-- </div> -->
             </div>
             <div class="col-md-8 col-lg-9">
                 <h2 class="mb-3"><?php echo htmlspecialchars($author['ten_tac_gia']); ?></h2>
@@ -132,37 +126,58 @@ $pageTitle = isset($author) ? 'Tác giả: ' . htmlspecialchars($author['ten_tac
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Fetch author images from Open Library if using default wrapper
+        // Fetch author images from Open Library
         const authorImages = document.querySelectorAll('.author-img-detail');
 
         authorImages.forEach(img => {
             const authorName = img.getAttribute('data-author-name');
-            if (authorName && img.style.display !== 'none') {
-                // Search for author to get OLID
-                fetch(`https://openlibrary.org/search/authors.json?q=${encodeURIComponent(authorName)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.numFound > 0 && data.docs && data.docs.length > 0) {
-                            // Sort by work_count descending
-                            data.docs.sort((a, b) => (b.work_count || 0) - (a.work_count || 0));
 
-                            const authorDoc = data.docs[0];
-                            const olid = authorDoc.key;
+            // Function to fetch image
+            const fetchAuthorImage = () => {
+                if (authorName) {
+                    // Search for author to get OLID
+                    fetch(`https://openlibrary.org/search/authors.json?q=${encodeURIComponent(authorName)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.numFound > 0 && data.docs && data.docs.length > 0) {
+                                // Sort by work_count descending
+                                data.docs.sort((a, b) => (b.work_count || 0) - (a.work_count || 0));
 
-                            // Size L for large quality
-                            const imageUrl = `https://covers.openlibrary.org/a/olid/${olid}-L.jpg`;
+                                const authorDoc = data.docs[0];
+                                const olid = authorDoc.key;
 
-                            // Create a temp image to check if it loads
-                            const tempImg = new Image();
-                            tempImg.onload = function() {
+                                // Size L for large quality
+                                const imageUrl = `https://covers.openlibrary.org/a/olid/${olid}-L.jpg`;
+
+                                // Update source
                                 img.src = imageUrl;
-                                img.style.display = 'inline-block';
-                                if (img.nextElementSibling) img.nextElementSibling.style.display = 'none';
-                            };
-                            tempImg.src = imageUrl;
-                        }
-                    })
-                    .catch(e => console.log(e));
+                                // Reset error handler to avoid loop if OL image also fails
+                                img.onerror = function() {
+                                    this.src = '/book_store/Content/images/authors/default-author.png';
+                                };
+                            }
+                        })
+                        .catch(e => console.log(e));
+                }
+            };
+
+            // If image is already default or fails to load (triggering onerror which sets it to default), try fetch
+            if (img.src.includes('default-author.png')) {
+                fetchAuthorImage();
+            } else {
+                // If it's a custom image, wait to see if it errors out
+                const originalOnError = img.onerror;
+                img.onerror = function() {
+                    // Call original error handler (sets to default)
+                    if (originalOnError) originalOnError.call(this);
+                    // Then try to fetch API
+                    fetchAuthorImage();
+                };
+
+                // Also check if it's arguably "broken" (naturalWidth = 0) immediately if already loaded
+                if (img.complete && img.naturalWidth === 0) {
+                    img.onerror.call(img);
+                }
             }
         });
     });
