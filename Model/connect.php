@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Database Connection File - Front-end
  * 
@@ -14,20 +15,29 @@
  */
 
 // Database configuration parameters
-$servername = "localhost";
-$username = "root";
-$password = ""; // Blank for default XAMPP installation
-$dbname = "bookstore";
+
+$servername = getenv('DB_HOST') ?: "localhost";
+$username = getenv('DB_USER') ?: "root";
+$password = getenv('DB_PASS') !== false ? getenv('DB_PASS') : ""; // Blank for default XAMPP
+$dbname = getenv('DB_NAME') ?: "bookstore";
+$port = getenv('DB_PORT') ?: 3306;
 
 // Create connection using MySQLi
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = mysqli_init();
 
-// Check connection
-if ($conn->connect_error) {
+// Optional: Auto-enable SSL if on cloud (TiDB/Render often utilize this)
+// if (getenv('DB_SSL_CA')) {
+//    $conn->ssl_set(NULL, NULL, getenv('DB_SSL_CA'), NULL, NULL);
+// }
+
+// Use real_connect for better control (port, flags)
+if (!$conn->real_connect($servername, $username, $password, $dbname, (int)$port)) {
     // Log error and display user-friendly message
     error_log("Database Connection Failed: " . $conn->connect_error);
     die("Không thể kết nối đến cơ sở dữ liệu. Vui lòng thử lại sau.");
 }
+
+
 
 // Set character set to UTF-8 (utf8mb4 for full Unicode support including emojis)
 if (!$conn->set_charset("utf8mb4")) {
@@ -55,4 +65,3 @@ if (!$conn->set_charset("utf8mb4")) {
  * // Always close connection when done
  * $conn->close();
  */
-?>

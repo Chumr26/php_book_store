@@ -21,7 +21,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Define base constants
-define('BASE_URL', 'http://localhost/book_store/');
+define('BASE_URL', getenv('BASE_URL') ?: 'http://localhost/book_store/');
 define('BASE_PATH', __DIR__ . '/');
 
 // Include database connection
