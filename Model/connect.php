@@ -26,7 +26,10 @@ $port = getenv('DB_PORT') ?: 3306;
 $conn = mysqli_init();
 
 // Enable SSL if configured (Required for TiDB Cloud)
-if (getenv('DB_SSL') === 'true') {
+// Enable SSL if configured OR if using TiDB Cloud (which requires SSL)
+$is_tidb = strpos($servername, 'tidbcloud') !== false;
+if (getenv('DB_SSL') === 'true' || $is_tidb) {
+    // TiDB requires SSL
     $conn->ssl_set(NULL, NULL, NULL, NULL, NULL);
     if (!$conn->real_connect($servername, $username, $password, $dbname, (int)$port, NULL, MYSQLI_CLIENT_SSL)) {
         error_log("Database Connection Failed (SSL): " . $conn->connect_error);
