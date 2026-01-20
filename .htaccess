@@ -3,9 +3,13 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
     
-    # Set the base path
-    RewriteBase /book_store/
+    # Set the base path (Use / for Render/Production, /book_store/ for XAMPP if needed)
+    # RewriteBase /book_store/
+    RewriteBase /
     
+    # Handle /admin (case insensitive) redirection to Admin directory
+    RewriteRule ^admin/?$ Admin/ [NC,L]
+
     # Allow static resources (CSS, JS, images) in Content directory
     RewriteCond %{REQUEST_URI} \.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|webp)$ [NC]
     RewriteRule ^ - [L]
@@ -16,7 +20,7 @@
     # Rewrite requests to index.php
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ index.php?path=$1 [QSA,L]
+    RewriteRule ^(.*)$ index.php?page=$1 [QSA,L]
 </IfModule>
 
 # Security headers - Block direct PHP access

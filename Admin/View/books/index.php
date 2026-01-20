@@ -303,6 +303,9 @@
             <div class="modal-body">
                 Bạn có chắc chắn muốn xóa sách <strong id="delete-book-name"></strong>?<br>
                 Hành động này không thể hoàn tác.
+                <div class="alert alert-warning mt-2">
+                    <small><i class="fas fa-exclamation-triangle mr-1"></i> Lưu ý: Nếu sách đã có đơn hàng/đánh giá, hệ thống sẽ chuyển sang trạng thái "Ngừng kinh doanh".</small>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
@@ -311,6 +314,31 @@
                     <input type="hidden" name="book_id" id="delete-book-id">
                     <button type="submit" class="btn btn-danger">Xóa</button>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Bulk Delete Confirmation Modal -->
+<div class="modal fade" id="bulkDeleteModal" tabindex="-1" role="dialog" aria-labelledby="bulkDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bulkDeleteModalLabel">Xác nhận xóa nhiều sách</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn xóa <strong id="manual-delete-count"></strong> sách đã chọn?<br>
+                <div class="alert alert-warning mt-2">
+                    <small><i class="fas fa-exclamation-triangle mr-1"></i> Lưu ý: Nếu sách đã có đơn hàng hoặc đánh giá, hệ thống sẽ chuyển sang trạng thái "Ngừng kinh doanh" thay vì xóa vĩnh viễn.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirm-bulk-delete-btn">Xóa đã chọn</button>
             </div>
         </div>
     </div>
@@ -368,8 +396,20 @@
                 }
             }
         }
+
+        if (bulkBtn) {
+            bulkBtn.addEventListener('click', function() {
+                var count = document.querySelectorAll('.book-check:checked').length;
+                document.getElementById('manual-delete-count').textContent = count;
+                $('#bulkDeleteModal').modal('show');
+            });
+        }
     });
 
+    // Handle Bulk Delete Confirm Click
+    document.getElementById('confirm-bulk-delete-btn').addEventListener('click', function() {
+        document.getElementById('bulk-action-form').submit();
+    });
     // Custom Dropdown Handling
     function selectOption(name, value, label) {
         // Update hidden input

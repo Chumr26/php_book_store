@@ -537,17 +537,31 @@ class Books
      * Delete book (Admin function)
      * 
      * @param int $id Book ID
-     * @return bool Success status
+     * @return string|bool 'deleted', 'discontinued' or false
      */
     public function deleteBook($id)
     {
-        // Soft delete - just set status to discontinued?
-        // Or delete row? Let's use delete row if clean, or soft delete.
-        // Schema says trang_thai ENUM.
         $sql = "DELETE FROM sach WHERE id_sach = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $id);
-        return $stmt->execute();
+
+        try {
+            if ($stmt->execute()) {
+                return 'deleted';
+            }
+        } catch (Exception $e) {
+            // Check for foreign key constraint violation (MySQL Error 1451)
+            // If the book is used in orders, reviews etc. we cannot hard delete
+            if ($this->conn->errno == 1451 || $stmt->errno == 1451) {
+                // Fallback to soft delete (Discontinued)
+                if ($this->updateBookStatus($id, 'Ngừng kinh doanh')) {
+                    return 'discontinued';
+                }
+            }
+            error_log("Delete Book Error: " . $e->getMessage());
+        }
+
+        return false;
     }
 
     /**

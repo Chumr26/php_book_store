@@ -369,7 +369,7 @@ INSERT INTO sach (ten_sach, id_tacgia, id_nxb, id_theloai, isbn, gia, gia_goc, h
 -- =============================================
 -- SEED DATA - KHÁCH HÀNG
 -- =============================================
--- Password: 123456 (hashed)
+-- Password: password (hashed)
 INSERT INTO khachhang (ten_khachhang, email, password, dien_thoai, dia_chi, ngay_sinh, gioi_tinh) VALUES
 ('Nguyễn Văn A', 'nguyenvana@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0901234567', '123 Nguyễn Huệ, Q1, TP.HCM', '1990-05-15', 'Nam'),
 ('Trần Thị B', 'tranthib@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0912345678', '456 Lê Lợi, Q3, TP.HCM', '1995-08-20', 'Nữ'),

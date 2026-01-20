@@ -486,15 +486,18 @@ class AdminBookController extends BaseController
             $book = $this->bookModel->getBookById($bookId);
 
             // Delete book
-            $success = $this->bookModel->deleteBook($bookId);
+            // Delete book
+            $result = $this->bookModel->deleteBook($bookId);
 
-            if ($success) {
+            if ($result === 'deleted') {
                 // Delete image file
                 if ($book && $book['anh_bia'] && file_exists(__DIR__ . '/../../' . $book['anh_bia'])) {
                     unlink(__DIR__ . '/../../' . $book['anh_bia']);
                 }
 
                 SessionHelper::setFlash('success', 'Xóa sách thành công');
+            } elseif ($result === 'discontinued') {
+                SessionHelper::setFlash('warning', 'Sách đã có dữ liệu liên quan (đơn hàng/đánh giá), đã chuyển sang trạng thái "Ngừng kinh doanh" để bảo toàn dữ liệu.');
             } else {
                 throw new Exception('Không thể xóa sách');
             }
@@ -542,17 +545,23 @@ class AdminBookController extends BaseController
                 $book = $this->bookModel->getBookById($bookId);
 
                 // Delete book
-                if ($this->bookModel->deleteBook($bookId)) {
+                // Delete book
+                $result = $this->bookModel->deleteBook($bookId);
+
+                if ($result === 'deleted') {
                     $deletedCount++;
 
                     // Delete image file
                     if ($book && $book['anh_bia'] && file_exists(__DIR__ . '/../../' . $book['anh_bia'])) {
                         unlink(__DIR__ . '/../../' . $book['anh_bia']);
                     }
+                } elseif ($result === 'discontinued') {
+                    // Count as processed/modified but not deleted physically
+                    // Maybe we want to track this separately?
                 }
             }
 
-            SessionHelper::setFlash('success', "Đã xóa $deletedCount sách");
+            SessionHelper::setFlash('success', "Đã xử lý xóa/cập nhật trạng thái cho các sách đã chọn.");
         } catch (Exception $e) {
             error_log("Error in bulkDelete: " . $e->getMessage());
             SessionHelper::setFlash('error', $e->getMessage());

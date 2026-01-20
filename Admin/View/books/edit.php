@@ -431,6 +431,9 @@
             <div class="modal-body">
                 Bạn có chắc chắn muốn xóa sách <strong><?php echo htmlspecialchars($book['ten_sach']); ?></strong>?<br>
                 Hành động này không thể hoàn tác.
+                <div class="alert alert-warning mt-2">
+                    <small><i class="fas fa-exclamation-triangle mr-1"></i> Lưu ý: Nếu sách đã có đơn hàng/đánh giá, hệ thống sẽ chuyển sang trạng thái "Ngừng kinh doanh".</small>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
