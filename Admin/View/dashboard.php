@@ -2,8 +2,18 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
         <div class="dropdown no-arrow">
+            <?php
+            $periodLabels = [
+                'day' => 'Hôm nay',
+                'week' => 'Tuần này',
+                'month' => 'Tháng này',
+                'year' => 'Năm nay',
+                'all' => 'Tất cả'
+            ];
+            $currentLabel = $periodLabels[$period ?? 'month'] ?? 'Tháng này';
+            ?>
             <button class="btn btn-sm btn-primary shadow-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-calendar fa-sm text-white-50"></i> <?php echo ucfirst($period ?? 'Month'); ?>
+                <i class="fas fa-calendar fa-sm text-white-50"></i> <?php echo $currentLabel; ?>
             </button>
             <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuButton">
                 <div class="dropdown-header">Thời gian:</div>
@@ -11,6 +21,8 @@
                 <a class="dropdown-item" href="?page=dashboard&period=week">Tuần này</a>
                 <a class="dropdown-item" href="?page=dashboard&period=month">Tháng này</a>
                 <a class="dropdown-item" href="?page=dashboard&period=year">Năm nay</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="?page=dashboard&period=all">Tất cả</a>
             </div>
         </div>
     </div>
