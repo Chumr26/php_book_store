@@ -49,18 +49,18 @@ docs/notes.txt
 *.sql.bak
 
 # User uploads (but keep directory structure)
-Content/images/books/*.jpg
-Content/images/books/*.jpeg
-Content/images/books/*.png
-Content/images/books/*.gif
-Content/images/books/*.webp
+# Content/images/books/*.jpg
+# Content/images/books/*.jpeg
+# Content/images/books/*.png
+# Content/images/books/*.gif
+# Content/images/books/*.webp
 !Content/images/books/.gitkeep
 
-Content/images/banners/*.jpg
-Content/images/banners/*.jpeg
-Content/images/banners/*.png
-Content/images/banners/*.gif
-Content/images/banners/*.webp
+# Content/images/banners/*.jpg
+# Content/images/banners/*.jpeg
+# Content/images/banners/*.png
+# Content/images/banners/*.gif
+# Content/images/banners/*.webp
 !Content/images/banners/.gitkeep
 
 # OS files
