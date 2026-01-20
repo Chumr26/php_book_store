@@ -21,7 +21,7 @@ if (!isset($globalCartBookIds) && isset($GLOBALS['globalCartBookIds'])) {
     $globalCartBookIds = $GLOBALS['globalCartBookIds'];
 }
 
-$coverUrl = function_exists('book_cover_url') ? book_cover_url($book['isbn'] ?? null, 'medium') : '/book_store/Content/images/books/no-image.jpg';
+$coverUrl = function_exists('book_cover_url') ? book_cover_url($book['isbn'] ?? null, 'medium') : BASE_URL . 'Content/images/books/no-image.jpg';
 ?>
 
 <div class="book-card">
@@ -33,7 +33,7 @@ $coverUrl = function_exists('book_cover_url') ? book_cover_url($book['isbn'] ?? 
                     class="card-img-top"
                     alt="<?php echo htmlspecialchars($book['ten_sach']); ?>"
                     loading="lazy" decoding="async"
-                    onerror="this.onerror=null;this.src='/book_store/Content/images/books/no-image.jpg';"
+                    onerror="this.onerror=null;this.src='<?php echo BASE_URL; ?>Content/images/books/no-image.jpg';"
                     style="height: 420px; object-fit: cover; background: #fff;">
             </a>
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Cover helper
  *
@@ -16,7 +17,7 @@
 function book_cover_url(?string $isbn, string $size = 'medium'): string
 {
     // Local placeholder (keep this file in your project)
-    $placeholder = '/book_store/Content/images/books/no-image.jpg';
+    $placeholder = BASE_URL . 'Content/images/books/no-image.jpg';
 
     $isbn = trim((string)$isbn);
     if ($isbn === '') {
@@ -32,5 +33,5 @@ function book_cover_url(?string $isbn, string $size = 'medium'): string
     // IMPORTANT: The hosted BookCover API returns JSON (not an image).
     // So this helper returns a local proxy route that 302-redirects to the real image URL.
     // Route is handled by `CoverController` via: ?page=cover&isbn=...
-    return '/book_store/?page=cover&isbn=' . rawurlencode($isbn);
+    return BASE_URL . '?page=cover&isbn=' . rawurlencode($isbn);
 }
