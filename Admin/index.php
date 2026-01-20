@@ -21,13 +21,14 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Define base constants
-define('ADMIN_BASE_URL', 'http://localhost/book_store/Admin/');
+// Define base constants
+define('ADMIN_BASE_URL', (getenv('BASE_URL') ?: 'http://localhost/book_store/') . 'Admin/');
 define('ADMIN_BASE_PATH', __DIR__ . '/');
-define('BASE_URL', 'http://localhost/book_store/');
+define('BASE_URL', getenv('BASE_URL') ?: 'http://localhost/book_store/');
 define('BASE_PATH', dirname(__DIR__) . '/');
 
 // Include database connection
-require_once ADMIN_BASE_PATH . 'Model/connect.php';
+require_once BASE_PATH . 'Model/connect.php';
 
 // Include SessionHelper
 require_once BASE_PATH . 'Controller/helpers/SessionHelper.php';
