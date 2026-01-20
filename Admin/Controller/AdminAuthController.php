@@ -1,4 +1,5 @@
 <?php
+
 /**
  * AdminAuthController
  * Handles admin authentication (Login/Logout)
@@ -8,34 +9,37 @@ require_once __DIR__ . '/../../Model/connect.php';
 require_once __DIR__ . '/../Model/AdminAuth.php';
 require_once __DIR__ . '/../../Controller/helpers/SessionHelper.php';
 
-class AdminAuthController {
+class AdminAuthController
+{
     private $conn;
     private $authModel;
-    
-    public function __construct($dbConnection) {
+
+    public function __construct($dbConnection)
+    {
         $this->conn = $dbConnection;
         $this->authModel = new AdminAuth($this->conn);
     }
-    
+
     /**
      * Handle Login
      * GET: Show form
      * POST: Process login
      */
-    public function login() {
+    public function login()
+    {
         SessionHelper::start();
-        
+
         // If already logged in, redirect to dashboard
         if ($this->authModel->isAdminLoggedIn()) {
             header('Location: ' . ADMIN_BASE_URL . 'index.php?page=dashboard');
             exit;
         }
-        
+
         $viewData = [];
-        
+
         // Handle POST request
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            
+
             // Verify CSRF
             $token = $_POST['csrf_token'] ?? '';
             if (!SessionHelper::verifyCSRFToken($token)) {
@@ -43,19 +47,19 @@ class AdminAuthController {
                 header('Location: ' . ADMIN_BASE_URL . 'index.php?page=login');
                 exit;
             }
-            
+
             $username = trim($_POST['username'] ?? '');
             $password = $_POST['password'] ?? '';
-            
+
             if (empty($username) || empty($password)) {
                 SessionHelper::setFlash('error', 'Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.');
                 header('Location: ' . ADMIN_BASE_URL . 'index.php?page=login');
                 exit;
             }
-            
+
             // Verify credentials
             $adminUser = $this->authModel->verifyAdmin($username, $password);
-            
+
             if ($adminUser) {
                 // Login Success
                 $this->authModel->createAdminSession($adminUser);
@@ -69,7 +73,7 @@ class AdminAuthController {
                 exit;
             }
         }
-        
+
         // Handle GET (Show Form)
         // Add Quick Login data (Dev Mode) - only allow on local environment
         if (SessionHelper::isLocalRequest()) {
@@ -81,7 +85,7 @@ class AdminAuthController {
                 ]
             ];
         }
-        
+
         return $viewData;
     }
 
@@ -89,7 +93,8 @@ class AdminAuthController {
      * Dev-only: login as an admin without needing the password.
      * Localhost-only to prevent security issues.
      */
-    public function devQuickLogin() {
+    public function devQuickLogin()
+    {
         SessionHelper::start();
 
         if (!SessionHelper::isLocalRequest()) {
@@ -159,11 +164,12 @@ class AdminAuthController {
         header('Location: ' . ADMIN_BASE_URL . 'index.php?page=login');
         exit;
     }
-    
+
     /**
      * Handle Logout
      */
-    public function logout() {
+    public function logout()
+    {
         SessionHelper::start();
         $this->authModel->logout();
         SessionHelper::setFlash('success', 'Đăng xuất thành công.');
