@@ -36,10 +36,10 @@
                                         <label class="custom-control-label" for="check-all"></label>
                                     </div>
                                 </th>
-                                <th style="width: 25%">Tên tác giả</th>
-                                <th style="width: 20%">Bút danh</th>
+                                <th>Tên tác giả</th>
+                                <th>Ngày sinh</th>
                                 <th>Quốc tịch</th>
-                                <th style="width: 120px">SL sách</th>
+                                <th>SL sách</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -59,12 +59,12 @@
                                             </div>
                                         </td>
                                         <td class="align-middle">
-                                            <?php echo htmlspecialchars($auth['but_danh'] ?? $auth['pen_name'] ?? ''); ?>
+                                            <?php echo htmlspecialchars($auth['ngay_sinh'] ?? $auth['birth_date'] ?? ''); ?>
                                         </td>
                                         <td class="align-middle">
                                             <?php echo htmlspecialchars($auth['quoc_tich'] ?? $auth['nationality'] ?? ''); ?>
                                         </td>
-                                        <td class="align-middle text-center">
+                                        <td class="align-middle">
                                             <span class="badge badge-pill-custom badge-info">
                                                 <i class="fas fa-book mr-1"></i>
                                                 <?php echo $auth['book_count'] ?? 0; ?>

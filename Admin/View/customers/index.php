@@ -127,7 +127,7 @@
                                         <label class="custom-control-label" for="check-all"></label>
                                     </div>
                                 </th>
-                                <th style="width: 80px">ID</th>
+                                <!-- <th style="width: 80px">ID</th> -->
                                 <th style="width: 20%">Họ tên</th>
                                 <th>Email</th>
                                 <th style="width: 130px">Số điện thoại</th>
@@ -148,17 +148,20 @@
                                                 <label class="custom-control-label" for="check-<?php echo $customer['ma_khach_hang']; ?>"></label>
                                             </div>
                                         </td>
-                                        <td class="align-middle text-center">
+                                        <!-- <td class="align-middle text-center">
                                             <span class="badge badge-light border"><?php echo $customer['ma_khach_hang']; ?></span>
-                                        </td>
+                                        </td> -->
                                         <td class="align-middle">
                                             <div class="book-title">
                                                 <i class="fas fa-user text-primary mr-2"></i>
                                                 <?php echo htmlspecialchars($customer['ho_ten']); ?>
                                             </div>
                                         </td>
-                                        <td class="align-middle">
-                                            <span class="text-muted"><i class="fas fa-envelope mr-1 text-gray-400"></i><?php echo htmlspecialchars($customer['email']); ?></span>
+                                        <td class="align-middle customers-email-cell">
+                                            <span class="text-muted customers-email">
+                                                <i class="fas fa-envelope text-gray-400"></i>
+                                                <span class="email-text"><?php echo htmlspecialchars($customer['email']); ?></span>
+                                            </span>
                                         </td>
                                         <td class="align-middle">
                                             <span class="text-muted"><i class="fas fa-phone mr-1 text-gray-400"></i><?php echo htmlspecialchars($customer['so_dien_thoai']); ?></span>

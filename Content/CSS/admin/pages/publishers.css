@@ -1,0 +1,15 @@
+.publishers-table {
+    table-layout: fixed;
+}
+
+.publishers-table th.col-publisher-name,
+.publishers-table td.col-publisher-name {
+    width: 300px;
+    max-width: 300px;
+}
+
+.publishers-table td.col-publisher-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

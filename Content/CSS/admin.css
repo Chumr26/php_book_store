@@ -17,3 +17,11 @@
     --light: #f8f9fc;
     --dark: #5a5c69;
 }
+
+@font-face {
+    font-family: "JetBrains Mono";
+    src: url("../JetBrainsMono-2.304/fonts/webfonts/JetBrainsMono-SemiBold.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}

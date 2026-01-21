@@ -1,0 +1,27 @@
+.customers-email {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.customers-email-cell {
+    width: 220px;
+    max-width: 220px;
+}
+
+.customers-email i {
+    flex: 0 0 auto;
+    margin-right: 0.25rem;
+}
+
+.customers-email .email-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

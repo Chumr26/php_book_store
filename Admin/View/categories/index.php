@@ -83,7 +83,7 @@
                                                 <label class="custom-control-label" for="check-<?php echo $cat['ma_danh_muc']; ?>"></label>
                                             </div>
                                         </td>
-                                        <td class="align-middle text-center">
+                                        <td class="align-middle">
                                             <span class="badge badge-light border"><?php echo $cat['thu_tu']; ?></span>
                                         </td>
                                         <td class="align-middle">

@@ -10,13 +10,16 @@
 
 .admin-body {
     background-color: #f8f9fc;
-    font-family: 'Nunito', sans-serif;
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-weight: 400;
+    word-spacing: -0.2em;
+    font-size: 14px !important;
 }
 
 /* Sidebar */
 #sidebar {
-    min-width: 165px;
-    max-width: 165px;
+    min-width: 190px;
+    max-width: 190px;
     background: #4e73df;
     color: #fff;
     transition: all 0.3s;
@@ -33,7 +36,7 @@
 }
 
 #sidebar.active {
-    margin-left: -165px;
+    margin-left: -190px;
 }
 
 #sidebar .sidebar-header {
@@ -88,8 +91,8 @@
     flex-direction: column;
 
     /* Layout fix for fixed sidebar */
-    margin-left: 165px;
-    width: calc(100% - 165px);
+    margin-left: 190px;
+    width: calc(100% - 190px);
     transition: all 0.3s;
 }
 
@@ -114,7 +117,7 @@
 /* Responsive */
 @media (max-width: 768px) {
     #sidebar {
-        margin-left: -165px;
+        margin-left: -190px;
     }
 
     #sidebar.active {

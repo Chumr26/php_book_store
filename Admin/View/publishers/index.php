@@ -27,7 +27,7 @@
                 <form id="bulk-action-form" action="index.php?page=publisher_bulk_delete" method="POST">
                     <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
 
-                    <table class="table table-custom table-hover mb-0" id="dataTable" width="100%" cellspacing="0">
+                    <table class="table table-custom table-hover mb-0 publishers-table" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
                                 <th style="width: 40px" class="text-center pl-4">
@@ -36,8 +36,8 @@
                                         <label class="custom-control-label" for="check-all"></label>
                                     </div>
                                 </th>
-                                <th style="width: 30%">Tên nhà xuất bản</th>
-                                <th>Địa chỉ</th>
+                                <th class="col-publisher-name">Tên nhà xuất bản</th>
+                                <th style="width: 400px;">Địa chỉ</th>
                                 <th>Điện thoại</th>
                                 <th style="width: 120px">SL sách</th>
                             </tr>
@@ -53,7 +53,7 @@
                                                 <label class="custom-control-label" for="check-<?php echo $pub['ma_nxb']; ?>"></label>
                                             </div>
                                         </td>
-                                        <td class="align-middle">
+                                        <td class="align-middle col-publisher-name">
                                             <div class="publisher-name font-weight-bold text-primary">
                                                 <?php echo htmlspecialchars($pub['ten_nxb'] ?? $pub['publisher_name'] ?? ''); ?>
                                             </div>
@@ -67,7 +67,7 @@
                                         <td class="align-middle">
                                             <?php echo htmlspecialchars($pub['dien_thoai'] ?? $pub['phone'] ?? ''); ?>
                                         </td>
-                                        <td class="align-middle text-center">
+                                        <td class="align-middle">
                                             <span class="badge badge-pill-custom badge-info">
                                                 <i class="fas fa-book mr-1"></i>
                                                 <?php echo $pub['book_count'] ?? 0; ?>

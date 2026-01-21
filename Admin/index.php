@@ -471,13 +471,19 @@ if ($viewFile && file_exists(ADMIN_BASE_PATH . $viewFile)) {
         <?php if ($page === 'books' || $page === 'book_create' || $page === 'book_edit'): ?>
             <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/admin/pages/books.css">
         <?php endif; ?>
+        <?php if ($page === 'customers'): ?>
+            <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/admin/pages/customers.css">
+        <?php endif; ?>
+        <?php if ($page === 'publishers'): ?>
+            <link rel="stylesheet" href="<?php echo BASE_URL; ?>Content/CSS/admin/pages/publishers.css">
+        <?php endif; ?>
 
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
     </head>
 
-    <body class="admin-body">
+    <body class="admin-body admin-page-<?php echo htmlspecialchars($page); ?>">
         <script>
             // Check for saved sidebar state immediately to prevent FOUC
             (function() {
