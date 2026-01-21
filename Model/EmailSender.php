@@ -68,19 +68,37 @@ class EmailSender {
     private function loadConfig() {
         $localConfigFile = __DIR__ . '/../config/email.local.php';
 
-        if (!file_exists($localConfigFile)) {
+        $envConfig = [
+            'smtp_host' => getenv('SMTP_HOST') ?: null,
+            'smtp_port' => getenv('SMTP_PORT') ?: null,
+            'smtp_username' => getenv('SMTP_USERNAME') ?: null,
+            'smtp_password' => getenv('SMTP_PASSWORD') ?: null,
+            'smtp_secure' => getenv('SMTP_SECURE') ?: null,
+            'from_email' => getenv('SMTP_FROM_EMAIL') ?: null,
+            'from_name' => getenv('SMTP_FROM_NAME') ?: null,
+            'smtp_debug' => getenv('SMTP_DEBUG') ?: null,
+        ];
+
+        $envConfig = array_filter($envConfig, fn($v) => $v !== null && $v !== '');
+
+        $localFileConfig = [];
+        if (file_exists($localConfigFile)) {
+            $localFileConfig = include $localConfigFile;
+            if (!is_array($localFileConfig)) {
+                throw new RuntimeException('Invalid SMTP config in config/email.local.php (expected a PHP array).');
+            }
+        }
+
+        $finalConfig = array_merge($envConfig, $localFileConfig);
+
+        if (empty($finalConfig)) {
             throw new RuntimeException(
-                'Missing required SMTP config file: config/email.local.php. ' .
-                'Copy config/email.local.php.example to config/email.local.php and set smtp_password.'
+                'Missing SMTP configuration. Provide environment variables (SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, SMTP_SECURE, SMTP_FROM_EMAIL, SMTP_FROM_NAME) '
+                . 'or create config/email.local.php.'
             );
         }
 
-        $localFileConfig = include $localConfigFile;
-        if (!is_array($localFileConfig)) {
-            throw new RuntimeException('Invalid SMTP config in config/email.local.php (expected a PHP array).');
-        }
-
-        return $localFileConfig;
+        return $finalConfig;
     }
 
     private function logMailError($message) {
