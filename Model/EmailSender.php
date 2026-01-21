@@ -6,23 +6,10 @@
  * Uses Composer's PHPMailer library
  */
 
-// Include Composer autoloader
-require_once __DIR__ . '/../vendor/autoload.php';
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
-
 class EmailSender {
-    private $mail;
-    private $smtpHost;
-    private $smtpPort;
-    private $smtpUsername;
-    private $smtpPassword;
-    private $smtpSecure;
+    private $resendApiKey;
     private $fromEmail;
     private $fromName;
-    private $smtpDebug;
     private $lastError;
     private $isConfigured;
     
@@ -32,8 +19,6 @@ class EmailSender {
      * @param array $config SMTP configuration (optional, uses defaults if not provided)
      */
     public function __construct($config = []) {
-        $this->mail = new PHPMailer(true);
-
         $this->lastError = null;
         $this->isConfigured = false;
 
@@ -42,18 +27,13 @@ class EmailSender {
         if (is_array($config) && !empty($config)) {
             $baseConfig = array_merge($baseConfig, $config);
         }
-        
-        // Default SMTP configuration (Resend-first; can be overridden)
-        $this->smtpHost = $baseConfig['smtp_host'] ?? 'smtp.resend.com';
-        $this->smtpPort = (int)($baseConfig['smtp_port'] ?? 587);
-        $this->smtpUsername = $baseConfig['smtp_username'] ?? 'resend';
-        $this->smtpPassword = $baseConfig['smtp_password'] ?? '';
-        $this->smtpSecure = $baseConfig['smtp_secure'] ?? 'starttls';
+
+        // Resend HTTP API configuration
+        $this->resendApiKey = $baseConfig['resend_api_key'] ?? '';
         $this->fromEmail = $baseConfig['from_email'] ?? '';
         $this->fromName = $baseConfig['from_name'] ?? 'BookStore';
-        $this->smtpDebug = (int)($baseConfig['smtp_debug'] ?? 0);
-        
-        // Configure SMTP
+
+        // Validate config
         $this->configureTransport();
     }
 
@@ -69,14 +49,9 @@ class EmailSender {
         $localConfigFile = __DIR__ . '/../config/email.local.php';
 
         $envConfig = [
-            'smtp_host' => getenv('SMTP_HOST') ?: null,
-            'smtp_port' => getenv('SMTP_PORT') ?: null,
-            'smtp_username' => getenv('SMTP_USERNAME') ?: null,
-            'smtp_password' => getenv('SMTP_PASSWORD') ?: null,
-            'smtp_secure' => getenv('SMTP_SECURE') ?: null,
-            'from_email' => getenv('SMTP_FROM_EMAIL') ?: null,
-            'from_name' => getenv('SMTP_FROM_NAME') ?: null,
-            'smtp_debug' => getenv('SMTP_DEBUG') ?: null,
+            'resend_api_key' => getenv('RESEND_API_KEY') ?: null,
+            'from_email' => getenv('RESEND_FROM_EMAIL') ?: null,
+            'from_name' => getenv('RESEND_FROM_NAME') ?: null,
         ];
 
         $envConfig = array_filter($envConfig, fn($v) => $v !== null && $v !== '');
@@ -91,10 +66,10 @@ class EmailSender {
 
         $finalConfig = array_merge($envConfig, $localFileConfig);
 
-        if (empty($finalConfig)) {
+        if (empty($finalConfig['resend_api_key']) || empty($finalConfig['from_email'])) {
             throw new RuntimeException(
-                'Missing SMTP configuration. Provide environment variables (SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, SMTP_SECURE, SMTP_FROM_EMAIL, SMTP_FROM_NAME) '
-                . 'or create config/email.local.php.'
+                'Missing Resend configuration. Provide RESEND_API_KEY and RESEND_FROM_EMAIL (and optional RESEND_FROM_NAME) '
+                . 'in environment variables or config/email.local.php.'
             );
         }
 
@@ -120,54 +95,21 @@ class EmailSender {
      * Configure SMTP settings
      */
     private function configureTransport() {
-        try {
-            $this->isConfigured = false;
+        $this->isConfigured = false;
 
-            // If SMTP credentials are missing, we cannot authenticate to most SMTP servers (e.g., Gmail).
-            // Keep behavior explicit and log a clear message.
-            if (empty($this->smtpUsername) || empty($this->smtpPassword)) {
-                $this->lastError = 'Missing SMTP credentials (smtp_username / smtp_password) in config/email.local.php.';
-                $this->logMailError('EmailSender not configured: ' . $this->lastError);
-                return;
-            }
-
-            if (empty($this->fromEmail)) {
-                $this->lastError = 'Missing sender address (from_email) in config/email.local.php.';
-                $this->logMailError('EmailSender not configured: ' . $this->lastError);
-                return;
-            }
-
-            // Server settings
-            if ($this->smtpDebug > 0) {
-                $this->mail->SMTPDebug = SMTP::DEBUG_SERVER;
-            }
-            $this->mail->isSMTP();
-            $this->mail->Host = $this->smtpHost;
-            $this->mail->SMTPAuth = true;
-            $this->mail->Username = $this->smtpUsername;
-            $this->mail->Password = $this->smtpPassword;
-            $secure = strtolower(trim((string)$this->smtpSecure));
-            if ($secure === 'smtps' || $secure === 'ssl' || $secure === 'implicit') {
-                $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-            } elseif ($secure === 'starttls' || $secure === 'tls' || $secure === 'explicit') {
-                $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            } else {
-                // No encryption (not recommended)
-                $this->mail->SMTPSecure = '';
-                $this->mail->SMTPAutoTLS = false;
-            }
-            $this->mail->Port = $this->smtpPort;
-            $this->mail->CharSet = 'UTF-8';
-            
-            // Set default sender
-            $this->mail->setFrom($this->fromEmail, $this->fromName);
-
-            $this->isConfigured = true;
-            
-        } catch (Exception $e) {
-            $this->lastError = $e->getMessage();
-            $this->logMailError("PHPMailer configuration error: {$e->getMessage()}");
+        if (empty($this->resendApiKey)) {
+            $this->lastError = 'Missing Resend API key (RESEND_API_KEY).';
+            $this->logMailError('EmailSender not configured: ' . $this->lastError);
+            return;
         }
+
+        if (empty($this->fromEmail)) {
+            $this->lastError = 'Missing sender address (RESEND_FROM_EMAIL).';
+            $this->logMailError('EmailSender not configured: ' . $this->lastError);
+            return;
+        }
+
+        $this->isConfigured = true;
     }
     
     /**
@@ -196,30 +138,51 @@ class EmailSender {
                 return false;
             }
 
-            // Clear any previous state (important if the same instance is reused)
-            $this->mail->clearAllRecipients();
-            $this->mail->clearAttachments();
+            if (!function_exists('curl_init')) {
+                $this->lastError = 'cURL extension is not available.';
+                $this->logMailError('Email send failed: ' . $this->lastError);
+                return false;
+            }
 
-            // Recipients
-            $this->mail->addAddress($to, $toName);
-            
-            // Content
-            $this->mail->isHTML(true);
-            $this->mail->Subject = $subject;
-            $this->mail->Body = $body;
-            $this->mail->AltBody = $altBody ?: strip_tags($body);
-            
-            // Send
-            $result = $this->mail->send();
+            $payload = [
+                'from' => $this->fromName
+                    ? $this->fromName . ' <' . $this->fromEmail . '>'
+                    : $this->fromEmail,
+                'to' => [$to],
+                'subject' => $subject,
+                'html' => $body,
+                'text' => $altBody ?: strip_tags($body)
+            ];
 
-            // Clear recipients for next email
-            $this->mail->clearAllRecipients();
-            
-            return $result;
-            
+            $ch = curl_init('https://api.resend.com/emails');
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $this->resendApiKey,
+                'Content-Type: application/json'
+            ]);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+
+            if ($response === false || $httpCode < 200 || $httpCode >= 300) {
+                $errorMessage = $curlError ?: ('HTTP ' . $httpCode . ' response');
+                $decoded = json_decode((string)$response, true);
+                if (is_array($decoded) && !empty($decoded['message'])) {
+                    $errorMessage .= ' - ' . $decoded['message'];
+                }
+                $this->lastError = $errorMessage;
+                $this->logMailError("Email sending failed: {$this->lastError}");
+                return false;
+            }
+
+            return true;
+
         } catch (Exception $e) {
-            $info = $this->mail->ErrorInfo;
-            $this->lastError = $info ?: $e->getMessage();
+            $this->lastError = $e->getMessage();
             $this->logMailError("Email sending failed: {$this->lastError}");
             return false;
         }

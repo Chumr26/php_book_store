@@ -1,23 +1,13 @@
 <?php
 
-// Local SMTP secrets (DO NOT COMMIT).
+// Resend HTTP API secrets (DO NOT COMMIT).
 // Copy to: config/email.local.php
-// Then fill in your Resend API key.
 
 return [
-    // Resend SMTP
-    'smtp_host' => 'smtp.resend.com',
-    'smtp_port' => 587,
-    'smtp_username' => 'resend',
-    'smtp_password' => 're_YOUR_RESEND_API_KEY_HERE',
-
-    // starttls (587/2587) or smtps (465/2465)
-    'smtp_secure' => 'starttls',
+    // Resend API
+    'resend_api_key' => 're_YOUR_RESEND_API_KEY_HERE',
 
     // Must be on your verified domain in Resend
     'from_email' => 'noreply@your-verified-domain.com',
     'from_name' => 'BookStore',
-
-    // Set to 1 temporarily to debug SMTP
-    'smtp_debug' => 0,
 ];
