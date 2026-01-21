@@ -132,22 +132,24 @@ composer install
     *   *Lưu ý: Script này sẽ tạo toàn bộ bảng và thêm dữ liệu mẫu.*
 
 ### Bước 4: Triển khai (Tùy chọn)
-Để đưa dự án lên mạng (deploy), chúng tôi khuyên dùng **Render** (Web Service) và **TiDB Cloud** (Cơ sở dữ liệu).
+Để đưa dự án lên mạng (deploy), chúng tôi khuyên dùng **Render** (Web Service) và **Aiven for MySQL** (Cơ sở dữ liệu).
 
-**1. Cơ sở dữ liệu (TiDB Cloud):**
-*   Tạo một cluster Serverless miễn phí trên [TiDB Cloud](https://tidbcloud.com/).
+**1. Cơ sở dữ liệu (Aiven for MySQL):**
+*   Tạo dịch vụ MySQL trên [Aiven](https://aiven.io/).
 *   Kết nối bằng MySQL client và import file `db/bookstore.sql`.
 
 **2. Web Service (Render):**
 *   Kết nối kho lưu trữ GitHub của bạn với [Render](https://render.com/).
 *   Chọn **Docker** làm runtime.
 *   Thêm các Biến môi trường (Environment Variables) sau trong Dashboard của Render:
-    *   `DB_HOST`: Host TiDB của bạn (ví dụ: `gateway01...tidbcloud.com`)
-    *   `DB_USER`: User TiDB của bạn
-    *   `DB_PASS`: Mật khẩu TiDB của bạn
+    *   `DB_HOST`: Host MySQL Aiven của bạn (ví dụ: `mysql-xxxx.aivencloud.com`)
+    *   `DB_USER`: User MySQL Aiven của bạn
+    *   `DB_PASS`: Mật khẩu MySQL Aiven của bạn
     *   `DB_NAME`: `bookstore`
-    *   `DB_PORT`: `4000`
+    *   `DB_PORT`: Port MySQL Aiven (thường là `3306`)
     *   `DB_SSL`: `true`
+    *   `DB_SSL_CA_PATH`: Đường dẫn file CA (tùy chọn)
+    *   `DB_SSL_CA`: Nội dung chứng chỉ CA (tùy chọn nếu không có file)
     *   `BASE_URL`: URL Render của bạn (ví dụ: `https://your-app.onrender.com/`)
 
 ---

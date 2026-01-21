@@ -1,48 +1,43 @@
-# Deployment Guide: Render + TiDB
+# Deployment Guide: Render + Aiven
 
-This guide outlines the steps to deploy the BookStore application using **Render** (for web hosting) and **TiDB Cloud** (for the database).
+This guide outlines the steps to deploy the BookStore application using **Render** (for web hosting) and **Aiven for MySQL** (for the database).
 
 ## Prerequisites
 - A [GitHub](https://github.com/) account (Application code must be in a repository).
 - A [Render](https://render.com/) account.
-- A [TiDB Cloud](https://tidbcloud.com/) account.
+- A [Aiven](https://aiven.io/) account.
 
 ---
 
-## Step 1: Prepare Database (TiDB Cloud)
+## Step 1: Prepare Database (Aiven for MySQL)
 
 1.  **Create a Cluster**:
-    - Log in to TiDB Cloud.
-    - Create a new "Serverless" cluster (Free Tier is sufficient for testing).
+    - Log in to Aiven.
+    - Create a new **MySQL** service (Free tier or trial if available).
     - Give it a name (e.g., `bookstore-db`).
 
 2.  **Get Connection Info**:
-    - Once the cluster is created, click **"Connect"**.
-    - Select **"Connect with general SQL client"**.
+    - Once the service is created, click **"Quick Connect"** or **"Service Overview"**.
     - Note down the values:
-        - **Host**: (e.g., `gateway01.us-west-2.prod.aws.tidbcloud.com`)
-        - **Port**: `4000`
-        - **User**: (e.g., `2.root`)
+        - **Host**: (e.g., `mysql-xxxx.aivencloud.com`)
+        - **Port**: `3306`
+        - **User**: (e.g., `avnadmin`)
         - **Password**: (The password you set/generated)
 
 3.  **Import Database Schema**:
-    - You need to run the content of `db/bookstore.sql` on your TiDB cluster.
-    - **Option A (TiDB SQL Editor)**:
-        - Open the "Chat2Query" or SQL Editor in TiDB Cloud.
-        - Copy and paste the contents of `db/bookstore.sql`.
-        - Run the script *twice* (or block by block) if there are foreign key dependency issues, though the script usually handles order.
-    - **Option B (Local MySQL Client)**:
-        - Connect from your local terminal:
-          ```bash
-          mysql -u [User] -h [Host] -P 4000 -p --ssl-mode=VERIFY_IDENTITY --ssl-ca=/etc/ssl/cert.pem
-          ```
-          *(Note: TiDB requires SSL usually. The exact command depends on your OS/Setup.)*
-        - Source the file: `source db/bookstore.sql`
+        - You need to run the content of `db/bookstore.sql` on your Aiven service.
+        - **Option A (MySQL Client)**:
+                - Connect from your local terminal:
+                    ```bash
+                    mysql -u [User] -h [Host] -P 3306 -p --ssl-ca=/path/to/ca.pem
+                    ```
+                    *(Note: Aiven requires SSL. Use the CA certificate provided by Aiven.)*
+                - Source the file: `source db/bookstore.sql`
         
-        **For Windows (PowerShell with XAMPP/MariaDB):**
-        ```powershell
-        cmd /c "mysql -u [User] -h [Host] -P 4000 -p --ssl < db\bookstore.sql"
-        ```
+                **For Windows (PowerShell with XAMPP/MariaDB):**
+                ```powershell
+                cmd /c "mysql -u [User] -h [Host] -P 3306 -p --ssl-ca=PATH\to\ca.pem < db\bookstore.sql"
+                ```
 
 ---
 
@@ -61,16 +56,18 @@ This guide outlines the steps to deploy the BookStore application using **Render
     - **Instance Type**: Free (if available) or Starter.
 
 3.  **Environment Variables (Advanced)**:
-    - Scroll down to "Environment Variables" and add the following keys using your TiDB credentials:
+    - Scroll down to "Environment Variables" and add the following keys using your Aiven credentials:
 
     | Key | Value (Example) |
     |-----|-----------------|
-    | `DB_HOST` | `gateway01...tidbcloud.com` |
-    | `DB_PORT` | `4000` |
-    | `DB_USER` | `2.root` |
-    | `DB_PASS` | `YOUR_TIDB_PASSWORD` |
+    | `DB_HOST` | `mysql-xxxx.aivencloud.com` |
+    | `DB_PORT` | `3306` |
+    | `DB_USER` | `avnadmin` |
+    | `DB_PASS` | `YOUR_AIVEN_PASSWORD` |
     | `DB_NAME` | `bookstore` |
-    | `DB_SSL` | `true` (Optional, as TiDB enforces SSL typically) |
+    | `DB_SSL` | `true` |
+    | `DB_SSL_CA_PATH` | `/path/to/ca.pem` (optional) |
+    | `DB_SSL_CA` | `(CA cert content)` (optional) |
 
 4.  **Deploy**:
     - Click **Create Web Service**.
@@ -96,7 +93,7 @@ This guide outlines the steps to deploy the BookStore application using **Render
 
 -   **Database Connection Error**:
     -   Double-check your Environment Variables in Render.
-    -   Ensure TiDB "Traffic Filters" (IP Access List) allow `0.0.0.0/0` (Allow All) or include Render's IP ranges (Allow All is easiest for Serverless).
+    -   Ensure Aiven allows connections from Render (add Render IPs or allowlist as required).
 
 -   **404 Errors**:
     -   This usually means `.htaccess` is not working. The provided `Dockerfile` enables `mod_rewrite`, so this should work automatically. 
@@ -110,6 +107,6 @@ This guide outlines the steps to deploy the BookStore application using **Render
     > 2. Ensure `DB_SSL` is NOT required if using the auto-detection logic, but verifying connection details is always good practice.
 
 -   **500 Errors / Insecure Transport**:
-    -   If you see "Connections using insecure transport are prohibited", ensure you have updated `Model/connect.php` with the SSL fix and **re-deployed**.
-    -   The application now auto-detects TiDB Cloud.
+    -   If you see "Connections using insecure transport are prohibited", ensure `DB_SSL` is `true` and a valid CA is available.
+    -   The application now auto-detects Aiven/TiDB hosts for SSL.
 

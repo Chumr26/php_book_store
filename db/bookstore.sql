@@ -293,7 +293,7 @@ INSERT INTO nhaxuatban (ten_nxb, dia_chi, dien_thoai, email, website) VALUES
 ('Bloomsbury Publishing', '50 Bedford Square, London WC1B 3DP, UK', '+44-20-7631-5600', 'info@bloomsbury.com', 'https://www.bloomsbury.com'),
 ('Oxford University Press', 'Great Clarendon Street, Oxford OX2 6DP, UK', '+44-1865-556767', 'enquiry@oup.com', 'https://global.oup.com'),
 ('Pearson Education', '330 Hudson Street, New York, NY 10013, USA', '+1-212-641-2400', 'info@pearson.com', 'https://www.pearson.com'),
-("O'Reilly Media", '1005 Gravenstein Highway North, Sebastopol, CA 95472, USA', '+1-707-827-7000', 'info@oreilly.com', 'https://www.oreilly.com'),
+('O''Reilly Media', '1005 Gravenstein Highway North, Sebastopol, CA 95472, USA', '+1-707-827-7000', 'info@oreilly.com', 'https://www.oreilly.com'),
 ('Kodansha', '2-12-21 Otowa, Bunkyo-ku, Tokyo 112-8001, Japan', '+81-3-5395-3535', 'info@kodansha.co.jp', 'https://www.kodansha.co.jp'),
 ('Vintage Books', '1745 Broadway, New York, NY 10019, USA', '+1-212-751-2600', 'info@penguinrandomhouse.com', 'https://www.penguinrandomhouse.com/imprints/vintage-books'),
 ('Crown Publishing', '1745 Broadway, New York, NY 10019, USA', '+1-212-782-9000', 'crownpublicity@penguinrandomhouse.com', 'https://crownpublishing.com'),
@@ -501,7 +501,7 @@ INSERT INTO khachhang (ten_khachhang, email, password, dien_thoai, dia_chi, ngay
 
 -- Bulk generate orders + order details for analytics
 -- NOTE: Stored Procedure disabled for Cloud Import compatibility
-/*
+
 DELIMITER $$
 CREATE PROCEDURE sp_seed_bulk_orders(
     IN p_start_date DATE,
@@ -644,12 +644,10 @@ DELIMITER ;
 CALL sp_seed_bulk_orders('2024-01-01', 18, 20);
 
 DROP PROCEDURE sp_seed_bulk_orders;
-*/
 
 -- =============================================
 -- SEED DATA - REVIEWS
 -- =============================================
-/*
 DELIMITER $$
 CREATE PROCEDURE sp_seed_reviews(IN p_count INT)
 BEGIN
@@ -705,7 +703,6 @@ DELIMITER ;
 
 CALL sp_seed_reviews(100);
 DROP PROCEDURE sp_seed_reviews;
-*/
 
 -- =============================================
 -- CREATE VIEWS FOR REPORTING
@@ -762,7 +759,6 @@ ORDER BY tong_chi_tieu DESC;
 -- =============================================
 
 -- Procedure: Thêm sách vào giỏ hàng
-/*
 DELIMITER $$
 CREATE PROCEDURE sp_them_vao_gio(
     IN p_id_khachhang INT,
@@ -789,10 +785,8 @@ BEGIN
     END IF;
 END$$
 DELIMITER ;
-*/
 
 -- Procedure: Tạo đơn hàng từ giỏ hàng
-/*
 DELIMITER $$
 CREATE PROCEDURE sp_tao_don_hang(
     IN p_id_khachhang INT,
@@ -853,7 +847,6 @@ BEGIN
     DELETE FROM giohang WHERE id_khachhang = p_id_khachhang;
 END$$
 DELIMITER ;
-*/
     
 
 
@@ -862,7 +855,6 @@ DELIMITER ;
 -- =============================================
 
 -- Trigger: Cập nhật lượt xem khi xem chi tiết sách
-/*
 DELIMITER $$
 CREATE TRIGGER tr_cap_nhat_luot_xem
 AFTER INSERT ON danhgia
@@ -873,10 +865,8 @@ BEGIN
     WHERE id_sach = NEW.id_sach;
 END$$
 DELIMITER ;
-*/
 
 -- Trigger: Kiểm tra số lượng tồn trước khi thêm vào giỏ
-/*
 DELIMITER $$
 CREATE TRIGGER tr_kiem_tra_ton_kho
 BEFORE INSERT ON giohang
@@ -894,7 +884,6 @@ BEGIN
     END IF;
 END$$
 DELIMITER ;
-*/
 
 -- =============================================
 -- COMPLETION MESSAGE

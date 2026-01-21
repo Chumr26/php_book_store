@@ -14,19 +14,39 @@
  */
 
 // Database configuration parameters
-$servername = "localhost";
-$username = "root";
-$password = ""; // Blank for default XAMPP installation
-$dbname = "bookstore";
+$servername = getenv('DB_HOST') ?: "localhost";
+$username = getenv('DB_USER') ?: "root";
+$password = getenv('DB_PASS') !== false ? getenv('DB_PASS') : ""; // Blank for default XAMPP
+$dbname = getenv('DB_NAME') ?: "bookstore";
+$port = getenv('DB_PORT') ?: 3306;
+$sslCaPath = getenv('DB_SSL_CA_PATH') ?: null;
+$sslCa = getenv('DB_SSL_CA') ?: null;
 
 // Create connection using MySQLi
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = mysqli_init();
 
-// Check connection
-if ($conn->connect_error) {
-    // Log error and display user-friendly message
-    error_log("Admin Database Connection Failed: " . $conn->connect_error);
-    die("Không thể kết nối đến cơ sở dữ liệu. Vui lòng kiểm tra cấu hình.");
+// Enable SSL if configured OR if using TiDB/Aiven (which requires SSL)
+$is_tidb = strpos($servername, 'tidbcloud') !== false;
+$is_aiven = stripos($servername, 'aivencloud') !== false;
+$use_ssl = getenv('DB_SSL') === 'true' || $is_tidb || $is_aiven;
+
+if ($use_ssl) {
+    if (!$sslCaPath && $sslCa) {
+        $tempCaPath = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'db-ca.pem';
+        if (@file_put_contents($tempCaPath, $sslCa) !== false) {
+            $sslCaPath = $tempCaPath;
+        }
+    }
+    $conn->ssl_set(NULL, NULL, $sslCaPath ?: NULL, NULL, NULL);
+    if (!$conn->real_connect($servername, $username, $password, $dbname, (int)$port, NULL, MYSQLI_CLIENT_SSL)) {
+        error_log("Admin Database Connection Failed (SSL): " . $conn->connect_error);
+        die("Không thể kết nối đến cơ sở dữ liệu (SSL). Vui lòng kiểm tra cấu hình.");
+    }
+} else {
+    if (!$conn->real_connect($servername, $username, $password, $dbname, (int)$port)) {
+        error_log("Admin Database Connection Failed: " . $conn->connect_error);
+        die("Không thể kết nối đến cơ sở dữ liệu. Vui lòng kiểm tra cấu hình.");
+    }
 }
 
 // Set character set to UTF-8 (utf8mb4 for full Unicode support including emojis)

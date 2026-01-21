@@ -1,25 +1,25 @@
-# Deployment Plan: Render + TiDB
+# Deployment Plan: Render + Aiven
 
-This document outlines the steps to deploy the Bookstore PHP application to **Render** (Web Service) using **TiDB Cloud** (Database).
+This document outlines the steps to deploy the Bookstore PHP application to **Render** (Web Service) using **Aiven for MySQL** (Database).
 
-## Phase 1: Database Migration (TiDB Cloud)
+## Phase 1: Database Migration (Aiven for MySQL)
 **Objective:** Move your local `bookstore` database to the cloud.
 
-1.  **Create TiDB Cluster:**
-    *   Sign up/Login to [TiDB Cloud](https://tidbcloud.com/).
-    *   Create a "Serverless" cluster (Free tier is sufficient for testing).
+1.  **Create Aiven MySQL Service:**
+    *   Sign up/Login to [Aiven](https://aiven.io/).
+    *   Create a MySQL service (Free tier or trial if available).
 2.  **Export Local Database:**
     *   Use phpMyAdmin or `mysqldump` to export your local database to a `.sql` file.
     *   Target file: `db/bookstore.sql` (already exists, but ensure it has the latest data).
-3.  **Import to TiDB:**
-    *   Use the TiDB Cloud "Import" feature or a MySQL client (like MySQL Workbench, DBeaver, or CLI) to connect to TiDB and import the `.sql` file.
-    *   **Important:** Get the Connection Details from TiDB Console:
-        *   **Host** (e.g., `gateway01.us-west-2.prod.aws.tidbcloud.com`)
-        *   **Port** (e.g., `4000`)
-        *   **User** (e.g., `2.root`)
+3.  **Import to Aiven:**
+    *   Use a MySQL client (MySQL Workbench, DBeaver, or CLI) to connect to Aiven and import the `.sql` file.
+    *   **Important:** Get the Connection Details from Aiven:
+        *   **Host** (e.g., `mysql-xxxx.aivencloud.com`)
+        *   **Port** (e.g., `3306`)
+        *   **User** (e.g., `avnadmin`)
         *   **Password**
         *   **Database Name** (e.g., `bookstore`)
-    *   *Note:* TiDB requires a secure connection (SSL/TLS). Our PHP connection code usually handles this automatically if the environment supports it, but we might need to enforce it.
+    *   *Note:* Aiven requires a secure connection (SSL/TLS). Our PHP connection code supports SSL and optional CA.
 
 ## Phase 2: Application Containerization (Docker)
 **Objective:** Package the application to run consistently on Render.
@@ -38,7 +38,7 @@ This document outlines the steps to deploy the Bookstore PHP application to **Re
 **Objective:** Prepare the codebase for the cloud.
 
 1.  **Environment Variables:**
-    *   We have already updated `Model/connect.php` and `Admin/Model/connect.php` to use `getenv('DB_HOST')`, etc.
+    *   We have updated `Model/connect.php` and `Admin/Model/connect.php` to use `getenv('DB_HOST')`, etc., and support SSL CA for Aiven.
 2.  **Dependency Management:**
     *   Ensure `composer.json` is valid.
     *   The Docker build process will run `composer install`.
@@ -51,15 +51,17 @@ This document outlines the steps to deploy the Bookstore PHP application to **Re
     *   Source: GitHub Repository.
     *   Runtime: **Docker**.
 3.  **Configure Environment Variables (on Render Dashboard):**
-    *   `DB_HOST`: (Your TiDB Host)
-    *   `DB_PORT`: `4000`
-    *   `DB_USER`: (Your TiDB User)
-    *   `DB_PASSWORD`: (Your TiDB Password)
+    *   `DB_HOST`: (Your Aiven Host)
+    *   `DB_PORT`: `3306`
+    *   `DB_USER`: (Your Aiven User)
+    *   `DB_PASS`: (Your Aiven Password)
     *   `DB_NAME`: `bookstore`
+    *   `DB_SSL`: `true`
+    *   `DB_SSL_CA_PATH` or `DB_SSL_CA` (optional)
     *   `PAYOS_CLIENT_ID`, `PAYOS_API_KEY`, etc. (if needed).
 
 ## Phase 5: Verification
-1.  **Check Logs:** Ensure Apache starts and connects to TiDB.
+1.  **Check Logs:** Ensure Apache starts and connects to Aiven.
 2.  **Test Functionality:**
     *   Visit the URL.
     *   Test Login/Register (Database writes).

@@ -44,6 +44,9 @@ docs/notes.txt
 *.tmp
 *.bak
 
+# Local scripts containing secrets
+scripts/migration.ps1
+
 # Database backups (except schema and seeds)
 *.sql.backup
 *.sql.bak

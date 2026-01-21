@@ -21,16 +21,26 @@ $username = getenv('DB_USER') ?: "root";
 $password = getenv('DB_PASS') !== false ? getenv('DB_PASS') : ""; // Blank for default XAMPP
 $dbname = getenv('DB_NAME') ?: "bookstore";
 $port = getenv('DB_PORT') ?: 3306;
+$sslCaPath = getenv('DB_SSL_CA_PATH') ?: null;
+$sslCa = getenv('DB_SSL_CA') ?: null;
 
 // Create connection using MySQLi
 $conn = mysqli_init();
 
-// Enable SSL if configured (Required for TiDB Cloud)
-// Enable SSL if configured OR if using TiDB Cloud (which requires SSL)
+// Enable SSL if configured OR if using Aiven/TiDB (which requires SSL)
 $is_tidb = strpos($servername, 'tidbcloud') !== false;
-if (getenv('DB_SSL') === 'true' || $is_tidb) {
-    // TiDB requires SSL
-    $conn->ssl_set(NULL, NULL, NULL, NULL, NULL);
+$is_aiven = stripos($servername, 'aivencloud') !== false;
+$use_ssl = getenv('DB_SSL') === 'true' || $is_tidb || $is_aiven;
+
+if ($use_ssl) {
+    // Aiven/TiDB require SSL. Use CA if provided.
+    if (!$sslCaPath && $sslCa) {
+        $tempCaPath = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'db-ca.pem';
+        if (@file_put_contents($tempCaPath, $sslCa) !== false) {
+            $sslCaPath = $tempCaPath;
+        }
+    }
+    $conn->ssl_set(NULL, NULL, $sslCaPath ?: NULL, NULL, NULL);
     if (!$conn->real_connect($servername, $username, $password, $dbname, (int)$port, NULL, MYSQLI_CLIENT_SSL)) {
         error_log("Database Connection Failed (SSL): " . $conn->connect_error);
         die("Không thể kết nối đến cơ sở dữ liệu (SSL). Vui lòng thử lại sau.");

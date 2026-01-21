@@ -133,22 +133,24 @@ composer install
     *   *Note: This script will create all tables and populate them with sample data.*
 
 ### Step 4: Deployment (Optional)
-To deploy this project live, we recommend using **Render** (Web Service) and **TiDB Cloud** (Database).
+To deploy this project live, we recommend using **Render** (Web Service) and **Aiven for MySQL** (Database).
 
-**1. Database (TiDB Cloud):**
-*   Create a free Serverless cluster on [TiDB Cloud](https://tidbcloud.com/).
+**1. Database (Aiven for MySQL):**
+*   Create a MySQL service on [Aiven](https://aiven.io/).
 *   Connect to it using a MySQL client and import `db/bookstore.sql`.
 
 **2. Web Service (Render):**
 *   Connect your GitHub repository to [Render](https://render.com/).
 *   Select **Docker** as the runtime.
 *   Add the following Environment Variables in the Render Dashboard:
-    *   `DB_HOST`: Your TiDB Host (e.g., `gateway01...tidbcloud.com`)
-    *   `DB_USER`: Your TiDB User
-    *   `DB_PASS`: Your TiDB Password
+    *   `DB_HOST`: Your Aiven MySQL Host (e.g., `mysql-xxxx.aivencloud.com`)
+    *   `DB_USER`: Your Aiven MySQL User
+    *   `DB_PASS`: Your Aiven MySQL Password
     *   `DB_NAME`: `bookstore`
-    *   `DB_PORT`: `4000`
+    *   `DB_PORT`: Your Aiven MySQL Port (usually `3306`)
     *   `DB_SSL`: `true`
+    *   `DB_SSL_CA_PATH`: Path to CA file (optional)
+    *   `DB_SSL_CA`: CA certificate content (optional, if file path is not available)
     *   `BASE_URL`: Your Render URL (e.g., `https://your-app.onrender.com/`)
 
 ---
