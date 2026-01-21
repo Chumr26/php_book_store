@@ -117,9 +117,8 @@ class AdminAuthController
 
         $username = trim($_POST['username'] ?? '');
         if ($username === '') {
-            SessionHelper::setFlash('error', 'Tài khoản admin không hợp lệ.');
-            header('Location: ' . ADMIN_BASE_URL . 'index.php?page=login');
-            exit;
+            // In dev quick login, default to the local seed admin if missing.
+            $username = 'admin';
         }
 
         // Try DB first

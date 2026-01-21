@@ -17,7 +17,7 @@
 function book_cover_url(?string $isbn, string $size = 'medium'): string
 {
     // Local placeholder (keep this file in your project)
-    $placeholder = BASE_URL . 'Content/images/books/no-image.jpg';
+    $placeholder = BASE_URL . 'Content/images/books/no-image.webp';
 
     $isbn = trim((string)$isbn);
     if ($isbn === '') {

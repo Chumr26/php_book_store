@@ -391,14 +391,9 @@ class OrderController extends BaseController
             $payOS = new PayOS(PAYOS_CLIENT_ID, PAYOS_API_KEY, PAYOS_CHECKSUM_KEY);
 
             // Callback URLs
-            // Ensure you have absolute URL logic or correct relative path handling
-            $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
-            $host = $_SERVER['HTTP_HOST'];
-            $baseUrl = "$protocol://$host" . dirname($_SERVER['PHP_SELF']);
-            // If dirname is '\' or '/', handle carefully. simpler to just use /index.php... 
-            // Better to assume index.php is in root of web accessible folder:
-            // Fix: Just construct current script URL.
-            $scriptUrl = "$protocol://$host" . $_SERVER['SCRIPT_NAME']; // .../index.php
+            $baseUrl = $this->getAppBaseUrl();
+            $scriptPath = $_SERVER['SCRIPT_NAME'] ?? '/index.php';
+            $scriptUrl = rtrim($baseUrl, '/') . $scriptPath;
 
             $returnUrl = $scriptUrl . "?page=payos_callback";
             $cancelUrl = $scriptUrl . "?page=checkout";
@@ -526,7 +521,7 @@ class OrderController extends BaseController
 
         $orderData = [
             'order_number' => $orderNumber,
-            'payment_method' => 'PayOS', // Explicit
+            'payment_method' => 'payos', // Explicit (matches DB enum)
             'payment_status' => $paymentStatus, // 'paid'
             'recipient_name' => Validator::sanitizeString($_POST['recipient_name']),
             'phone' => Validator::sanitizeString($_POST['phone']),
@@ -556,6 +551,28 @@ class OrderController extends BaseController
         } else {
             throw new Exception("Lỗi lưu đơn hàng vào database");
         }
+    }
+
+    /**
+     * Resolve base URL (proxy-aware) for building absolute callback URLs
+     *
+     * @return string
+     */
+    private function getAppBaseUrl()
+    {
+        if (defined('PAYOS_APP_URL') && PAYOS_APP_URL) {
+            return PAYOS_APP_URL;
+        }
+
+        $proto = 'http';
+        if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+            $proto = $_SERVER['HTTP_X_FORWARDED_PROTO'];
+        } elseif (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+            $proto = 'https';
+        }
+
+        $host = $_SERVER['HTTP_X_FORWARDED_HOST'] ?? $_SERVER['HTTP_HOST'] ?? 'localhost';
+        return $proto . '://' . $host;
     }
 
     /**

@@ -126,7 +126,7 @@ CREATE TABLE hoadon (
     ngay_dat_hang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     tong_tien DECIMAL(10,2) NOT NULL,
     trang_thai ENUM('pending', 'confirmed', 'shipping', 'completed', 'cancelled') DEFAULT 'pending',
-    phuong_thuc_thanh_toan ENUM('COD', 'transfer', 'card', 'momo', 'vnpay') DEFAULT 'COD',
+    phuong_thuc_thanh_toan ENUM('COD', 'transfer', 'card', 'momo', 'vnpay', 'payos') DEFAULT 'COD',
     trang_thai_thanh_toan ENUM('unpaid', 'paid') DEFAULT 'unpaid',
     ten_nguoi_nhan VARCHAR(100) NOT NULL,
     dia_chi_giao TEXT NOT NULL,
@@ -450,6 +450,7 @@ INSERT INTO magiamgia (ma_code, ten_chuongtrinh, loai_giam, gia_tri_giam, gia_tr
 ('NEWYEAR2025', 'Khuyến mãi năm mới 2025', 'percent', 15, 200000, 50000, 100, '2025-01-01 00:00:00', '2025-01-31 23:59:59'),
 ('BOOKFEST', 'Lễ hội sách', 'percent', 20, 300000, 100000, 50, '2025-04-01 00:00:00', '2025-04-30 23:59:59'),
 ('FREESHIP', 'Miễn phí vận chuyển', 'fixed', 30000, 150000, 30000, 200, '2025-01-01 00:00:00', '2025-12-31 23:59:59'),
+('TESTFREE', 'Miễn phí vận chuyển', 'free_shipping', 0, 0, 0, 100, '2025-01-01 00:00:00', '2026-12-31 23:59:59'),
 ('STUDENT10', 'Giảm giá sinh viên', 'percent', 10, 100000, 30000, 500, '2025-01-01 00:00:00', '2025-12-31 23:59:59');
 
 -- =============================================

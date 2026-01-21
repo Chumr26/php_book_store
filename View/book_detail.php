@@ -30,12 +30,12 @@ $pageTitle = isset($book) ? htmlspecialchars($book['ten_sach']) : 'Chi ti·∫øt s√
                     <?php
                     $coverUrl = $__coverHelperLoaded
                         ? book_cover_url($book['isbn'] ?? null, 'large')
-                        : BASE_URL . 'Content/images/books/no-image.jpg';
+                        : BASE_URL . 'Content/images/books/no-image.webp';
                     ?>
                     <img src="<?php echo htmlspecialchars($coverUrl); ?>"
                         alt="<?php echo htmlspecialchars($book['ten_sach']); ?>"
                         loading="lazy" decoding="async"
-                        onerror="this.onerror=null;this.src='<?php echo BASE_URL; ?>Content/images/books/no-image.jpg';"
+                        onerror="this.onerror=null;this.src='<?php echo BASE_URL; ?>Content/images/books/no-image.webp';"
                         class="img-fluid rounded shadow w-100">
                 </div>
             </div>

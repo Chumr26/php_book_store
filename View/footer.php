@@ -208,10 +208,10 @@
                                     response.data.forEach(function(book) {
                                         const coverUrl = book.isbn ?
                                             `/book_store/?page=cover&isbn=${encodeURIComponent(String(book.isbn).replace(/[^0-9Xx]/g, ''))}` :
-                                            '/book_store/Content/images/books/no-image.jpg';
+                                            '/book_store/Content/images/books/no-image.webp';
                                         html += `
                                             <a href="?page=book_detail&id=${book.ma_sach}" class="quick-search-item text-decoration-none">
-                                                <img src="${coverUrl}" alt="${book.ten_sach}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/book_store/Content/images/books/no-image.jpg';">
+                                                <img src="${coverUrl}" alt="${book.ten_sach}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/book_store/Content/images/books/no-image.webp';">
                                                 <div class="book-info">
                                                     <div class="book-title">${book.ten_sach}</div>
                                                     <div class="book-price">${formatPrice(book.gia)} đ</div>

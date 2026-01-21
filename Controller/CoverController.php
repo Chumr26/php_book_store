@@ -20,7 +20,7 @@ class CoverController extends BaseController
      */
     public function redirectByIsbn(string $isbn): void
     {
-        $placeholder = '/book_store/Content/images/books/no-image.jpg';
+        $placeholder = '/book_store/Content/images/books/no-image.webp';
 
         $cacheTtlSeconds = defined('COVER_METADATA_CACHE_TTL')
             ? max(0, (int)constant('COVER_METADATA_CACHE_TTL'))

@@ -31,15 +31,19 @@
                             const devAdminQuickLoginCsrfToken = '<?php echo htmlspecialchars(SessionHelper::generateCSRFToken(), ENT_QUOTES, 'UTF-8'); ?>';
 
                             function devQuickLoginAdmin(username, name) {
+                                if (!username) {
+                                    username = 'admin';
+                                }
+
                                 document.getElementById('username').value = username;
                                 document.getElementById('password').value = '';
-                                
+
                                 // Visual feedback
                                 const btn = document.getElementById('adminQuickLogin');
                                 btn.innerHTML = '<i class="fas fa-check"></i> Selected: ' + name;
                                 btn.classList.remove('btn-outline-danger');
                                 btn.classList.add('btn-danger');
-                                
+
                                 // Highlight inputs
                                 document.getElementById('username').style.backgroundColor = '#f8d7da';
                                 document.getElementById('password').style.backgroundColor = '#f8d7da';
@@ -47,26 +51,6 @@
                                     document.getElementById('username').style.backgroundColor = '';
                                     document.getElementById('password').style.backgroundColor = '';
                                 }, 1000);
-
-                                // Submit dev quick login (localhost-only)
-                                const form = document.createElement('form');
-                                form.method = 'POST';
-                                form.action = 'index.php?page=dev_quick_login';
-
-                                const csrf = document.createElement('input');
-                                csrf.type = 'hidden';
-                                csrf.name = 'csrf_token';
-                                csrf.value = devAdminQuickLoginCsrfToken;
-                                form.appendChild(csrf);
-
-                                const u = document.createElement('input');
-                                u.type = 'hidden';
-                                u.name = 'username';
-                                u.value = username;
-                                form.appendChild(u);
-
-                                document.body.appendChild(form);
-                                form.submit();
                             }
                         </script>
                     </div>

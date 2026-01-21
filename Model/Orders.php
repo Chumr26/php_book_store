@@ -57,6 +57,12 @@ class Orders
             $paymentMethodLower = strtolower((string)$paymentMethod);
             if ($paymentMethodLower === 'cod') {
                 $paymentMethod = 'COD';
+            } elseif ($paymentMethodLower === 'payos') {
+                $paymentMethod = 'payos';
+            } elseif ($paymentMethodLower === 'vnpay') {
+                $paymentMethod = 'vnpay';
+            } elseif ($paymentMethodLower === 'momo') {
+                $paymentMethod = 'momo';
             }
 
             // Payment status enum: unpaid|paid

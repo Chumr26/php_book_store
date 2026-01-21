@@ -45,30 +45,27 @@ if (class_exists('SessionHelper')) {
                                 function devQuickLoginCustomer(customerId, email) {
                                     if (!customerId) return;
 
-                                    // Keep a nice visual cue about what's happening
+                                    // Visual feedback + populate fields only
                                     const btn = document.getElementById('quickLoginDropdown');
-                                    btn.innerHTML = '<i class="fas fa-spinner fa-spin text-warning"></i> Logging in: ' + (email || '...');
+                                    btn.innerHTML = '<i class="fas fa-check text-warning"></i> Selected: ' + (email || '...');
                                     btn.classList.remove('btn-outline-info');
                                     btn.classList.add('btn-info');
 
-                                    const form = document.createElement('form');
-                                    form.method = 'POST';
-                                    form.action = '?page=dev_quick_login';
+                                    const emailInput = document.getElementById('emailInput');
+                                    const passwordInput = document.getElementById('passwordInput');
+                                    if (emailInput) {
+                                        emailInput.value = email || '';
+                                        emailInput.style.backgroundColor = '#d1ecf1';
+                                    }
+                                    if (passwordInput) {
+                                        passwordInput.value = '';
+                                        passwordInput.style.backgroundColor = '#d1ecf1';
+                                    }
 
-                                    const csrf = document.createElement('input');
-                                    csrf.type = 'hidden';
-                                    csrf.name = 'csrf_token';
-                                    csrf.value = devQuickLoginCsrfToken;
-                                    form.appendChild(csrf);
-
-                                    const id = document.createElement('input');
-                                    id.type = 'hidden';
-                                    id.name = 'customer_id';
-                                    id.value = customerId;
-                                    form.appendChild(id);
-
-                                    document.body.appendChild(form);
-                                    form.submit();
+                                    setTimeout(() => {
+                                        if (emailInput) emailInput.style.backgroundColor = '';
+                                        if (passwordInput) passwordInput.style.backgroundColor = '';
+                                    }, 1000);
                                 }
                             </script>
                         </div>

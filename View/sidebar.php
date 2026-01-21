@@ -172,12 +172,12 @@
                         <?php
                         $coverUrl = $__coverHelperLoaded
                             ? book_cover_url($book['isbn'] ?? null, 'small')
-                            : BASE_URL . 'Content/images/books/no-image.jpg';
+                            : BASE_URL . 'Content/images/books/no-image.webp';
                         ?>
                         <img src="<?php echo htmlspecialchars($coverUrl); ?>"
                             alt="<?php echo htmlspecialchars($book['ten_sach']); ?>"
                             loading="lazy" decoding="async"
-                            onerror="this.onerror=null;this.src='<?php echo BASE_URL; ?>Content/images/books/no-image.jpg';"
+                            onerror="this.onerror=null;this.src='<?php echo BASE_URL; ?>Content/images/books/no-image.webp';"
                             class="mr-2" style="width: 50px; height: 70px; object-fit: cover;">
                         <div class="media-body">
                             <a href="?page=book_detail&id=<?php echo $book['ma_sach']; ?>"

@@ -24,6 +24,41 @@ ini_set('display_errors', 1);
 define('BASE_URL', getenv('BASE_URL') ?: 'http://localhost/book_store/');
 define('BASE_PATH', __DIR__ . '/');
 
+// Ensure placeholder image exists (local + production)
+$placeholderPath = BASE_PATH . 'Content/images/books/no-image.webp';
+if (!is_file($placeholderPath)) {
+    $placeholderDir = dirname($placeholderPath);
+    if (!is_dir($placeholderDir)) {
+        @mkdir($placeholderDir, 0777, true);
+    }
+
+    $created = false;
+    if (function_exists('imagecreatetruecolor') && function_exists('imagejpeg')) {
+        $width = 300;
+        $height = 450;
+        $img = @imagecreatetruecolor($width, $height);
+        if ($img !== false) {
+            $bg = @imagecolorallocate($img, 230, 230, 230);
+            $text = @imagecolorallocate($img, 120, 120, 120);
+            if ($bg !== false) {
+                @imagefilledrectangle($img, 0, 0, $width, $height, $bg);
+                @imagestring($img, 5, 95, 210, 'No Image', $text);
+                $created = @imagejpeg($img, $placeholderPath, 85);
+            }
+            @imagedestroy($img);
+        }
+    }
+
+    if (!$created) {
+        // Fallback: tiny 1x1 JPEG (base64)
+        $base64Jpeg = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////2wBDAf//////////////////////////////////////////////////////////////////////////////////////wAARCAAQABADASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIQAxAAAAG9AP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQMBAT8Af//EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQIBAT8Af//EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEABj8Cf//Z';
+        $jpegData = base64_decode($base64Jpeg, true);
+        if ($jpegData !== false) {
+            @file_put_contents($placeholderPath, $jpegData, LOCK_EX);
+        }
+    }
+}
+
 // Include database connection
 require_once BASE_PATH . 'Model/connect.php';
 
