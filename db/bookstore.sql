@@ -883,8 +883,6 @@ BEGIN
     DELETE FROM giohang WHERE id_khachhang = p_id_khachhang;
 END$$
 DELIMITER ;
-    
-
 
 -- =============================================
 -- CREATE TRIGGERS

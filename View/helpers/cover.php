@@ -46,14 +46,17 @@ function book_local_cover_url(?string $path): ?string
 {
     $path = trim((string)$path);
     if ($path === '') {
+        error_log('[cover] empty path');
         return null;
     }
 
+    error_log('[cover] raw path=' . $path);
+
     if (preg_match('#^https?://#i', $path)) {
+        error_log('[cover] external url=' . $path);
         return $path;
     }
 
-    // Normalize Windows paths (e.g., D:\...\Content\images\books\file.jpg)
     $normalizedPath = str_replace('\\', '/', $path);
 
     if (preg_match('#(?:^|/)(Content/images/books/)(.+)$#i', $normalizedPath, $m)) {
@@ -64,18 +67,27 @@ function book_local_cover_url(?string $path): ?string
         $path = ltrim($normalizedPath, '/');
     }
 
+    error_log('[cover] normalized path=' . $path);
+
     if (defined('BASE_PATH')) {
         $absolutePath = BASE_PATH . ltrim($path, '/');
+        error_log('[cover] absolute=' . $absolutePath);
+
         if (is_file($absolutePath)) {
+            error_log('[cover] found absolute');
             return BASE_URL . ltrim($path, '/');
         }
 
         $fallbackPath = 'Content/images/books/' . ltrim(basename($path), '/');
         $fallbackAbsolute = BASE_PATH . $fallbackPath;
+        error_log('[cover] fallback absolute=' . $fallbackAbsolute);
+
         if (is_file($fallbackAbsolute)) {
+            error_log('[cover] found fallback');
             return BASE_URL . $fallbackPath;
         }
 
+        error_log('[cover] not found');
         return null;
     }
 
