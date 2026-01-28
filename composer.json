@@ -5,6 +5,7 @@
     "require": {
         "phpmailer/phpmailer": "^7.0",
         "payos/payos": "^2.0",
-        "guzzlehttp/guzzle": "^7.10"
+        "guzzlehttp/guzzle": "^7.10",
+        "ext-mongodb": "*"
     }
 }

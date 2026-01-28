@@ -162,13 +162,15 @@ class BookController extends BaseController
                 exit;
             }
 
-            $page = isset($_GET['page_num']) ? (int)$_GET['page_num'] : 1;
             $sortBy = isset($_GET['sort']) ? $_GET['sort'] : 'ten_sach';
             $order = isset($_GET['order']) ? $_GET['order'] : 'ASC';
-            $limit = 12;
+            $limit = 10;
 
-            // Search books
-            $result = $this->booksModel->searchBooks($keyword, $page, $limit, $sortBy, $order);
+            // Semantic search (top 10)
+            $result = $this->booksModel->semanticSearchBooks($keyword, $limit);
+
+            // Align pagination to semantic results
+            $pagination = new Pagination($result['total'] ?? 0, $limit, 1);
 
             // Get categories for sidebar
             $categories = $this->categoriesModel->getAllCategories();
@@ -176,8 +178,10 @@ class BookController extends BaseController
             $data = [
                 'books' => $result['data'] ?? [],
                 'total' => $result['total'] ?? 0,
-                'current_page' => $page,
-                'total_pages' => $result['total_pages'] ?? 0,
+                'totalBooks' => $result['total'] ?? 0,
+                'current_page' => 1,
+                'total_pages' => $result['total_pages'] ?? 1,
+                'pagination' => $pagination,
                 'categories' => $categories,
                 'keyword' => htmlspecialchars($keyword),
                 'sort_by' => $sortBy,

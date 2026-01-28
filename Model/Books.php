@@ -7,6 +7,8 @@
  * Used by both customer-facing pages and admin panel
  */
 
+require_once __DIR__ . '/VectorSearch.php';
+
 class Books
 {
     private $conn;
@@ -130,6 +132,146 @@ class Books
         $result = $stmt->get_result();
 
         return $result->fetch_assoc();
+    }
+
+    /**
+     * Get books by an ordered list of IDs (preserve order)
+     *
+     * @param int[] $bookIds
+     * @return array
+     */
+    public function getBooksByIds(array $bookIds)
+    {
+        $bookIds = array_values(array_filter($bookIds, fn($id) => is_numeric($id)));
+        if (empty($bookIds)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($bookIds), '?'));
+        $types = str_repeat('i', count($bookIds) * 2);
+        $params = array_merge($bookIds, $bookIds);
+
+        $sql = "SELECT s.*, 
+                       s.id_sach as ma_sach,
+                       tg.ten_tacgia as author_name,
+                       nxb.ten_nxb as publisher_name,
+                       tl.ten_theloai as category_name,
+                       (SELECT COALESCE(AVG(so_sao), 0) FROM danhgia WHERE id_sach = s.id_sach AND trang_thai = 'approved') as diem_trung_binh,
+                       (SELECT COUNT(*) FROM danhgia WHERE id_sach = s.id_sach AND trang_thai = 'approved') as so_luong_danh_gia
+                FROM sach s
+                LEFT JOIN tacgia tg ON s.id_tacgia = tg.id_tacgia
+                LEFT JOIN nhaxuatban nxb ON s.id_nxb = nxb.id_nxb
+                LEFT JOIN theloai tl ON s.id_theloai = tl.id_theloai
+                WHERE s.id_sach IN ({$placeholders})
+                ORDER BY FIELD(s.id_sach, {$placeholders})";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('SQL Prepare Error in getBooksByIds: ' . $this->conn->error);
+            return [];
+        }
+
+        $stmt->bind_param($types, ...$params);
+        if (!$stmt->execute()) {
+            error_log('SQL Execute Error in getBooksByIds: ' . $stmt->error);
+            return [];
+        }
+
+        $result = $stmt->get_result();
+        $books = [];
+        while ($row = $result->fetch_assoc()) {
+            $books[] = $row;
+        }
+
+        return $books;
+    }
+
+    /**
+     * Get all books and related metadata for vector indexing
+     *
+     * @return array
+     */
+    public function getBooksForVectorIndex()
+    {
+        $sql = "SELECT s.id_sach,
+                       s.ten_sach,
+                       s.mo_ta,
+                       tg.ten_tacgia as author_name,
+                       nxb.ten_nxb as publisher_name,
+                       tl.ten_theloai as category_name
+                FROM sach s
+                LEFT JOIN tacgia tg ON s.id_tacgia = tg.id_tacgia
+                LEFT JOIN nhaxuatban nxb ON s.id_nxb = nxb.id_nxb
+                LEFT JOIN theloai tl ON s.id_theloai = tl.id_theloai
+                WHERE s.trang_thai = 'available'";
+
+        $result = $this->conn->query($sql);
+        if (!$result) {
+            error_log('SQL Query Error in getBooksForVectorIndex: ' . $this->conn->error);
+            return [];
+        }
+
+        $books = [];
+        while ($row = $result->fetch_assoc()) {
+            $books[] = $row;
+        }
+
+        return $books;
+    }
+
+    /**
+     * Semantic search using vector embeddings stored in MongoDB Atlas
+     *
+     * @param string $keyword Search query
+     * @param int $limit
+     * @return array
+     */
+    public function semanticSearchBooks($keyword, $limit = 10)
+    {
+        $keyword = trim((string)$keyword);
+        if ($keyword === '') {
+            return [
+                'data' => [],
+                'total' => 0,
+                'total_pages' => 0,
+                'current_page' => 1,
+                'limit' => $limit
+            ];
+        }
+
+        try {
+            $vectorSearch = new VectorSearch();
+            $bookIds = $vectorSearch->searchProductIds($keyword, $limit);
+
+            if (empty($bookIds)) {
+                return [
+                    'data' => [],
+                    'total' => 0,
+                    'total_pages' => 0,
+                    'current_page' => 1,
+                    'limit' => $limit
+                ];
+            }
+
+            $books = $this->getBooksByIds($bookIds);
+
+            return [
+                'data' => $books,
+                'total' => count($bookIds),
+                'total_pages' => 1,
+                'current_page' => 1,
+                'limit' => $limit
+            ];
+        } catch (Exception $e) {
+            error_log('Semantic search failed: ' . $e->getMessage());
+            return [
+                'data' => [],
+                'total' => 0,
+                'total_pages' => 0,
+                'current_page' => 1,
+                'limit' => $limit
+            ];
+        }
     }
 
     /**
