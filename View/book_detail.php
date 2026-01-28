@@ -27,6 +27,7 @@ $pageTitle = isset($book) ? htmlspecialchars($book['ten_sach']) : 'Chi ti·∫øt s√
             <!-- Book Image -->
             <div class="col-md-6 mb-4">
                 <div class="book-image-detail sticky-top" style="top: 160px; z-index: 900;">
+                    
                     <?php
                     $coverUrl = $__coverHelperLoaded
                         ? book_cover_url_for_book($book, 'large')

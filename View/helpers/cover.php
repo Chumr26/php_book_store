@@ -55,22 +55,14 @@ function book_local_cover_url(?string $path): ?string
 
     // Normalize Windows paths (e.g., D:\...\Content\images\books\file.jpg)
     $normalizedPath = str_replace('\\', '/', $path);
-    $contentMarker = '/Content/images/books/';
-    $uploadMarker = '/upload/';
 
-    $markerPos = stripos($normalizedPath, $contentMarker);
-    if ($markerPos !== false) {
-        $normalizedPath = ltrim(substr($normalizedPath, $markerPos + 1), '/');
+    if (preg_match('#(?:^|/)(Content/images/books/)(.+)$#i', $normalizedPath, $m)) {
+        $path = $m[1] . $m[2];
+    } elseif (preg_match('#(?:^|/)(upload/)(.+)$#i', $normalizedPath, $m)) {
+        $path = $m[1] . $m[2];
     } else {
-        $uploadPos = stripos($normalizedPath, $uploadMarker);
-        if ($uploadPos !== false) {
-            $normalizedPath = ltrim(substr($normalizedPath, $uploadPos + 1), '/');
-        } else {
-            $normalizedPath = ltrim($normalizedPath, '/');
-        }
+        $path = ltrim($normalizedPath, '/');
     }
-
-    $path = $normalizedPath;
 
     if (defined('BASE_PATH')) {
         $absolutePath = BASE_PATH . ltrim($path, '/');
