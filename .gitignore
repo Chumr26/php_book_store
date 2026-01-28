@@ -29,6 +29,8 @@ yarn-error.log
 .env.*.local
 config/database.local.php
 config/email.local.php
+config/vector_search.local.php
+config/payos_config.php
 
 # Logs
 *.log

@@ -32,15 +32,15 @@ class VectorSearch
         $this->timeoutSeconds = (int)($baseConfig['timeout_seconds'] ?? 30);
 
         if (empty($baseConfig['mongo_uri'])) {
-            throw new RuntimeException('Missing MongoDB URI in config/vector_search.local.php.');
+            throw new RuntimeException('Missing MongoDB URI. Set MONGO_URI env var or provide config/vector_search.local.php.');
         }
 
         if (empty($this->mongoDb) || empty($this->mongoCollection) || empty($this->mongoIndex)) {
-            throw new RuntimeException('Invalid MongoDB configuration in config/vector_search.local.php.');
+            throw new RuntimeException('Invalid MongoDB configuration. Set MONGO_DB, MONGO_COLLECTION, MONGO_VECTOR_INDEX env vars or use config/vector_search.local.php.');
         }
 
         if (empty($this->geminiApiKey)) {
-            throw new RuntimeException('Missing gemini_api_key in config/vector_search.local.php.');
+            throw new RuntimeException('Missing GEMINI_API_KEY. Set env var or provide config/vector_search.local.php.');
         }
 
         if (!class_exists('MongoDB\\Driver\\Manager')) {
@@ -51,13 +51,26 @@ class VectorSearch
     }
 
     /**
-     * Load configuration from local config file (required)
+     * Load configuration from environment variables and optional local config file
      *
      * @return array
      */
     private function loadConfig()
     {
         $localConfigFile = __DIR__ . '/../config/vector_search.local.php';
+
+        $envConfig = [
+            'mongo_uri' => getenv('MONGO_URI') ?: null,
+            'mongo_db' => getenv('MONGO_DB') ?: null,
+            'mongo_collection' => getenv('MONGO_COLLECTION') ?: null,
+            'mongo_vector_index' => getenv('MONGO_VECTOR_INDEX') ?: null,
+            'gemini_api_key' => getenv('GEMINI_API_KEY') ?: null,
+            'gemini_model' => getenv('GEMINI_MODEL') ?: null,
+            'gemini_base_url' => getenv('GEMINI_BASE_URL') ?: null,
+            'timeout_seconds' => getenv('VECTOR_TIMEOUT_SECONDS') ?: null,
+        ];
+
+        $envConfig = array_filter($envConfig, fn($v) => $v !== null && $v !== '');
 
         $localFileConfig = [];
         if (file_exists($localConfigFile)) {
@@ -67,11 +80,13 @@ class VectorSearch
             }
         }
 
-        if (empty($localFileConfig)) {
-            throw new RuntimeException('Missing config/vector_search.local.php.');
+        $finalConfig = array_merge($localFileConfig, $envConfig);
+
+        if (empty($finalConfig)) {
+            throw new RuntimeException('Missing vector search configuration. Provide env vars (MONGO_URI, MONGO_DB, MONGO_COLLECTION, MONGO_VECTOR_INDEX, GEMINI_API_KEY) or config/vector_search.local.php.');
         }
 
-        return $localFileConfig;
+        return $finalConfig;
     }
 
     private function logMessage($message)

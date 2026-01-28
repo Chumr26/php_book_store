@@ -33,7 +33,19 @@ require_once __DIR__ . '/../Model/EmailSender.php';
 require_once __DIR__ . '/../Model/Coupon.php';
 require_once __DIR__ . '/helpers/SessionHelper.php';
 require_once __DIR__ . '/helpers/Validator.php';
-require_once __DIR__ . '/../config/payos_config.php';
+// PayOS configuration via environment variables (no secrets in git)
+if (!defined('PAYOS_CLIENT_ID')) {
+    define('PAYOS_CLIENT_ID', getenv('PAYOS_CLIENT_ID') ?: '');
+}
+if (!defined('PAYOS_API_KEY')) {
+    define('PAYOS_API_KEY', getenv('PAYOS_API_KEY') ?: '');
+}
+if (!defined('PAYOS_CHECKSUM_KEY')) {
+    define('PAYOS_CHECKSUM_KEY', getenv('PAYOS_CHECKSUM_KEY') ?: '');
+}
+if (!defined('PAYOS_APP_URL')) {
+    define('PAYOS_APP_URL', rtrim(getenv('PAYOS_APP_URL') ?: '', '/'));
+}
 
 use PayOS\PayOS;
 use PayOS\Models\V2\PaymentRequests\CreatePaymentLinkRequest;

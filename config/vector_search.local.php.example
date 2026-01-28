@@ -1,5 +1,17 @@
 <?php
 
+// Vector Search Configuration (example)
+// Prefer environment variables in production. Do NOT commit secrets.
+//
+// MONGO_URI=
+// MONGO_DB=cdphp
+// MONGO_COLLECTION=book
+// MONGO_VECTOR_INDEX=book_vector_index
+// GEMINI_API_KEY=
+// GEMINI_MODEL=gemini-embedding-001
+// GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/models
+// VECTOR_TIMEOUT_SECONDS=30
+
 return [
     'mongo_uri' => 'mongodb+srv://<username>:<password>@<cluster-url>/',
     'mongo_db' => 'cdphp',

@@ -11,6 +11,10 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libzip-dev \
     unzip \
+    libssl-dev \
+    pkg-config \
+    && pecl install mongodb \
+    && docker-php-ext-enable mongodb \
     && docker-php-ext-install mysqli pdo_mysql gd zip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 

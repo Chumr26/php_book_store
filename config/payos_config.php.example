@@ -1,0 +1,15 @@
+<?php
+// PayOS Configuration (example)
+// Use environment variables in production. Do NOT commit secrets.
+
+// PAYOS_CLIENT_ID=
+// PAYOS_API_KEY=
+// PAYOS_CHECKSUM_KEY=
+// PAYOS_APP_URL=
+
+return [
+    'PAYOS_CLIENT_ID' => 'your-client-id',
+    'PAYOS_API_KEY' => 'your-api-key',
+    'PAYOS_CHECKSUM_KEY' => 'your-checksum-key',
+    'PAYOS_APP_URL' => 'https://your-domain.com'
+];
