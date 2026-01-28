@@ -53,6 +53,18 @@ function book_local_cover_url(?string $path): ?string
         return $path;
     }
 
+    // Normalize Windows paths (e.g., D:\...\Content\images\books\file.jpg)
+    $normalizedPath = str_replace('\\', '/', $path);
+    $contentMarker = '/Content/images/books/';
+    $markerPos = stripos($normalizedPath, $contentMarker);
+    if ($markerPos !== false) {
+        $normalizedPath = ltrim(substr($normalizedPath, $markerPos + 1), '/');
+    } else {
+        $normalizedPath = ltrim($normalizedPath, '/');
+    }
+
+    $path = $normalizedPath;
+
     if (defined('BASE_PATH')) {
         $absolutePath = BASE_PATH . ltrim($path, '/');
         if (!is_file($absolutePath)) {
