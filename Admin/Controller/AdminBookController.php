@@ -79,13 +79,13 @@ class AdminBookController extends BaseController
             }
 
             if ($category > 0) {
-                $conditions[] = "ma_danh_muc = ?";
+                $conditions[] = "s.id_theloai = ?";
                 $params[] = $category;
                 $types .= 'i';
             }
 
             if (!empty($status)) {
-                $conditions[] = "tinh_trang = ?";
+                $conditions[] = "s.trang_thai = ?";
                 $params[] = $status;
                 $types .= 's';
             }
@@ -93,7 +93,7 @@ class AdminBookController extends BaseController
             $whereClause = !empty($conditions) ? 'WHERE ' . implode(' AND ', $conditions) : '';
 
             // Get total count
-            $countQuery = "SELECT COUNT(*) as total FROM sach $whereClause";
+            $countQuery = "SELECT COUNT(*) as total FROM sach s $whereClause";
             $stmt = $this->conn->prepare($countQuery);
 
             if (!empty($params)) {
