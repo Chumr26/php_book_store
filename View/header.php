@@ -58,6 +58,7 @@
                                 name="keyword"
                                 id="quickSearch"
                                 placeholder="Tìm kiếm sách, tác giả, nhà xuất bản..."
+                                value="<?php echo isset($_GET['keyword']) ? htmlspecialchars($_GET['keyword']) : ''; ?>"
                                 autocomplete="off">
                             <button type="submit" class="btn btn-primary btn-search">
                                 <i class="fas fa-search"></i>

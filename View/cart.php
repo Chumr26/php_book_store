@@ -27,7 +27,11 @@ require_once __DIR__ . '/helpers/cover.php';
                         <tr data-cart-item-id="<?php echo $item['ma_sach']; ?>">
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <?php $coverUrl = book_cover_url($item['isbn'] ?? null, 'small'); ?>
+                                    <?php
+                                    $coverUrl = function_exists('book_cover_url_for_book')
+                                        ? book_cover_url_for_book($item, 'small')
+                                        : book_cover_url($item['isbn'] ?? null, 'small');
+                                    ?>
                                     <img src="<?php echo htmlspecialchars($coverUrl); ?>" 
                                  loading="lazy" decoding="async"
                                          style="width: 70px; height: 100px; object-fit: cover;" class="mr-3">

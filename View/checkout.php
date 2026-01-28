@@ -127,7 +127,11 @@ require_once __DIR__ . '/helpers/cover.php';
                             <div class="order-items mb-3" style="max-height: 300px; overflow-y: auto;">
                                 <?php foreach ($cartItems as $item): ?>
                                     <div class="d-flex mb-3 pb-3 border-bottom">
-                                        <?php $coverUrl = book_cover_url($item['isbn'] ?? null, 'small'); ?>
+                                        <?php
+                                        $coverUrl = function_exists('book_cover_url_for_book')
+                                            ? book_cover_url_for_book($item, 'small')
+                                            : book_cover_url($item['isbn'] ?? null, 'small');
+                                        ?>
                                         <img src="<?php echo htmlspecialchars($coverUrl); ?>"
                                             loading="lazy" decoding="async"
                                             style="width: 60px; height: 80px; object-fit: cover;" class="mr-3">

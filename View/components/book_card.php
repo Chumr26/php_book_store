@@ -21,7 +21,9 @@ if (!isset($globalCartBookIds) && isset($GLOBALS['globalCartBookIds'])) {
     $globalCartBookIds = $GLOBALS['globalCartBookIds'];
 }
 
-$coverUrl = function_exists('book_cover_url') ? book_cover_url($book['isbn'] ?? null, 'medium') : BASE_URL . 'Content/images/books/no-image.webp';
+$coverUrl = function_exists('book_cover_url_for_book')
+    ? book_cover_url_for_book($book, 'medium')
+    : (function_exists('book_cover_url') ? book_cover_url($book['isbn'] ?? null, 'medium') : BASE_URL . 'Content/images/books/no-image.webp');
 ?>
 
 <div class="book-card">

@@ -171,8 +171,10 @@
                         <span class="badge badge-danger mr-2 align-self-start"><?php echo $index + 1; ?></span>
                         <?php
                         $coverUrl = $__coverHelperLoaded
-                            ? book_cover_url($book['isbn'] ?? null, 'small')
-                            : BASE_URL . 'Content/images/books/no-image.webp';
+                            ? book_cover_url_for_book($book, 'small')
+                            : (function_exists('book_cover_url')
+                                ? book_cover_url($book['isbn'] ?? null, 'small')
+                                : BASE_URL . 'Content/images/books/no-image.webp');
                         ?>
                         <img src="<?php echo htmlspecialchars($coverUrl); ?>"
                             alt="<?php echo htmlspecialchars($book['ten_sach']); ?>"

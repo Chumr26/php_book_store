@@ -29,8 +29,10 @@ $pageTitle = isset($book) ? htmlspecialchars($book['ten_sach']) : 'Chi ti·∫øt s√
                 <div class="book-image-detail sticky-top" style="top: 160px; z-index: 900;">
                     <?php
                     $coverUrl = $__coverHelperLoaded
-                        ? book_cover_url($book['isbn'] ?? null, 'large')
-                        : BASE_URL . 'Content/images/books/no-image.webp';
+                        ? book_cover_url_for_book($book, 'large')
+                        : (function_exists('book_cover_url')
+                            ? book_cover_url($book['isbn'] ?? null, 'large')
+                            : BASE_URL . 'Content/images/books/no-image.webp');
                     ?>
                     <img src="<?php echo htmlspecialchars($coverUrl); ?>"
                         alt="<?php echo htmlspecialchars($book['ten_sach']); ?>"
